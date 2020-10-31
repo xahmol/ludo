@@ -16,11 +16,12 @@ Original Commodore 128 version (in Dutch):
 
 Screenshots of Oric Atmos version:
 
-![](D:\Git\ludo\LudoTitle.png)
+![](LudoTitle.png)
 
-![](D:\Git\ludo\LudoGame.png)
+![](LudoGame.png)
 
 **Credits**:
+
 Original written in 1992 on the Commodore 128, converted in 2020 to the Oric Atmos.
 
 Oric version build with and using code from OSDK (https://osdk.org/). [Copyright](https://osdk.org/index.php?page=documentation&subpage=copyright).
