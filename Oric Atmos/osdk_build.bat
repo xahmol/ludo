@@ -63,7 +63,6 @@ SET YM2MYM=%osdk%\Bin\ym2mym.exe -h1 -m15872
 ::
 %OSDK%\bin\taptap ren build\LUDOSCRM.tap "LUDOSCRM" 0
 %OSDK%\bin\taptap ren build\LUDOTITL.tap "LUDOTITL" 0
-%OSDK%\bin\taptap ren build\LUDOCHRS.tap "LUDOCHRS" 0
 %OSDK%\bin\taptap ren build\mymplayer.tap "LUDOMACO" 0
 
 ECHO Building DSK file
