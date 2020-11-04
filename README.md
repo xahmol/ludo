@@ -25,6 +25,7 @@ Screenshots of Oric Atmos version:
 Original written in 1992 on the Commodore 128, converted in 2020 to the Oric Atmos.
 
 Oric version build with and using code from OSDK (https://osdk.org/). [Copyright](https://osdk.org/index.php?page=documentation&subpage=copyright).
+
 Music player routine used from https://osdk.org/index.php?page=articles&ref=ART5
 
 Original windowing system code on Commodore 128 by unknown author.
