@@ -546,8 +546,8 @@ subPlayerwins
 loopInvalidchoice
     XC=15: YC=13: MN=7: GOSUB funcMenupulldown
     IF M=1 AND SP(0,1)=0 AND SP(1,1)=0 AND SP(2,1)=0 AND SP(3,1)=0 THEN GOTO loopInvalidchoice
-    IF M=2 THE NEI=3: ZV=1
-    IF M=3 THE NEI=1: ZV=1
+    IF M=2 THEN EI=3: ZV=1
+    IF M=3 THEN EI=1: ZV=1
     GOSUB funcWindowrestore
     RETURN
 
