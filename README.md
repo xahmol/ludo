@@ -15,6 +15,7 @@ Original Commodore 128 version (in Dutch):
   https://github.com/xahmol/ludo/raw/v0.8-alpha/C128/D64/mejn.d64
 
 **Instructions for playing**:
+
 The game is menu driven. For menu navigation, use the cursor keys (up, down, left, right) and press ENTER to select. Active choice has a white background in the main menu bar, yellow in the pull down menus. If the main menu bar shows no white hightlighted options, no menu choices are possible, the computer is busy executing game turn actions.
 Popups wait for a keypress, for this any key will work. Joystick is also possible for the C128 version, but not yet implemented for the Oric Atmos version. Mouse not supported.
 
