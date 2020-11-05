@@ -5,14 +5,14 @@ Ludo game for 8 bit computers. By Xander Mol.
 Latest build for Oric Atmos:
 
 - DSK version:
-  https://github.com/xahmol/ludo/raw/v0.8-alpha/Oric%20Atmos/BUILD/LUDO.dsk
+  https://github.com/xahmol/ludo/raw/main/Oric%20Atmos/BUILD/LUDO.dsk
 - HFE version (for Cumana Reborn):
-  https://github.com/xahmol/ludo/raw/v0.8-alpha/Oric%20Atmos/BUILD/LUDO_dsk.hfe
+  https://github.com/xahmol/ludo/raw/main/Oric%20Atmos/BUILD/LUDO_dsk.hfe
 
 Original Commodore 128 version (in Dutch):
 
 - D64 version:
-  https://github.com/xahmol/ludo/raw/v0.8-alpha/C128/D64/mejn.d64
+  https://github.com/xahmol/ludo/raw/main/C128/D64/mejn.d64
 
 **Instructions for playing**:
 
