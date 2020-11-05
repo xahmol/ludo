@@ -17,7 +17,8 @@ Original Commodore 128 version (in Dutch):
 **Instructions for playing**:
 
 The game is menu driven. For menu navigation, use the cursor keys (up, down, left, right) and press ENTER to select. Active choice has a white background in the main menu bar, yellow in the pull down menus. If the main menu bar shows no white hightlighted options, no menu choices are possible, the computer is busy executing game turn actions.
-Popups wait for a keypress, for this any key will work. Joystick is also possible for the C128 version, but not yet implemented for the Oric Atmos version. Mouse not supported.
+Popups wait for a keypress, for this any key will work. Pawn selection is also performed using the cursor keys and ENTER.
+Joystick is also possible for the C128 version, but not yet implemented for the Oric Atmos version. Mouse not supported.
 
 The game uses the LUDO rules from the Dutch 'Mens Erger je Niet' variant as played by my family 30 years ago, so probably there are some 'house rules' interpretations that are not the same as the present official game manual, like what is allowed after a six is thrown depending on how many pawns are already on the board. Example: after throwing a six, moving the newly placed pawn with the next dice throw is obligatory, also if this would attack another pawn of the same player. Exception is if all pawns are on the board, moving the new pawn is in that case optional. As the game only allows valid moves, this should indicate itself.
 
