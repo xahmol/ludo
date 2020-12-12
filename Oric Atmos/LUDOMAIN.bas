@@ -64,7 +64,8 @@ Start:+1:0
     AL$=LC$+" !#$%&'()"+CHR$(34)+"+-@*^:[;]=,<.>/?_"
     RESTORE
     S$="                                        "
-    AD=#A000:WN=1: DIM WI(10,2): MU=1: CC=0
+    AD=#A100:WN=1: DIM WI(10,2): MU=1: CC=0
+    GOSUB subIJKDetect
     GOSUB subInitialisation
     GOSUB subReadmenudata
     XC=18: YC=8: B=20: H=6: GOSUB funcMenumakeborder
@@ -401,11 +402,11 @@ subHumanchoosepawn
     REPEAT
         CC=1: GOSUB funcPawnplace: CC=0
         JM=1:TT$=CHR$(8)+CHR$(9)+CHR$(10)+CHR$(11)+CHR$(13)
-        TJ$="11111111":GOSUB funcGetkey
+        TJ$="1111":GOSUB funcGetkey
         GOSUB funcPawnplace
-        IF AW$=CHR$(8) OR AW$=CHR$(10) OR JW=5 OR JW=6 OR JW=7 OR JW=8 THEN PN=PN-1: RI=-1
-        IF AW$=CHR$(9) OR AW$=CHR$(11) OR JW=1 OR JW=2 OR JW=3 OR JW=4 THEN PN=PN+1: RI=1
-        IF AW$=CHR$(13) OR JW>=128 THEN PULL: GOTO exitHumanchoosepawn
+        IF AW$=CHR$(8) OR AW$=CHR$(10) OR JL=1 OR JD=1 THEN PN=PN-1: RI=-1
+        IF AW$=CHR$(9) OR AW$=CHR$(11) OR JR=1 OR JU=1 THEN PN=PN+1: RI=1
+        IF AW$=CHR$(13) OR JF=1 THEN PULL: GOTO exitHumanchoosepawn
         IF PN>3 THEN PN=0
         IF PN<0 THEN PN=3
         REPEAT
@@ -669,21 +670,21 @@ endifMenupulldown1
         PRINT MN$(MN,N);CHR$(129);CHR$(91);CHR$(144)
     NEXT N
     PRINT @XC,YC+N;CHR$(129);CHR$(123);LEFT$(O$,4+LEN(MN$(MN,1)));
-    M=1:TT$=CHR$(11)+CHR$(10)+CHR$(13):TJ$="11011101"
-    IF MN<=MN(0) THEN TT$=TT$+CHR$(8)+CHR$(9):TJ$="11111111"
+    M=1:TT$=CHR$(11)+CHR$(10)+CHR$(13):TJ$="0011"
+    IF MN<=MN(0) THEN TT$=TT$+CHR$(8)+CHR$(9):TJ$="1111"
     EX=0
     REPEAT
         PRINT @XC+2,YC+M;CHR$(147);CHR$(128);MN$(MN,M);
         PRINT CHR$(129);CHR$(91);CHR$(144)
         JM=1: GOSUB funcGetkey: JM=0
-        IF AW$=CHR$(13) OR JW>=128 THEN EX=1
-        IF AW$=CHR$(8) OR JW=7 THEN M=0: EX=1: GOTO endifMenupulldown2
-        IF AW$=CHR$(9) OR JW=3 THEN M=0: EX=1: GOTO endifMenupulldown2
+        IF AW$=CHR$(13) OR JF=1 THEN EX=1
+        IF AW$=CHR$(8) OR JL=1 THEN M=0: EX=1: GOTO endifMenupulldown2
+        IF AW$=CHR$(9) OR JR=1 THEN M=0: EX=1: GOTO endifMenupulldown2
         IF EX<>0 THEN GOTO endifMenupulldown2
             PRINT @XC+2,YC+M;CHR$(150);CHR$(128);MN$(MN,M);
             PRINT CHR$(129);CHR$(91);CHR$(144)
-            IF AW$=CHR$(11) OR JW=1 OR JW=2 OR JW=8 THEN M=M-1
-            IF AW$=CHR$(10) OR JW=4 OR JW=5 OR JW=6 THEN M=M+1
+            IF AW$=CHR$(11) OR JU=1 THEN M=M-1
+            IF AW$=CHR$(10) OR JD=1 THEN M=M+1
             IF M>MN(MN) THEN M=1
             IF M<1 THEN M=MN(MN)
 endifMenupulldown2
@@ -694,12 +695,11 @@ endifMenupulldown2
 'ASK FOR KEYPRESS OR JOYSTICK
 
 funcGetkey
-    POKE 735,0
+    AW$=""
     REPEAT
-        GET AW$: INSTR TT$,AW$,1
-        'TBD FOR READING JOYSTICK
-        JW=0
-    UNTIL IN>0
+        AW$=KEY$: INSTR TT$,AW$,1
+        IF JM=1 THEN GOSUB subIJKRead
+    UNTIL (IN>0 OR JF=1 OR JL=1 OR JR=1 OR JU=1 OR JD=1)
     RETURN
 
 'MAIN MENU
@@ -709,14 +709,14 @@ funcMenumain
     REPEAT
         REPEAT
             PRINT @MC(MN,0),0;CHR$(151);MN$(MN,0);CHR$(146)
-            TT$=CHR$(8)+CHR$(9)+CHR$(13):TJ$="01110111"
+            TT$=CHR$(8)+CHR$(9)+CHR$(13):TJ$="1100"
             JM=1:GOSUB funcGetkey:JM=0
             PRINT @MC(MN,0),0;CHR$(146);MN$(MN,0);
-            IF AW$=CHR$(8) OR JW=6 OR JW=7 OR JW=8 THEN MN=MN-1
-            IF AW$=CHR$(9) OR JW=2 OR JW=3 OR JW=4 THEN MN=MN+1
+            IF AW$=CHR$(8) OR JL=1 THEN MN=MN-1
+            IF AW$=CHR$(9) OR JR=1 THEN MN=MN+1
             IF MN<1 THEN MN=MN(0)
             IF MN>MN(0) THEN MN=1
-        UNTIL AW$=CHR$(13) OR JW>=128
+        UNTIL AW$=CHR$(13) OR JF=1
         XC=MC(MN,0)-1: YC=0
         IF XC+LEN(MN$(MN,1))>38 THEN XC=MC(MN,1)-LEN(MN$(MN,1))
         GOSUB funcMenupulldown
@@ -739,7 +739,7 @@ endifInput1
         PR$=AN$+CHR$(160)+LEFT$(B$,ML-LEN(AN$)-1)
 endifInput2
         PLOTXC+1,YC,PR$
-        GOSUB funcGetkey
+        JM=0: GOSUB funcGetkey
         IF AW$=CHR$(13) THEN PULL: GOTO exitInput
         INSTR CHR$(8)+CHR$(9)+CHR$(127),AW$,1
         IF IN<>0 THEN GOTO endifInput3
@@ -793,7 +793,7 @@ subGameend
 'WAIT FOR KEYPRESS OR JOYSTICK
 
 funcWaitkey
-    TT$=AL$+CHR$(13):TJ$="00000000": JM=1
+    TT$=AL$+CHR$(13):TJ$="0000": JM=1
     GOSUB funcGetkey
     JM=0
     RETURN
@@ -824,6 +824,35 @@ subMusicnext
     CALL #6500
     RETURN
    
+'IJK INTERFACE DETECT
+
+subIJKDetect
+    CALL #A000
+    IF PEEK(#A006)=0 THEN JP=0: ELSE JP=1
+    RETURN
+
+'IJK JOYSTICK INTERFACE READ
+
+subIJKRead
+    JL = 0: JR = 0: JU = 0: JD = 0: JF = 0
+    IF JP=0 THEN RETURN
+    CALL #A003
+    JA = PEEK(#A007): JB = PEEK(#A008)
+    IF MID$(TJ$,1,1)="0" THEN GOTO endifIJKRead1
+        IF (JA AND 1) OR (JB AND 1) THEN JR=1
+endifIJKRead1
+    IF MID$(TJ$,2,1)="0" THEN GOTO endifIJKRead2
+        IF (JA AND 2) OR (JB AND 2) THEN JL=1
+endifIJKRead2
+    IF MID$(TJ$,3,1)="0" THEN GOTO endifIJKRead3
+        IF (JA AND 8) OR (JB AND 8) THEN JD=1
+endifIJKRead3
+    IF MID$(TJ$,4,1)="0" THEN GOTO endifIJKRead4   
+        IF (JA AND 16) OR (JB AND 16) THEN JU=1
+endifIJKRead4
+    IF (JA AND 4) OR (JB AND 4) THEN JF=1
+    RETURN    
+
 '
 'END OF PROGRAM
 '    

@@ -25,6 +25,9 @@ ECHO Assembling music player
 %osdk%\bin\xa mymplayer.s -o build\mymplayer.o
 %OSDK%\bin\header -h1 -a0 build\mymplayer.o build\mymplayer.tap $6500
 
+ECHO Assembling joystick driver
+%osdk%\bin\xa ijk-driver.s -o build\ijk-driver.o
+%OSDK%\bin\header -h1 -a0 build\ijk-driver.o build\ijk-driver.tap $a000
 
 ::
 :: Convert musics
@@ -64,9 +67,10 @@ SET YM2MYM=%osdk%\Bin\ym2mym.exe -h1 -m15872
 %OSDK%\bin\taptap ren build\LUDOSCRM.tap "LUDOSCRM" 0
 %OSDK%\bin\taptap ren build\LUDOTITL.tap "LUDOTITL" 0
 %OSDK%\bin\taptap ren build\mymplayer.tap "LUDOMACO" 0
+%OSDK%\bin\taptap ren build\ijk-driver.tap "LUDOJOYD" 0
 
 ECHO Building DSK file
-%OSDK%\bin\tap2dsk -iCLS:LUDO -c20:3 -nLUDO build\LUDO.tap build\LUDOMAIN.tap LUDOFOTO.hir build\LUDOTITL.tap build\LUDOSCRM.tap build\mymplayer.tap build\R-Type.tap build\AxelF.tap build\Wizzball.tap build\LUDO.dsk
+%OSDK%\bin\tap2dsk -iCLS:LUDO -c20:3 -nLUDO build\LUDO.tap build\LUDOMAIN.tap LUDOFOTO.hir build\LUDOTITL.tap build\LUDOSCRM.tap build\mymplayer.tap build\ijk-driver.tap build\R-Type.tap build\AxelF.tap build\Wizzball.tap build\LUDO.dsk
 %OSDK%\bin\old2mfm build\LUDO.dsk
 
 GOTO End

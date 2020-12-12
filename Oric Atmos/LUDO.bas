@@ -36,6 +36,7 @@ Start:+1:0
     
     HIMEM #6000
     CLS
+    RESTORE
     PAPER 0: INK 7: PRINT CHR$(17)
     FORX=0 TO 39
         POKE#BB80+X,8
@@ -54,6 +55,7 @@ Start:+1:0
     WP=200: GOSUB funcWaitkey
     TEXT: CLS: PRINT CHR$(17)
     LOAD "LUDOTITL.BIN"
+    LOAD "LUDOJOYD.BIN"
     AT$=CHR$(135):TX$="Press key to continue.": YC =24 : GOSUB funcCenter
     GOSUB subScrolltext
     AT$=CHR$(135):TX$="Please wait while loading...": YC =24 : GOSUB funcCenter
@@ -79,7 +81,6 @@ funcWaitkey
     '--- SCROLLTEXT ---
     
 subScrolltext
-    RESTORE
     SS$="                                        ": SC$=SS$
     REPEAT
         IF LEN(SC$)>45 THEN GOTO endifScroll1
