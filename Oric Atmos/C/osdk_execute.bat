@@ -9,6 +9,7 @@ IF "%OSDK%"=="" GOTO ErCfg
 ::
 :: Set the build paremeters
 ::
+SET OSDKDISK=LUDO.dsk
 CALL osdk_config.bat
 
 ::
