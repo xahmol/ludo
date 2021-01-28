@@ -12,7 +12,7 @@ IF "%OSDK%"=="" GOTO ErCfg
 ::
 SET OSDKADDR=$500
 SET OSDKNAME=LUDOMAIN
-SET OSDKFILE=main
+SET OSDKFILE=main libsedoric
 CALL %OSDK%\bin\make.bat %OSDKFILE%
 
 ::SET OSDKNAME=LUDOMAIN
@@ -67,7 +67,6 @@ echo %osdk%
 ::
 Echo Renaming files in TAP to friendly names
 %OSDK%\bin\taptap ren build\LUDOMAIN.tap "LUDOMAIN" 0
-copy LUDOSCRM.tap build\LUDOSCRM.tap
 %OSDK%\bin\taptap ren build\LUDOSCRM.tap "LUDOSCRM" 0
 ::%OSDK%\bin\taptap ren build\LUDOTITL.tap "LUDOTITL" 0
 ::%OSDK%\bin\taptap ren build\mymplayer.tap "LUDOMACO" 0

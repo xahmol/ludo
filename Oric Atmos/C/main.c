@@ -1,4 +1,15 @@
+/*
+L U D O   MAIN PROGRAM
+WRITTEN BY XANDER MOL
+CONVERTED TO ORIC ATMOS BASIC IN 2020
+CONVERTED TO ORIC ATMOS C IN 2021
+ORIGINAL WRITTEN IN 1992 FOR COMMODORE 128
+(C)2020 IDREAMTIN8BITS.COM
+*/
+
+/* Defines */
 #include <lib.h>
+#include "libsedoric.h"
 
 /* External functions */
 extern char *strchr(char *s,char c); /* from string.h */
@@ -14,8 +25,11 @@ char menupulldown(char xpos, char ypos, char menunumber);
 char menumain();
 char* screenpos(unsigned char xpos, unsigned char ypos);
 char getkey(char* allowedkeys, char joystickmask);
+void wait(unsigned int wait_cs);
 
 /* Variables */
+
+//Window data
 struct WindowStruct
 {
     int address;
@@ -27,6 +41,7 @@ struct WindowStruct Window[9];
 int windowaddress = 0xa100;
 unsigned char windownumber = 1;
 
+//Menu data
 char menubaroptions = 4;
 char pulldownmenunumber = 7;
 char menubartitles[4][12] = {"Game","Disc","Music","Information"};
@@ -51,34 +66,94 @@ char pulldownmenutitles[7][3][15] = {
      "Stop         "}
 };
 
+//Input validation strings
 char numbers[11]="0123456789";
 char letters[53]="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 char updownenter[4] = {10,11,13,0};
 char leftright[3] = {8,9,0};
 
+//Pawn position co-ords main field
+unsigned char vc[40][2] = {
+     { 2,13}, { 5,13}, { 8,13}, {11,13}, {14,13},
+     {14,11}, {14, 9}, {14, 7}, {14, 5}, {17, 5},
+     {20, 5}, {20, 7}, {20, 9}, {20,11}, {20,13},
+     {23,13}, {26,13}, {29,13}, {32,13}, {32,15},
+     {32,17}, {29,17}, {26,17}, {23,17}, {20,17},
+     {20,19}, {20,21}, {20,23}, {20,25}, {17,25},
+     {14,25}, {14,23}, {14,21}, {14,19}, {14,17},
+     {11,17}, { 8,17}, { 5,17}, { 2,17}, { 2,15}
+};
+//Pawn posiiion co-ords start and destination
+unsigned char rc[4][8][2] = {
+    {{ 2, 5}, { 5, 5}, { 2, 7}, { 5, 7}, { 5,15}, { 8,15}, {11,15}, {14,15}},
+    {{29, 5}, {32, 5}, {29, 7}, {32, 7}, {17, 7}, {17, 9}, {17,11}, {17,13}},
+    {{29,23}, {32,23}, {29,25}, {32,25}, {29,15}, {26,15}, {23,15}, {20,15}},
+    {{ 2,23}, { 5,23}, { 2,25}, { 5,25}, {17,23}, {17,21}, {17,19}, {17,17}}
+};
+//Player data
+unsigned char sp[4][4] = {
+    {0,0,2,0},
+    {0,0,1,0},
+    {0,0,4,0},
+    {0,0,3,0}
+};
+//Dice graphics string data
+unsigned char dns[6][2][3] = {
+    {{188,189,0},{190,191,0}},
+    {{192,193,0},{193,194,0}},
+    {{195,189,0},{190,196,0}},
+    {{192,197,0},{198,194,0}},
+    {{195,199,0},{200,196,0}},
+    {{201,201,0},{202,202,0}}
+};
+unsigned char sc[4][4][2];
+unsigned char pm[4];
+unsigned char np[4];
+int pw[3];
+unsigned char ei = 0;
+
 /* Main routine */
 
 void main()
 {
+    int x;
+
     setflags(SCREEN);
+
+    //Game start
     paper(0);
-    ink(1);
+    ink(3);
     cls();
 
-    loadmainscreen();
-    menuplacebar();
+    //Ask for loading save game
     menumakeborder(18,8,6,20);
     sprintf(screenpos(20,10),"%cLoad old game?%c",A_FWYELLOW, A_FWRED);
     menupulldown(27,11,5);
     windowrestore();
-    menumain();
+    
+    //Main game loop
+    do
+    {
+        loadmainscreen();
+        
+    } while (ei != 1);
+    
+    //End of game
+    cls();
+    paper(0);
+    ink(3);
+    for(x=0;x<40;x++) { poke(0xbb80+x,0); }
+    sprintf(screenpos(1,0),"%cThanks for playing, goodbye.",A_FWCYAN);
+    //call(0x6503);
 }
 
 /* Game routines */
 void loadmainscreen()
 {
-    sedoric("!LOAD \"LUDOSCRM.BIN\"");
-    /*GOSUB funcMenuplacebar*/
+    int rc;
+    int len = 0;
+    rc = loadfile("LUDOSCRM.BIN", (void*)0xb500, &len);
+    menuplacebar();
 }
 
 /* Functions for windowing and menu system */
@@ -332,4 +407,11 @@ char getkey(char* allowedkeys, char joystickmask)
         key = get();
     } while (strchr(allowedkeys, key)==0);
     return key;
+}
+
+void wait(unsigned int wait_cs)
+ {
+ 	//we use TIMER3 at adress #276-#277
+	doke(0x0276,wait_cs);
+	while ( deek(0x0276)>0){};
 }
