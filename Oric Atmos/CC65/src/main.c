@@ -8,23 +8,28 @@ ORIGINAL WRITTEN IN 1992 FOR COMMODORE 128
 */
 
 /* Defines */
-#include <lib.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <conio.h>
+#include <string.h>
+#include <joystick.h>
+#include "osdklib.h"
 #include "libsedoric.h"
-
-/* External functions */
-extern char *strchr(char *s,char c); /* from string.h */
-extern char *strcat(char *s1,char *s2); /* from string.h */
+#include "libmymplayer.h"
 
 /* Functions */
+void loadintro();
 void loadmainscreen();
+void turnhuman();
+void musicnext();
 void windowsave(unsigned char ypos, unsigned char height);
 void windowrestore();
 void menumakeborder(unsigned char xpos, unsigned char ypos, unsigned char height, unsigned char width);
 void menuplacebar();
-char menupulldown(char xpos, char ypos, char menunumber);
-char menumain();
-char* screenpos(unsigned char xpos, unsigned char ypos);
-char getkey(char* allowedkeys, char joystickmask);
+unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char menunumber);
+unsigned char menumain();
+unsigned char* screenpos(unsigned char xpos, unsigned char ypos);
+unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed);
 void wait(unsigned int wait_cs);
 
 /* Variables */
@@ -32,22 +37,22 @@ void wait(unsigned int wait_cs);
 //Window data
 struct WindowStruct
 {
-    int address;
+    unsigned int address;
     unsigned char ypos;
     unsigned char height;
 };
 struct WindowStruct Window[9];
 
-int windowaddress = 0xa100;
+unsigned int windowaddress = 0xa100;
 unsigned char windownumber = 1;
 
 //Menu data
-char menubaroptions = 4;
-char pulldownmenunumber = 7;
-char menubartitles[4][12] = {"Game","Disc","Music","Information"};
-char menubarcoords[4] = {1,6,11,17};
-char pulldownmenuoptions[7] = {3,2,3,1,2,2,3};
-char pulldownmenutitles[7][3][15] = {
+unsigned char menubaroptions = 4;
+unsigned char pulldownmenunumber = 7;
+unsigned char menubartitles[4][12] = {"Game","Disc","Music","Information"};
+unsigned char menubarcoords[4] = {1,6,11,17};
+unsigned char pulldownmenuoptions[7] = {3,2,3,1,2,2,3};
+unsigned char pulldownmenutitles[7][3][15] = {
     {"Throw dice",
      "Restart   ",
      "Stop      "},
@@ -67,10 +72,10 @@ char pulldownmenutitles[7][3][15] = {
 };
 
 //Input validation strings
-char numbers[11]="0123456789";
-char letters[53]="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-char updownenter[4] = {10,11,13,0};
-char leftright[3] = {8,9,0};
+unsigned char numbers[11]="0123456789";
+unsigned char letters[53]="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+unsigned char updownenter[4] = {10,11,13,0};
+unsigned char leftright[3] = {8,9,0};
 
 //Pawn position co-ords main field
 unsigned char vc[40][2] = {
@@ -111,55 +116,110 @@ unsigned char pm[4];
 unsigned char np[4];
 int pw[3];
 unsigned char ei = 0;
+unsigned char joyinterface = 0;
+unsigned char musicnumber = 1;
 
 /* Main routine */
 
 void main()
 {
-    int x;
-    int rc;
-    int len = 0;
-
-    setflags(SCREEN);
+    unsigned char x;
 
     //Game start
-    paper(0);
-    ink(3);
-    cls();
+    clrscr();
+    bgcolor(0);    
+    textcolor(3);
+
+    loadintro();
 
     loadmainscreen();
 
     //Ask for loading save game
     menumakeborder(18,8,6,20);
-    sprintf(screenpos(20,10),"%cLoad old game?%c",A_FWYELLOW, A_FWRED);
+    gotoxy(20,11);
+    cprintf("%cLoad old game?%c",A_FWYELLOW, A_FWRED);
     menupulldown(27,11,5);
     windowrestore();
 
-    menumain();
-
-    //Main game loop
-    //do
-    //{
-    //    loadmainscreen();
-    //
-    //} while (ei != 1);
+    turnhuman();
     
     //End of game
-    cls();
-    paper(0);
-    ink(3);
+    clrscr();
+    bgcolor(0);    
+    textcolor(3);
     for(x=0;x<40;x++) { poke(0xbb80+x,0); }
-    sprintf(screenpos(1,0),"%cThanks for playing, goodbye.",A_FWCYAN);
-    //call(0x6503);
+    gotoxy(1,1);
+    cprintf("%cThanks for playing, goodbye.",A_FWCYAN);
+    endmusic();
 }
 
 /* Game routines */
+void loadintro()
+{
+    /* Game intro */
+
+    int rc;
+    int len = 0;
+
+    rc = loadfile("LUDOTITL.BIN", (void*)0xb500, &len);
+    rc = loadfile("LUDOMUS1.BIN", (void*)0x7600, &len);
+    startmusic();
+    cgetc();
+}
+
 void loadmainscreen()
 {
+    /* Function to load main screen and print menu bar */
+
     int rc;
     int len = 0;
     rc = loadfile("LUDOSCRM.BIN", (void*)0xb500, &len);
     menuplacebar();
+}
+
+void turnhuman()
+{
+    /* Turn for the human players */
+
+    unsigned char choice;
+
+    do
+    {
+        choice = menumain();
+        switch (choice)
+        {
+        case 31:
+            musicnext();
+            break;
+
+        case 32:
+            endmusic();
+            break;
+        
+        case 33:
+            endmusic();
+            startmusic();
+            break;
+        
+        default:
+            break;
+        }
+    } while (choice != 11);
+}
+
+void musicnext()
+{
+    /* Funtion to load and start next music track */
+
+    int rc;
+    int len = 0;
+    unsigned char musicfilename[15];
+
+    endmusic();
+    if(++musicnumber>3) { musicnumber = 1;}
+    sprintf((char*)musicfilename,"LUDOMUS%d.BIN", musicnumber);
+    rc = loadfile(musicfilename, (void*)0x7600, &len);
+    startmusic();
 }
 
 /* Functions for windowing and menu system */
@@ -196,89 +256,99 @@ void menumakeborder(unsigned char xpos, unsigned char ypos, unsigned char height
        - width: window width in characters        */
 
     unsigned char x, y;
-    char* screen;
+    unsigned char* screen;
     
     windowsave(ypos, height+2);
-    screen = screenpos(xpos-2,ypos);
-    sprintf(screen,"%c%c%c",A_STD,A_FWRED,125);
-    screen+=3;
-    for(x=0;x<width;x++) { sprintf(screen++,"%c",94); }
-    sprintf(screen,"%c",126);
+
+    screen = screenpos(xpos-2,ypos+1);
+    poke(screen++,A_STD);
+    poke(screen++,A_FWRED);
+    poke(screen++,125);
+    for(x=0;x<width;x++) {poke(screen++,94); }
+    poke(screen,126);
     for(y=0;y<height;y++)
     {
-        screen = screenpos(xpos-2,ypos+y+1);
-        sprintf(screen,"%c%c%c",A_STD,A_FWRED,91);
-        screen+=3;
-        for(x=0;x<width;x++) { sprintf(screen++,"%c", 32); }
-        sprintf(screen,"%c",92);
+        screen = screenpos(xpos-2,ypos+y+2);
+        poke(screen++,A_STD);
+        poke(screen++,A_FWRED);
+        poke(screen++,91);
+        for(x=0;x<width;x++) { poke(screen++, 32); }
+        poke(screen,92);
     }
-    screen = screenpos(xpos-2,ypos+height+1);
-    sprintf(screen,"%c%c%c",A_STD,A_FWRED,123);
-    screen+=3;
-    for(x=0;x<width;x++) { sprintf(screen++,"%c",93); }
-    sprintf(screen,"%c",124);
+    screen = screenpos(xpos-2,ypos+height+2);
+    poke(screen++,A_STD);
+    poke(screen++,A_FWRED);
+    poke(screen++,123);
+    for(x=0;x<width;x++) { poke(screen++,93); }
+    poke(screen,124);
 }
 
 void menuplacebar()
 {
-    char* screen = (char*)0xbba8;
-    char x;
+    /* Function to print menu bar */
 
-    sprintf(screen,"%c%c", A_FWBLACK, A_BGGREEN);
-    screen+=2;
+    unsigned char x;
+
+    poke(0xbba8,A_FWBLACK);
+    gotoxy(1,1);
+    cprintf("%c", A_BGGREEN);
     for(x=0;x<menubaroptions;x++)
     {
-        sprintf(screen,"%s ",menubartitles[x]);
-        screen+=strlen(menubartitles[x])+1;
+        cprintf("%s ",menubartitles[x]);
     }
 }
 
-char menupulldown(char xpos, char ypos, char menunumber)
+unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char menunumber)
 {
-    char* screen;
-    char x;
-    char validkeys[6];
-    char key;
-    char joymask = 3;
-    char exit = 0;
-    char menuchoice = 1;
+    /* Function for pull down menu
+       Input:
+       - xpos = x-coordinate of upper left corner
+       - ypos = y-coordinate of upper left corner
+       - menunumber = 
+         number of the menu as defined in pulldownmenuoptions array */
+
+    unsigned char x;
+    unsigned char validkeys[6];
+    unsigned char key;
+    unsigned char exit = 0;
+    unsigned char menuchoice = 1;
+    unsigned char* screen;
 
     windowsave(ypos, pulldownmenuoptions[menunumber]+4);
     if(menunumber>menubaroptions)
     {
-        screen = screenpos(xpos,ypos);
-        sprintf(screen,"%c%c",A_FWRED,125);
-        screen+=2;
-        for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+4;x++) { sprintf(screen++,"%c",94); }
+        screen = screenpos(xpos,ypos+1);
+        poke(screen++,A_FWRED);
+        poke(screen++,125);
+        for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+4;x++) { poke(screen++,94); }
     }
-    screen = screenpos(xpos,ypos+1);
     for(x=0;x<pulldownmenuoptions[menunumber-1];x++)
     {
-        sprintf(screen,"%c%c%c%c%s%c%c%c",
-            A_FWRED,91, A_BGCYAN,A_FWBLACK,
-            pulldownmenutitles[menunumber-1][x],
-            A_FWRED,91,A_BGBLACK);
-        screen+=40;
+        gotoxy(xpos,ypos+x+2);
+        cprintf("%c%c%c", A_FWRED,91, A_BGCYAN);
+        poke(screenpos(xpos+3,ypos+x+2),A_FWBLACK);
+        gotoxy(xpos+4,ypos+x+2);
+        cprintf("%s%c%c%c",            
+            pulldownmenutitles[menunumber-1][x],A_FWRED,91,A_BGBLACK);
     }
-    sprintf(screen,"%c%c",A_FWRED,123);
-    screen+=2;
-    for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+4;x++) { sprintf(screen++,"%c",93); }
+    screen = screenpos(xpos,ypos+pulldownmenuoptions[menunumber-1]+2);
+    poke(screen++,A_FWRED);
+    poke(screen++,123);
+    for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+4;x++) { poke(screen++,93); }
 
     strcpy(validkeys, updownenter);
     if(menunumber<=menubaroptions)
     {
         strcat(validkeys, leftright);
-        joymask+=12;
     }
     
     do
     {
-        screen = screenpos(xpos+2,ypos+menuchoice);
-        sprintf(screen,"%c%c%s%c%c%c",
-            A_BGYELLOW,A_FWBLACK,
-            pulldownmenutitles[menunumber-1][menuchoice-1],
-            A_FWRED,91,A_BGBLACK);
-        key = getkey(validkeys, joymask);
+        poke(screenpos(xpos+2,ypos+menuchoice+1), A_BGYELLOW);
+        poke(screenpos(xpos+3,ypos+menuchoice+1),A_FWBLACK);
+        gotoxy(xpos+4,ypos+menuchoice+1);
+        cprintf("%s%c%c%c",pulldownmenutitles[menunumber-1][menuchoice-1], A_FWRED,91,A_BGBLACK);
+        key = getkey(validkeys,joyinterface);
         switch (key)
         {
         case 13:
@@ -293,11 +363,10 @@ char menupulldown(char xpos, char ypos, char menunumber)
 
         case 10:
         case 11:
-            screen = screenpos(xpos+2,ypos+menuchoice);
-            sprintf(screen,"%c%c%s%c%c%c",
-                A_BGCYAN,A_FWBLACK,
-                pulldownmenutitles[menunumber-1][menuchoice-1],
-                A_FWRED,91,A_BGBLACK);
+            poke(screenpos(xpos+2,ypos+menuchoice+1), A_BGCYAN);
+            poke(screenpos(xpos+3,ypos+menuchoice+1), A_FWBLACK);
+            gotoxy(xpos+4,ypos+menuchoice+1);
+            cprintf("%s%c%c%c",pulldownmenutitles[menunumber-1][menuchoice-1],A_FWRED,91,A_BGBLACK);
             if(key==11)
             {
                 menuchoice--;
@@ -324,25 +393,25 @@ char menupulldown(char xpos, char ypos, char menunumber)
     return menuchoice;
 }
 
-char menumain()
+unsigned char menumain()
 {
-    char menubarchoice = 1;
-    char menuoptionchoice = 0;
-    char key;
-    char validkeys[4] = {8,9,13,0};
-    char xpos;
+    /* Function for main menu selection */
+
+    unsigned char menubarchoice = 1;
+    unsigned char menuoptionchoice = 0;
+    unsigned char key;
+    unsigned char validkeys[4] = {8,9,13,0};
+    unsigned char xpos;
 
     do
     {
         do
         {
-            sprintf(screenpos(menubarcoords[menubarchoice-1],0),
-                "%c%s%c", A_BGWHITE,
-                menubartitles[menubarchoice-1], A_BGGREEN);
-            key = getkey(validkeys, 12);
-            sprintf(screenpos(menubarcoords[menubarchoice-1],0),
-                "%c%s", A_BGGREEN,
-                menubartitles[menubarchoice-1]);
+            gotoxy(menubarcoords[menubarchoice-1],1);
+            cprintf("%c%s%c", A_BGWHITE,menubartitles[menubarchoice-1], A_BGGREEN);
+            key = getkey(validkeys,joyinterface);
+            gotoxy(menubarcoords[menubarchoice-1],1);
+            cprintf("%c%s", A_BGGREEN,menubartitles[menubarchoice-1]);
             if(key==8)
             {
                 menubarchoice--;
@@ -390,7 +459,7 @@ char menumain()
 
 /* Generic screen functions */
 
-char* screenpos(unsigned char xpos, unsigned char ypos)
+unsigned char* screenpos(unsigned char xpos, unsigned char ypos)
 {
     /* Function to calculate screen memory position of 
        given x,y co-ordinates.
@@ -399,19 +468,47 @@ char* screenpos(unsigned char xpos, unsigned char ypos)
        - ypos: y-co-ordinate
        Output: pointer to correct screen memoery position */
        
-    return (char*)0xbba8 + ypos*40 + xpos;
+    return (char*)0xbb80 + ypos*40 + xpos;
 }
 
 /* Generic input routines */
 
-char getkey(char* allowedkeys, char joystickmask)
+unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
 {
-    char key;
+    /* Function to wait on valid key or joystick press/move
+       Input: allowedkeys = string with valid key press options
+       Output: key value (or joystick converted to key value)    */
+
+    unsigned char key;
 
     do
     {
-        key = get();
-    } while (strchr(allowedkeys, key)==0);
+        key = 0;
+        /*if(ijk_present && joyallowed)
+        {
+            ijk_read();
+            if(ijk_ljoy&4) { key = 13; }
+            if(ijk_ljoy&1) { key = 9; }
+            if(ijk_ljoy&2) { key = 8; }
+            if(ijk_ljoy&8) { key = 10; }
+            if(ijk_ljoy&16) { key = 11; }
+            if(ijk_rjoy&4) { key = 13; }
+            if(ijk_rjoy&1) { key = 9; }
+            if(ijk_rjoy&2) { key = 8; }
+            if(ijk_rjoy&8) { key = 10; }
+            if(ijk_rjoy&16) { key = 11; }
+            if(key){
+                do
+                {
+                   ijk_read();
+                } while (ijk_ljoy || ijk_rjoy);
+            }
+        }*/
+        if(key == 0)
+        {
+            if(kbhit()) { key = cgetc();}
+        }
+    } while (strchr(allowedkeys, key)==0 || key == 0);
     return key;
 }
 
