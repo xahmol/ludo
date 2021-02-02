@@ -765,7 +765,7 @@ endifInput8
 endifInput6
     UNTIL LEN(AN$)=ML AND KN=LEN(AN$)+1
 exitInput
-    PRINT @XC1,YC;CHR$(131);AN$LEFT$(S$,ML-LEN(AN$));CHR$(129)
+    PRINT @XC,YC;CHR$(131);AN$LEFT$(S$,ML-LEN(AN$));CHR$(129)
     RETURN
 
 'MAKE RECTANGLE

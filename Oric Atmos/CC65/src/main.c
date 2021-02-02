@@ -20,6 +20,8 @@ ORIGINAL WRITTEN IN 1992 FOR COMMODORE 128
 /* Functions */
 void loadintro();
 void loadmainscreen();
+void gamereset();
+void inputofnames();
 void turnhuman();
 void musicnext();
 void windowsave(unsigned char ypos, unsigned char height);
@@ -28,8 +30,10 @@ void menumakeborder(unsigned char xpos, unsigned char ypos, unsigned char height
 void menuplacebar();
 unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char menunumber);
 unsigned char menumain();
+unsigned char areyousure();
 unsigned char* screenpos(unsigned char xpos, unsigned char ypos);
 unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed);
+int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned char size);
 void wait(unsigned int wait_cs);
 
 /* Variables */
@@ -113,36 +117,60 @@ unsigned char dns[6][2][3] = {
 };
 unsigned char sc[4][4][2];
 unsigned char pm[4];
-unsigned char np[4];
+unsigned char sps[4][21];
+unsigned char dp[4];
+char np[4];
 int pw[3];
-unsigned char ei = 0;
-unsigned char joyinterface = 0;
-unsigned char musicnumber = 1;
+unsigned char ei;
+unsigned char bs;
+unsigned char joyinterface;
+unsigned char musicnumber;
 
 /* Main routine */
 
 void main()
 {
-    unsigned char x;
+    unsigned char x, choice;
 
-    //Game start
+    joyinterface = 0;
+    musicnumber = 1;
+    ei = 0;
+
+    //Game intro
     clrscr();
     bgcolor(0);    
     textcolor(3);
 
     loadintro();
 
-    loadmainscreen();
-
     //Ask for loading save game
     menumakeborder(18,8,6,20);
     gotoxy(20,11);
     cprintf("%cLoad old game?%c",A_FWYELLOW, A_FWRED);
-    menupulldown(27,11,5);
+    choice = menupulldown(27,11,5);
     windowrestore();
+    //if(choice==1) { loadgame(); }
 
-    turnhuman();
-    
+    //Main game loop
+    do
+    {
+        loadmainscreen();
+        if(ei==2)
+        {
+            ei = 0;
+            //placepawnsafterload();
+        }
+        else
+        {
+            gamereset();
+            inputofnames();
+        }
+        do
+        {
+            turnhuman();
+        } while (ei==0);
+    } while (ei!=1); 
+
     //End of game
     clrscr();
     bgcolor(0);    
@@ -177,34 +205,93 @@ void loadmainscreen()
     menuplacebar();
 }
 
+void gamereset()
+{
+    /* Reset all player data */
+
+    unsigned char n,m;
+
+    bs=0;
+    ei=0;
+    for(n=0;n<4;n++)
+    {
+        sp[n][1]=4;
+        sp[n][3]=4;
+        np[n]=-1;
+        dp[n]=8;
+        for(m=0;m<4;m++)
+        {
+            sc[n][m][0]=1;
+            sc[n][m][1]=1;
+        }
+    }
+}
+
+void inputofnames()
+{
+    /* Enter player nanes */
+    unsigned char x, choice;
+
+    menumakeborder(4,8,6,34);
+    for(x=0;x<4;x++)
+    {
+        gotoxy(6,11);
+        cprintf("%cComputer plays for player%c %d%c?%c",A_FWYELLOW,A_FWCYAN,x+1,A_FWYELLOW,A_FWRED);
+        choice = menupulldown(28,11,5);
+        if(choice==1)
+        {
+            sp[x][0]=1;
+        }
+        else
+        {
+            sp[x][0]=0;
+        }
+        gotoxy(6,11);
+        cprintf("%cInput name for player%c %d%c:    %c",A_FWYELLOW,A_FWCYAN,x+1,A_FWYELLOW,A_FWRED);
+        input(6,12,sps[x],20);
+    }
+    windowrestore();
+}
+
 void turnhuman()
 {
     /* Turn for the human players */
 
     unsigned char choice;
+    unsigned char yesno;
 
     do
     {
         choice = menumain();
         switch (choice)
         {
-        case 31:
-            musicnext();
-            break;
+            case 12:
+                yesno = areyousure();
+                if(yesno==1) { ei=3; }
+                break;
 
-        case 32:
-            endmusic();
-            break;
-        
-        case 33:
-            endmusic();
-            startmusic();
-            break;
-        
-        default:
-            break;
+            case 13:
+                yesno = areyousure();
+                if(yesno==1) { ei=1; }
+                break;
+
+            case 31:
+                musicnext();
+                break;
+
+            case 32:
+                endmusic();
+                break;
+
+            case 33:
+                endmusic();
+                startmusic();
+                break;
+
+            default:
+                break;
         }
-    } while (choice != 11);
+    } while (choice!=11 && choice!=12 && choice!=13 && choice!=22);
 }
 
 void musicnext()
@@ -457,6 +544,19 @@ unsigned char menumain()
     return menubarchoice*10+menuoptionchoice;    
 }
 
+unsigned char areyousure()
+{
+    /* Pull down menu to verify if player is sure */
+    unsigned char choice;
+
+    menumakeborder(8,8,6,30);
+    gotoxy(10,11);
+    cprintf("%cAre you sure ?%c", A_FWYELLOW, A_FWRED);
+    choice = menupulldown(25,11,5);
+    windowrestore();
+    return choice;
+}
+
 /* Generic screen functions */
 
 unsigned char* screenpos(unsigned char xpos, unsigned char ypos)
@@ -511,6 +611,105 @@ unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
     } while (strchr(allowedkeys, key)==0 || key == 0);
     return key;
 }
+
+int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned char size)
+{
+    /**
+    * input/modify a string.
+    * based on version DraCopy 1.0e, then modified.
+    * Created 2009 by Sascha Bader.
+    * @param[in] xpos screen x where input starts.
+    * @param[in] ypos screen y where input starts.
+    * @param[in,out] str string that is edited, it can have content and must have at   least @p size + 1 bytes. Maximum size if 255 bytes.
+    * @param[in] size maximum length of @p str in bytes.
+    * @return -1 if input was aborted.
+    * @return >= 0 length of edited string @p str.
+    */
+
+    unsigned char idx = strlen(str);
+    unsigned char c, x, b, flag;
+    unsigned char validkeys[70] = {32,127,0};
+    unsigned char* screen;
+
+    strcat(validkeys,numbers);
+    strcat(validkeys,letters);
+    strcat(validkeys,updownenter);
+    strcat(validkeys,leftright);
+  
+    screen = screenpos(xpos,ypos+1);
+    poke(screen++,A_FWWHITE);
+    for(x=0;x<size;x++) { poke(screen++,94); }
+    poke(screen,A_FWRED);
+
+    cputsxy(xpos+1, ypos+1, str);
+    cputc(160);
+  
+    while(1)
+    {
+        c = getkey(validkeys,0);
+        switch (c)
+        {
+            case 13:
+                idx = strlen(str);
+                str[idx] = 0;
+                for(x=0;x<size;x++) {cputcxy(xpos+x+1,ypos+1,32); }
+                cputsxy(xpos+1, ypos+1, str);
+                return idx;
+  
+            case 127:
+                if (idx)
+                {
+                    --idx;
+                    cputcxy(xpos+idx+1, ypos+1, ' ');
+                    for(x = idx; 1; ++x)
+                    {
+                        b = str[x+1];
+                        str[x] = b;
+                        cputcxy(xpos+x+1, ypos+1, b ? b : 94);
+                        if (b == 0) { break; }
+                    }
+                    cputcxy(xpos+idx+1, ypos+1, str[idx] ? 128+str[idx] : 160);
+                    cputcxy(xpos+idx+2, ypos+1, str[idx+1] ? str[idx+1] : 94);
+                    gotoxy(xpos+idx+1, ypos+1);
+                }
+                break;
+  
+            case 8:
+                if (idx)
+                {
+                    --idx;
+                    cputcxy(xpos+idx+1, ypos+1, str[idx] ? 128+str[idx] : 160);
+                    cputcxy(xpos+idx+2, ypos+1, str[idx+1] ? str[idx+1] : 94);
+                    gotoxy(xpos+idx+1, ypos+1);
+                }
+                break;
+
+            case 9:
+                if (idx < strlen(str) && idx < size)
+                {
+                    ++idx;
+                    cputcxy(xpos+idx, ypos+1, str[idx-1]);
+                    cputcxy(xpos+idx+1, ypos+1, str[idx] ? 128+str[idx] : 160);
+                    gotoxy(xpos + idx + 1, ypos+1);
+                }
+                break;
+  
+            default:
+                if (idx < size)
+                {
+                    flag = (str[idx] == 0);
+                    str[idx] = c;
+                    gotoxy(xpos+idx+1, ypos+1);
+                    cputc(c);
+                    cputc(160);
+                    ++idx;
+                    if (flag) { str[idx+1] = 0; }
+                }
+                break;
+        }
+    }
+    return 0;
+}  
 
 void wait(unsigned int wait_cs)
  {
