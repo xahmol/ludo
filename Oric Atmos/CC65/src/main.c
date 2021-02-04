@@ -7,12 +7,12 @@ ORIGINAL WRITTEN IN 1992 FOR COMMODORE 128
 (C)2020 IDREAMTIN8BITS.COM
 */
 
-/* Defines */
+/* Includes */
 #include <stdlib.h>
 #include <stdio.h>
 #include <conio.h>
 #include <string.h>
-#include <joystick.h>
+#include "defines.h"
 #include "osdklib.h"
 #include "libsedoric.h"
 #include "libmymplayer.h"
@@ -23,6 +23,7 @@ void loadmainscreen();
 void gamereset();
 void inputofnames();
 void turnhuman();
+void savegame(unsigned char autosave);
 void musicnext();
 void windowsave(unsigned char ypos, unsigned char height);
 void windowrestore();
@@ -31,7 +32,6 @@ void menuplacebar();
 unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char menunumber);
 unsigned char menumain();
 unsigned char areyousure();
-unsigned char* screenpos(unsigned char xpos, unsigned char ypos);
 unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed);
 int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned char size);
 void wait(unsigned int wait_cs);
@@ -52,11 +52,11 @@ unsigned char windownumber = 1;
 
 //Menu data
 unsigned char menubaroptions = 4;
-unsigned char pulldownmenunumber = 7;
+unsigned char pulldownmenunumber = 8;
 unsigned char menubartitles[4][12] = {"Game","Disc","Music","Information"};
 unsigned char menubarcoords[4] = {1,6,11,17};
-unsigned char pulldownmenuoptions[7] = {3,2,3,1,2,2,3};
-unsigned char pulldownmenutitles[7][3][15] = {
+unsigned char pulldownmenuoptions[8] = {3,2,3,1,2,2,3,4};
+unsigned char pulldownmenutitles[8][4][16] = {
     {"Throw dice",
      "Restart   ",
      "Stop      "},
@@ -72,14 +72,18 @@ unsigned char pulldownmenutitles[7][3][15] = {
     ,"Stop   "},
     {"Continue game",
      "New game     ",
-     "Stop         "}
+     "Stop         "},
+    {"Slot 1: Empty  ",
+     "Slot 2: Empty  ",
+     "Slot 3: Empty  ",
+     "Slot 4: Empty  "}
 };
 
 //Input validation strings
 unsigned char numbers[11]="0123456789";
 unsigned char letters[53]="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-unsigned char updownenter[4] = {10,11,13,0};
-unsigned char leftright[3] = {8,9,0};
+unsigned char updownenter[4] = {C_DOWN,C_UP,C_ENTER,0};
+unsigned char leftright[3] = {C_LEFT,C_RIGHT,0};
 
 //Pawn position co-ords main field
 unsigned char vc[40][2] = {
@@ -108,12 +112,12 @@ unsigned char sp[4][4] = {
 };
 //Dice graphics string data
 unsigned char dns[6][2][3] = {
-    {{188,189,0},{190,191,0}},
-    {{192,193,0},{193,194,0}},
-    {{195,189,0},{190,196,0}},
-    {{192,197,0},{198,194,0}},
-    {{195,199,0},{200,196,0}},
-    {{201,201,0},{202,202,0}}
+    {{C_DICE01,C_DICE02,0},{C_DICE03,C_DICE04,0}},
+    {{C_DICE05,C_DICE06,0},{C_DICE06,C_DICE07,0}},
+    {{C_DICE08,C_DICE02,0},{C_DICE03,C_DICE09,0}},
+    {{C_DICE05,C_DICE10,0},{C_DICE11,C_DICE07,0}},
+    {{C_DICE08,C_DICE12,0},{C_DICE13,C_DICE09,0}},
+    {{C_DICE14,C_DICE14,0},{C_DICE15,C_DICE15,0}}
 };
 unsigned char sc[4][4][2];
 unsigned char pm[4];
@@ -175,8 +179,9 @@ void main()
     clrscr();
     bgcolor(0);    
     textcolor(3);
-    for(x=0;x<40;x++) { poke(0xbb80+x,0); }
-    gotoxy(1,1);
+    gotoxy(0,0);
+    for(x=0;x<40;x++) { cputc(0); }
+    gotoxy(0,1);
     cprintf("%cThanks for playing, goodbye.",A_FWCYAN);
     endmusic();
 }
@@ -191,6 +196,7 @@ void loadintro()
 
     rc = loadfile("LUDOTITL.BIN", (void*)0xb500, &len);
     rc = loadfile("LUDOMUS1.BIN", (void*)0x7600, &len);
+    rc = loadfile("LUDODATA.COM", (void*)0xb000, &len);
     startmusic();
     cgetc();
 }
@@ -275,6 +281,10 @@ void turnhuman()
                 if(yesno==1) { ei=1; }
                 break;
 
+            case 21:
+                savegame(0);
+                break;
+
             case 31:
                 musicnext();
                 break;
@@ -291,7 +301,54 @@ void turnhuman()
             default:
                 break;
         }
-    } while (choice!=11 && choice!=12 && choice!=13 && choice!=22);
+    } while (choice!=C_UP && choice!=12 && choice!=C_ENTER && choice!=22);
+}
+
+void savegame(unsigned char autosave)
+{
+    char* baseaddress = (char*)0xb000;
+    unsigned char filename[15];
+    unsigned char slot, rc, x;
+    unsigned char yesno = 1;
+
+    if(autosave)
+    {
+        strcpy(filename,"LUDOSAV0.SAV");
+    }
+    else
+    {
+        menumakeborder(7,5,12,31);
+        gotoxy(9,8);
+        cprintf("%cSave game.%c", A_FWGREEN, A_FWRED);
+        gotoxy(9,10);
+        cprintf("%cChoose slot:%c", A_FWYELLOW, A_FWRED);
+        slot = menupulldown(15,10,8);
+        if(peek(baseaddress+slot)==1)
+        {
+            gotoxy(9,10);
+            cprintf("%cSlot not empty. Sure?%c", A_FWYELLOW, A_FWRED);
+            yesno = menupulldown(15,10,5);
+        }
+        if(yesno==1)
+        {
+            gotoxy(9,10);
+            cprintf("%cChoose name of save. %c", A_FWYELLOW, A_FWRED);
+            input(9,10,pulldownmenutitles[7][slot-1],15);
+            for(x=strlen(pulldownmenutitles[7][slot-1]);x<15;x++)
+            {
+                pulldownmenutitles[7][slot-1][x] = C_SPACE;
+            }
+            pulldownmenutitles[7][slot-1][15] = 0;
+            windowrestore();
+            sprintf(filename,"LUDOSAV%d.SAV", slot);
+            poke(baseaddress+slot,1);
+            for(x=0;x<16;x++)
+            {
+                poke(baseaddress+(slot*16)+5,pulldownmenutitles[7][slot-1][x]);
+            }
+            savefile("LUDODATA.COM", baseaddress, 85);
+        }
+    }
 }
 
 void musicnext()
@@ -343,31 +400,30 @@ void menumakeborder(unsigned char xpos, unsigned char ypos, unsigned char height
        - width: window width in characters        */
 
     unsigned char x, y;
-    unsigned char* screen;
     
     windowsave(ypos, height+2);
 
-    screen = screenpos(xpos-2,ypos+1);
-    poke(screen++,A_STD);
-    poke(screen++,A_FWRED);
-    poke(screen++,125);
-    for(x=0;x<width;x++) {poke(screen++,94); }
-    poke(screen,126);
+    gotoxy(xpos-2,ypos+1);
+    cputc(A_STD);
+    cputc(A_FWRED);
+    cputc(C_LOWRIGHT);
+    for(x=0;x<width;x++) {cputc(C_LOWLINE); }
+    cputc(C_LOWLEFT);
     for(y=0;y<height;y++)
     {
-        screen = screenpos(xpos-2,ypos+y+2);
-        poke(screen++,A_STD);
-        poke(screen++,A_FWRED);
-        poke(screen++,91);
-        for(x=0;x<width;x++) { poke(screen++, 32); }
-        poke(screen,92);
+        gotoxy(xpos-2,ypos+y+2);
+        cputc(A_STD);
+        cputc(A_FWRED);
+        cputc(C_RIGHTLINE);
+        for(x=0;x<width;x++) { cputc(C_SPACE ); }
+        cputc(C_LEFTLINE);
     }
-    screen = screenpos(xpos-2,ypos+height+2);
-    poke(screen++,A_STD);
-    poke(screen++,A_FWRED);
-    poke(screen++,123);
-    for(x=0;x<width;x++) { poke(screen++,93); }
-    poke(screen,124);
+    gotoxy(xpos-2,ypos+height+2);
+    cputc(A_STD);
+    cputc(A_FWRED);
+    cputc(C_UPRIGHT);
+    for(x=0;x<width;x++) { cputc(C_UPLINE); }
+    cputc(C_UPLEFT);
 }
 
 void menuplacebar()
@@ -376,9 +432,9 @@ void menuplacebar()
 
     unsigned char x;
 
-    poke(0xbba8,A_FWBLACK);
-    gotoxy(1,1);
-    cprintf("%c", A_BGGREEN);
+    gotoxy(0,1);
+    cputc(A_FWBLACK);
+    cputc(A_BGGREEN);
     for(x=0;x<menubaroptions;x++)
     {
         cprintf("%s ",menubartitles[x]);
@@ -399,29 +455,27 @@ unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char
     unsigned char key;
     unsigned char exit = 0;
     unsigned char menuchoice = 1;
-    unsigned char* screen;
 
     windowsave(ypos, pulldownmenuoptions[menunumber]+4);
     if(menunumber>menubaroptions)
     {
-        screen = screenpos(xpos,ypos+1);
-        poke(screen++,A_FWRED);
-        poke(screen++,125);
-        for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+4;x++) { poke(screen++,94); }
+        gotoxy(xpos,ypos+1);
+        cputc(A_FWRED);
+        cputc(C_LOWRIGHT);
+        for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+4;x++) { cputc(C_LOWLINE); }
     }
     for(x=0;x<pulldownmenuoptions[menunumber-1];x++)
     {
         gotoxy(xpos,ypos+x+2);
-        cprintf("%c%c%c", A_FWRED,91, A_BGCYAN);
-        poke(screenpos(xpos+3,ypos+x+2),A_FWBLACK);
-        gotoxy(xpos+4,ypos+x+2);
+        cprintf("%c%c%c", A_FWRED,C_RIGHTLINE, A_BGCYAN);
+        cputc(A_FWBLACK);
         cprintf("%s%c%c%c",            
-            pulldownmenutitles[menunumber-1][x],A_FWRED,91,A_BGBLACK);
+            pulldownmenutitles[menunumber-1][x],A_FWRED,C_RIGHTLINE,A_BGBLACK);
     }
-    screen = screenpos(xpos,ypos+pulldownmenuoptions[menunumber-1]+2);
-    poke(screen++,A_FWRED);
-    poke(screen++,123);
-    for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+4;x++) { poke(screen++,93); }
+    gotoxy(xpos,ypos+pulldownmenuoptions[menunumber-1]+2);
+    cputc(A_FWRED);
+    cputc(C_UPRIGHT);
+    for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+4;x++) { cputc(C_UPLINE); }
 
     strcpy(validkeys, updownenter);
     if(menunumber<=menubaroptions)
@@ -431,30 +485,30 @@ unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char
     
     do
     {
-        poke(screenpos(xpos+2,ypos+menuchoice+1), A_BGYELLOW);
-        poke(screenpos(xpos+3,ypos+menuchoice+1),A_FWBLACK);
-        gotoxy(xpos+4,ypos+menuchoice+1);
-        cprintf("%s%c%c%c",pulldownmenutitles[menunumber-1][menuchoice-1], A_FWRED,91,A_BGBLACK);
+        gotoxy(xpos+2,ypos+menuchoice+1);
+        cputc(A_BGYELLOW);
+        cputc(A_FWBLACK);
+        cprintf("%s%c%c%c",pulldownmenutitles[menunumber-1][menuchoice-1], A_FWRED,C_RIGHTLINE,A_BGBLACK);
         key = getkey(validkeys,joyinterface);
         switch (key)
         {
-        case 13:
+        case C_ENTER:
             exit = 1;
             break;
         
-        case 8:
-        case 9:
+        case C_LEFT:
+        case C_RIGHT:
             exit = 1;
             menuchoice = 10 + key;
             break;
 
-        case 10:
-        case 11:
-            poke(screenpos(xpos+2,ypos+menuchoice+1), A_BGCYAN);
-            poke(screenpos(xpos+3,ypos+menuchoice+1), A_FWBLACK);
-            gotoxy(xpos+4,ypos+menuchoice+1);
-            cprintf("%s%c%c%c",pulldownmenutitles[menunumber-1][menuchoice-1],A_FWRED,91,A_BGBLACK);
-            if(key==11)
+        case C_DOWN:
+        case C_UP:
+            gotoxy(xpos+2,ypos+menuchoice+1);
+            cputc(A_BGCYAN);
+            cputc(A_FWBLACK);
+            cprintf("%s%c%c%c",pulldownmenutitles[menunumber-1][menuchoice-1],A_FWRED,C_RIGHTLINE,A_BGBLACK);
+            if(key==C_UP)
             {
                 menuchoice--;
                 if(menuchoice<1)
@@ -499,7 +553,7 @@ unsigned char menumain()
             key = getkey(validkeys,joyinterface);
             gotoxy(menubarcoords[menubarchoice-1],1);
             cprintf("%c%s", A_BGGREEN,menubartitles[menubarchoice-1]);
-            if(key==8)
+            if(key==C_LEFT)
             {
                 menubarchoice--;
                 if(menubarchoice<1)
@@ -507,7 +561,7 @@ unsigned char menumain()
                     menubarchoice = menubaroptions;
                 }
             }
-            else if (key==9)
+            else if (key==C_RIGHT)
             {
                 menubarchoice++;
                 if(menubarchoice>menubaroptions)
@@ -515,7 +569,7 @@ unsigned char menumain()
                     menubarchoice = 1;
                 }
             }
-        } while (key!=13);
+        } while (key!=C_ENTER);
         xpos=menubarcoords[menubarchoice-1]-1;
         if(xpos+strlen(pulldownmenutitles[menubarchoice-1][0])>38)
         {
@@ -557,20 +611,6 @@ unsigned char areyousure()
     return choice;
 }
 
-/* Generic screen functions */
-
-unsigned char* screenpos(unsigned char xpos, unsigned char ypos)
-{
-    /* Function to calculate screen memory position of 
-       given x,y co-ordinates.
-       Input:
-       - xpos: x-co-ordinate
-       - ypos: y-co-ordinate
-       Output: pointer to correct screen memoery position */
-       
-    return (char*)0xbb80 + ypos*40 + xpos;
-}
-
 /* Generic input routines */
 
 unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
@@ -587,14 +627,14 @@ unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
         /*if(ijk_present && joyallowed)
         {
             ijk_read();
-            if(ijk_ljoy&4) { key = 13; }
-            if(ijk_ljoy&1) { key = 9; }
-            if(ijk_ljoy&2) { key = 8; }
-            if(ijk_ljoy&8) { key = 10; }
-            if(ijk_ljoy&16) { key = 11; }
-            if(ijk_rjoy&4) { key = 13; }
-            if(ijk_rjoy&1) { key = 9; }
-            if(ijk_rjoy&2) { key = 8; }
+            if(ijk_ljoy&4) { key = C_ENTER; }
+            if(ijk_ljoy&1) { key = C_RIGHT; }
+            if(ijk_ljoy&2) { key = C_LEFT; }
+            if(ijk_ljoy&8) { key = C_DOWN; }
+            if(ijk_ljoy&16) { key = C_UP; }
+            if(ijk_rjoy&4) { key = C_ENTER; }
+            if(ijk_rjoy&1) { key = C_RIGHT; }
+            if(ijk_rjoy&2) { key = C_LEFT; }
             if(ijk_rjoy&8) { key = 10; }
             if(ijk_rjoy&16) { key = 11; }
             if(key){
@@ -628,35 +668,35 @@ int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned c
 
     unsigned char idx = strlen(str);
     unsigned char c, x, b, flag;
-    unsigned char validkeys[70] = {32,127,0};
-    unsigned char* screen;
+    unsigned char validkeys[70] = {C_SPACE ,C_DELETE,0};
 
     strcat(validkeys,numbers);
     strcat(validkeys,letters);
     strcat(validkeys,updownenter);
     strcat(validkeys,leftright);
   
-    screen = screenpos(xpos,ypos+1);
-    poke(screen++,A_FWWHITE);
-    for(x=0;x<size;x++) { poke(screen++,94); }
-    poke(screen,A_FWRED);
+    gotoxy(xpos,ypos+1);
+    cputc(A_FWWHITE);
+    for(x=0;x<size;x++) { cputc(C_LOWLINE); }
+    cputc(A_FWRED);
 
     cputsxy(xpos+1, ypos+1, str);
-    cputc(160);
+    cputc(C_INVSPACE);
   
     while(1)
     {
         c = getkey(validkeys,0);
         switch (c)
         {
-            case 13:
+            case C_ENTER:
                 idx = strlen(str);
                 str[idx] = 0;
-                for(x=0;x<size;x++) {cputcxy(xpos+x+1,ypos+1,32); }
+                gotoxy(xpos+1,ypos+1);
+                for(x=0;x<size;x++) {cputc(C_SPACE ); }
                 cputsxy(xpos+1, ypos+1, str);
                 return idx;
   
-            case 127:
+            case C_DELETE:
                 if (idx)
                 {
                     --idx;
@@ -665,31 +705,34 @@ int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned c
                     {
                         b = str[x+1];
                         str[x] = b;
-                        cputcxy(xpos+x+1, ypos+1, b ? b : 94);
+                        cputcxy(xpos+x+1, ypos+1, b ? b : C_LOWLINE);
                         if (b == 0) { break; }
                     }
-                    cputcxy(xpos+idx+1, ypos+1, str[idx] ? 128+str[idx] : 160);
-                    cputcxy(xpos+idx+2, ypos+1, str[idx+1] ? str[idx+1] : 94);
+                    gotoxy(xpos+idx+1, ypos+1);
+                    cputc(str[idx] ? 128+str[idx] : C_INVSPACE);
+                    cputc(str[idx+1] ? str[idx+1] : C_LOWLINE);
                     gotoxy(xpos+idx+1, ypos+1);
                 }
                 break;
   
-            case 8:
+            case C_LEFT:
                 if (idx)
                 {
                     --idx;
-                    cputcxy(xpos+idx+1, ypos+1, str[idx] ? 128+str[idx] : 160);
-                    cputcxy(xpos+idx+2, ypos+1, str[idx+1] ? str[idx+1] : 94);
+                    gotoxy(xpos+idx+1, ypos+1);
+                    cputc(str[idx] ? 128+str[idx] : C_INVSPACE);
+                    cputc(str[idx+1] ? str[idx+1] : C_LOWLINE);
                     gotoxy(xpos+idx+1, ypos+1);
                 }
                 break;
 
-            case 9:
+            case C_RIGHT:
                 if (idx < strlen(str) && idx < size)
                 {
                     ++idx;
-                    cputcxy(xpos+idx, ypos+1, str[idx-1]);
-                    cputcxy(xpos+idx+1, ypos+1, str[idx] ? 128+str[idx] : 160);
+                    gotoxy(xpos+idx, ypos+1);
+                    cputc(str[idx-1]);
+                    cputc(str[idx] ? 128+str[idx] : C_INVSPACE);
                     gotoxy(xpos + idx + 1, ypos+1);
                 }
                 break;
@@ -701,7 +744,7 @@ int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned c
                     str[idx] = c;
                     gotoxy(xpos+idx+1, ypos+1);
                     cputc(c);
-                    cputc(160);
+                    cputc(C_INVSPACE);
                     ++idx;
                     if (flag) { str[idx+1] = 0; }
                 }
