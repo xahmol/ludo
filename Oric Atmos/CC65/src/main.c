@@ -306,10 +306,14 @@ void turnhuman()
 
 void savegame(unsigned char autosave)
 {
-    char* baseaddress = (char*)0xb000;
+    unsigned int baseaddress = 0xb000;
     unsigned char filename[15];
-    unsigned char slot, rc, x;
+    unsigned char slot, x;
     unsigned char yesno = 1;
+
+    gotoxy(1,3);
+        cprintf("%X,%X,%X", baseaddress, baseaddress+1, peek(baseaddress+slot));
+        cgetc();
 
     if(autosave)
     {
@@ -323,6 +327,9 @@ void savegame(unsigned char autosave)
         gotoxy(9,10);
         cprintf("%cChoose slot:%c", A_FWYELLOW, A_FWRED);
         slot = menupulldown(15,10,8);
+        gotoxy(1,3);
+        cprintf("%u,%X,%X,%X", slot, baseaddress, baseaddress+slot, peek(baseaddress+slot));
+        cgetc();
         if(peek(baseaddress+slot)==1)
         {
             gotoxy(9,10);
@@ -346,7 +353,7 @@ void savegame(unsigned char autosave)
             {
                 poke(baseaddress+(slot*16)+5,pulldownmenutitles[7][slot-1][x]);
             }
-            savefile("LUDODATA.COM", baseaddress, 85);
+            savefile("LUDODATA.COM", (void*)baseaddress, 85);
         }
     }
 }

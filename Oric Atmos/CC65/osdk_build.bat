@@ -8,6 +8,7 @@
 IF "%OSDK%"=="" GOTO ErCfg
 
 %OSDK%\bin\header build\LUDOMAIN.bin build\LUDOMAIN.tap $0501
+%OSDK%\bin\header build\SAVETEST.bin build\SAVETEST.tap $0501
 %OSDK%\bin\header data\LUDODATA.bin build\LUDODATA.tap $b000
 
 ::
@@ -52,7 +53,7 @@ copy screen\LUDOTITL.tap build\LUDOTITL.tap
 %OSDK%\bin\taptap ren build\LUDOTITL.tap "LUDOTITL" 0
 
 ECHO Building DSK file
-%OSDK%\bin\tap2dsk -iCLS:LUDOMAIN -c20:3 -nLUDO build\LUDOMAIN.tap screen\LUDOFOTO.hir build\LUDOTITL.tap build\LUDOSCRM.tap build\LUDODATA.tap build\R-Type.tap build\AxelF.tap build\Wizzball.tap build\LUDO.dsk
+%OSDK%\bin\tap2dsk -iCLS:LUDOMAIN -c20:3 -nLUDO build\LUDOMAIN.tap build\SAVETEST.tap screen\LUDOFOTO.hir build\LUDOTITL.tap build\LUDOSCRM.tap build\LUDODATA.tap build\R-Type.tap build\AxelF.tap build\Wizzball.tap build\LUDO.dsk
 %OSDK%\bin\old2mfm build\LUDO.dsk
 
 GOTO End

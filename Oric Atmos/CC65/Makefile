@@ -1,19 +1,23 @@
 SOURCES = src/main.c
 LIBOBJECTS = include/libsedoric-ca65.s include/mymplayer-ca65.s
 
+TESTSOURCES = src/savetest.c
+TESTOBJECTS = include/libsedoric-ca65.s
+
 PROGRAM = build/LUDOMAIN.bin
+TESTPROG = build/SAVETEST.bin
 
 CC65_TARGET = atmos
 CC = cl65
 CFLAGS  = -t $(CC65_TARGET) --create-dep $(<:.c=.d) -Oirs -I include
 LDFLAGS = -t $(CC65_TARGET) -m $(PROGRAM).map
-LDFLAGSUPD = -t $(CC65_TARGET) -m $(UPDATE).map
+LDFLAGSTEST = -t $(CC65_TARGET) -m $(TESTPROG).map
 
 ########################################
 
 .SUFFIXES:
 .PHONY: all clean
-all: $(PROGRAM) $(UPDATE) $(ZIP)
+all: $(PROGRAM) $(TESTPROG)
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(SOURCES:.c=.d) $(SOURCESUPD:.c=.d)
@@ -25,5 +29,8 @@ endif
 $(PROGRAM): $(SOURCES:.c=.o)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBOBJECTS)
 
+$(TESTPROG): $(TESTSOURCES:.c=.o)
+	$(CC) $(LDFLAGSTEST) -o $@ $^ $(TESTOBJECTS)
+
 clean:
-	$(RM) $(SOURCES:.c=.o) $(SOURCES:.c=.d) $(SOURCESUPD:.c=.o) $(SOURCESUPD:.c=.d) $(PROGRAM) $(PROGRAM).map $(UPDATE) $(UPDATE).map
+	$(RM) $(SOURCES:.c=.o) $(SOURCES:.c=.d) $(TESTSOURCES:.c=.o) $(TESTSOURCES:.c=.d) $(PROGRAM) $(PROGRAM).map $(TESTPROG) $(TESTPROG).map
