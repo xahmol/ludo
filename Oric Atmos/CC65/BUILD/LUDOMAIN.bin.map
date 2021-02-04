@@ -10,162 +10,162 @@ libsedoric-ca65.o:
 mymplayer-ca65.o:
     CODE              Offs=001778  Size=00028C  Align=00001  Fill=0000
     ZEROPAGE          Offs=000000  Size=00000C  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(_cursor.o):
+/mnt/c/cc65/lib/atmos.lib(_cursor.o):
     BSS               Offs=0000AE  Size=000001  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(_directerrno.o):
+/mnt/c/cc65/lib/atmos.lib(_directerrno.o):
     CODE              Offs=001A04  Size=00000A  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(_hextab.o):
+/mnt/c/cc65/lib/atmos.lib(_hextab.o):
     RODATA            Offs=000129  Size=000010  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(_longminstr.o):
+/mnt/c/cc65/lib/atmos.lib(_longminstr.o):
     RODATA            Offs=000139  Size=00000C  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(_oserror.o):
+/mnt/c/cc65/lib/atmos.lib(_oserror.o):
     BSS               Offs=0000AF  Size=000001  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(_printf.o):
+/mnt/c/cc65/lib/atmos.lib(_printf.o):
     CODE              Offs=001A0E  Size=0003A5  Align=00001  Fill=0000
     BSS               Offs=0000B0  Size=00002B  Align=00001  Fill=0000
     DATA              Offs=000286  Size=000003  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(_seterrno.o):
+/mnt/c/cc65/lib/atmos.lib(_seterrno.o):
     CODE              Offs=001DB3  Size=000009  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(add.o):
+/mnt/c/cc65/lib/atmos.lib(add.o):
     CODE              Offs=001DBC  Size=00001C  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(addeqsp.o):
+/mnt/c/cc65/lib/atmos.lib(addeqsp.o):
     CODE              Offs=001DD8  Size=000011  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(addysp.o):
+/mnt/c/cc65/lib/atmos.lib(addysp.o):
     CODE              Offs=001DE9  Size=00000E  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(aslax2.o):
+/mnt/c/cc65/lib/atmos.lib(aslax2.o):
     CODE              Offs=001DF7  Size=00000B  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(aslax3.o):
+/mnt/c/cc65/lib/atmos.lib(aslax3.o):
     CODE              Offs=001E02  Size=00000E  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(axlong.o):
+/mnt/c/cc65/lib/atmos.lib(axlong.o):
     CODE              Offs=001E10  Size=00000D  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(callmain.o):
+/mnt/c/cc65/lib/atmos.lib(callmain.o):
     CODE              Offs=001E1D  Size=000017  Align=00001  Fill=0000
     DATA              Offs=000289  Size=000004  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(capslock.o):
+/mnt/c/cc65/lib/atmos.lib(capslock.o):
     CODE              Offs=001E34  Size=000007  Align=00001  Fill=0000
     ONCE              Offs=000000  Size=00000C  Align=00001  Fill=0000
     INIT              Offs=000000  Size=000001  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(cgetc.o):
+/mnt/c/cc65/lib/atmos.lib(cgetc.o):
     CODE              Offs=001E3B  Size=00002F  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(clrscr.o):
+/mnt/c/cc65/lib/atmos.lib(clrscr.o):
     CODE              Offs=001E6A  Size=000026  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(color.o):
-/mnt/l/cc65/lib/atmos.lib(condes.o):
+/mnt/c/cc65/lib/atmos.lib(color.o):
+/mnt/c/cc65/lib/atmos.lib(condes.o):
     CODE              Offs=001E90  Size=00000C  Align=00001  Fill=0000
     DATA              Offs=00028D  Size=000025  Align=00001  Fill=0000
     ONCE              Offs=00000C  Size=00000C  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(cprintf.o):
+/mnt/c/cc65/lib/atmos.lib(cprintf.o):
     CODE              Offs=001E9C  Size=00002A  Align=00001  Fill=0000
     BSS               Offs=0000DB  Size=000001  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(cputc.o):
+/mnt/c/cc65/lib/atmos.lib(cputc.o):
     CODE              Offs=001EC6  Size=00004A  Align=00001  Fill=0000
     RODATA            Offs=000145  Size=000038  Align=00001  Fill=0000
     ONCE              Offs=000018  Size=000007  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(cputs.o):
+/mnt/c/cc65/lib/atmos.lib(cputs.o):
     CODE              Offs=001F10  Size=000023  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(crt0.o):
+/mnt/c/cc65/lib/atmos.lib(crt0.o):
     STARTUP           Offs=000000  Size=000025  Align=00001  Fill=0000
     ONCE              Offs=00001F  Size=000020  Align=00001  Fill=0000
     INIT              Offs=000001  Size=00001C  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(ctype.o):
+/mnt/c/cc65/lib/atmos.lib(ctype.o):
     RODATA            Offs=00017D  Size=00008B  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(ctypemask.o):
+/mnt/c/cc65/lib/atmos.lib(ctypemask.o):
     CODE              Offs=001F33  Size=00001E  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(decsp1.o):
+/mnt/c/cc65/lib/atmos.lib(decsp1.o):
     CODE              Offs=001F51  Size=000009  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(decsp2.o):
+/mnt/c/cc65/lib/atmos.lib(decsp2.o):
     CODE              Offs=001F5A  Size=00000D  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(decsp3.o):
+/mnt/c/cc65/lib/atmos.lib(decsp3.o):
     CODE              Offs=001F67  Size=00000D  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(decsp4.o):
+/mnt/c/cc65/lib/atmos.lib(decsp4.o):
     CODE              Offs=001F74  Size=00000D  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(decsp5.o):
+/mnt/c/cc65/lib/atmos.lib(decsp5.o):
     CODE              Offs=001F81  Size=00000D  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(decsp6.o):
+/mnt/c/cc65/lib/atmos.lib(decsp6.o):
     CODE              Offs=001F8E  Size=00000D  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(decsp8.o):
+/mnt/c/cc65/lib/atmos.lib(decsp8.o):
     CODE              Offs=001F9B  Size=00000D  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(errno.o):
+/mnt/c/cc65/lib/atmos.lib(errno.o):
     BSS               Offs=0000DC  Size=000002  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(gotoxy.o):
+/mnt/c/cc65/lib/atmos.lib(gotoxy.o):
     CODE              Offs=001FA8  Size=00000D  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(icmp.o):
+/mnt/c/cc65/lib/atmos.lib(icmp.o):
     CODE              Offs=001FB5  Size=00002E  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(incsp1.o):
+/mnt/c/cc65/lib/atmos.lib(incsp1.o):
     CODE              Offs=001FE3  Size=000007  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(incsp2.o):
+/mnt/c/cc65/lib/atmos.lib(incsp2.o):
     CODE              Offs=001FEA  Size=000016  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(incsp4.o):
+/mnt/c/cc65/lib/atmos.lib(incsp4.o):
     CODE              Offs=002000  Size=000005  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(incsp6.o):
+/mnt/c/cc65/lib/atmos.lib(incsp6.o):
     CODE              Offs=002005  Size=000005  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(incsp8.o):
+/mnt/c/cc65/lib/atmos.lib(incsp8.o):
     CODE              Offs=00200A  Size=000005  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(kbhit.o):
+/mnt/c/cc65/lib/atmos.lib(kbhit.o):
     CODE              Offs=00200F  Size=000009  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(ldaxsp.o):
+/mnt/c/cc65/lib/atmos.lib(ldaxsp.o):
     CODE              Offs=002018  Size=000009  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(lneg.o):
+/mnt/c/cc65/lib/atmos.lib(lneg.o):
     CODE              Offs=002021  Size=00001E  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(lpush.o):
+/mnt/c/cc65/lib/atmos.lib(lpush.o):
     CODE              Offs=00203F  Size=000021  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(ltoa.o):
+/mnt/c/cc65/lib/atmos.lib(ltoa.o):
     CODE              Offs=002060  Size=000095  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(makebool.o):
+/mnt/c/cc65/lib/atmos.lib(makebool.o):
     CODE              Offs=0020F5  Size=00002C  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(memcpy.o):
+/mnt/c/cc65/lib/atmos.lib(memcpy.o):
     CODE              Offs=002121  Size=00003C  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(mul8.o):
+/mnt/c/cc65/lib/atmos.lib(mul8.o):
     CODE              Offs=00215D  Size=00003A  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(mulax10.o):
+/mnt/c/cc65/lib/atmos.lib(mulax10.o):
     CODE              Offs=002197  Size=000019  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(popa.o):
+/mnt/c/cc65/lib/atmos.lib(popa.o):
     CODE              Offs=0021B0  Size=00000C  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(popptr1.o):
+/mnt/c/cc65/lib/atmos.lib(popptr1.o):
     CODE              Offs=0021BC  Size=00000E  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(push1.o):
+/mnt/c/cc65/lib/atmos.lib(push1.o):
     CODE              Offs=0021CA  Size=000005  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(pusha.o):
+/mnt/c/cc65/lib/atmos.lib(pusha.o):
     CODE              Offs=0021CF  Size=000016  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(pushax.o):
+/mnt/c/cc65/lib/atmos.lib(pushax.o):
     CODE              Offs=0021E5  Size=00001A  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(pushwsp.o):
+/mnt/c/cc65/lib/atmos.lib(pushwsp.o):
     CODE              Offs=0021FF  Size=00001C  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(return0.o):
+/mnt/c/cc65/lib/atmos.lib(return0.o):
     CODE              Offs=00221B  Size=000004  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(return1.o):
+/mnt/c/cc65/lib/atmos.lib(return1.o):
     CODE              Offs=00221F  Size=000005  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(revers.o):
+/mnt/c/cc65/lib/atmos.lib(revers.o):
     CODE              Offs=002224  Size=000016  Align=00001  Fill=0000
     BSS               Offs=0000DE  Size=000001  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(sprintf.o):
+/mnt/c/cc65/lib/atmos.lib(sprintf.o):
     CODE              Offs=00223A  Size=00002B  Align=00001  Fill=0000
     BSS               Offs=0000DF  Size=000001  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(staxsp.o):
+/mnt/c/cc65/lib/atmos.lib(staxsp.o):
     CODE              Offs=002265  Size=00000B  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(strcat.o):
+/mnt/c/cc65/lib/atmos.lib(strcat.o):
     CODE              Offs=002270  Size=000031  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(strchr.o):
+/mnt/c/cc65/lib/atmos.lib(strchr.o):
     CODE              Offs=0022A1  Size=000027  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(strlen.o):
+/mnt/c/cc65/lib/atmos.lib(strlen.o):
     CODE              Offs=0022C8  Size=000016  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(strlower.o):
+/mnt/c/cc65/lib/atmos.lib(strlower.o):
     CODE              Offs=0022DE  Size=000027  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(sub.o):
+/mnt/c/cc65/lib/atmos.lib(sub.o):
     CODE              Offs=002305  Size=000015  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(subysp.o):
+/mnt/c/cc65/lib/atmos.lib(subysp.o):
     CODE              Offs=00231A  Size=00000D  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(vcprintf.o):
+/mnt/c/cc65/lib/atmos.lib(vcprintf.o):
     CODE              Offs=002327  Size=00007A  Align=00001  Fill=0000
     DATA              Offs=0002B2  Size=000008  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(vsnprintf.o):
+/mnt/c/cc65/lib/atmos.lib(vsnprintf.o):
     CODE              Offs=0023A1  Size=0000DA  Align=00001  Fill=0000
     DATA              Offs=0002BA  Size=000008  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(vsprintf.o):
+/mnt/c/cc65/lib/atmos.lib(vsprintf.o):
     CODE              Offs=00247B  Size=000012  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(zerobss.o):
+/mnt/c/cc65/lib/atmos.lib(zerobss.o):
     CODE              Offs=00248D  Size=000023  Align=00001  Fill=0000
-/mnt/l/cc65/lib/atmos.lib(zeropage.o):
+/mnt/c/cc65/lib/atmos.lib(zeropage.o):
     ZEROPAGE          Offs=00000C  Size=00001A  Align=00001  Fill=0000
 
 
@@ -324,20 +324,20 @@ __DESTRUCTOR_COUNT__ ([linker generated]):
 __DESTRUCTOR_TABLE__ ([linker generated]):
     condes.o                  runtime/condes.s(19)
 __GRAB__ ([linker generated]):
-    [linker generated]        /mnt/l/cc65/cfg/atmos.cfg(8)
+    [linker generated]        /mnt/c/cc65/cfg/atmos.cfg(8)
 __MAIN_SIZE__ ([linker generated]):
     crt0.o                    atmos/crt0.s(13)
 __MAIN_START__ ([linker generated]):
     crt0.o                    atmos/crt0.s(13)
-    [linker generated]        /mnt/l/cc65/cfg/atmos.cfg(14)
+    [linker generated]        /mnt/c/cc65/cfg/atmos.cfg(14)
 __ONCE_RUN__ ([linker generated]):
-    [linker generated]        /mnt/l/cc65/cfg/atmos.cfg(15)
-    [linker generated]        /mnt/l/cc65/cfg/atmos.cfg(15)
+    [linker generated]        /mnt/c/cc65/cfg/atmos.cfg(15)
+    [linker generated]        /mnt/c/cc65/cfg/atmos.cfg(15)
 __RAMEND__ ([linker generated]):
-    [linker generated]        /mnt/l/cc65/cfg/atmos.cfg(15)
-    [linker generated]        /mnt/l/cc65/cfg/atmos.cfg(14)
+    [linker generated]        /mnt/c/cc65/cfg/atmos.cfg(15)
+    [linker generated]        /mnt/c/cc65/cfg/atmos.cfg(14)
 __STACKSIZE__ ([linker generated]):
-    [linker generated]        /mnt/l/cc65/cfg/atmos.cfg(15)
+    [linker generated]        /mnt/c/cc65/cfg/atmos.cfg(15)
 __STARTUP__ (crt0.o):
     main.o                    src/main.s(13)
 __ctype (ctype.o):
@@ -345,20 +345,20 @@ __ctype (ctype.o):
 __ctypeidx (ctype.o):
     ctypemask.o               common/ctypemask.s(24)
 __directerrno (_directerrno.o):
-    vsnprintf.o               /mnt/l/cc65/asminc/errno.inc(10)
+    vsnprintf.o               /mnt/c/cc65/asminc/errno.inc(10)
 __errno (errno.o):
-    _seterrno.o               /mnt/l/cc65/asminc/errno.inc(7)
+    _seterrno.o               /mnt/c/cc65/asminc/errno.inc(7)
 __hextab (_hextab.o):
     ltoa.o                    common/ltoa.s(10)
 __longminstr (_longminstr.o):
     ltoa.o                    common/ltoa.s(10)
 __oserror (_oserror.o):
-    _directerrno.o            /mnt/l/cc65/asminc/errno.inc(7)
+    _directerrno.o            /mnt/c/cc65/asminc/errno.inc(7)
 __printf (_printf.o):
     vsnprintf.o               common/vsnprintf.s(10)
     vcprintf.o                conio/vcprintf.s(9)
 __seterrno (_seterrno.o):
-    _directerrno.o            /mnt/l/cc65/asminc/errno.inc(9)
+    _directerrno.o            /mnt/c/cc65/asminc/errno.inc(9)
 _bgcolor (color.o):
     main.o                    src/main.s(24)
 _cgetc (cgetc.o):
@@ -549,7 +549,7 @@ ptr1 (zeropage.o):
     vsnprintf.o               common/vsnprintf.s(11)
     strlower.o                common/strlower.s(13)
     ltoa.o                    common/ltoa.s(11)
-    _printf.o                 /mnt/l/cc65/asminc/zeropage.inc(12)
+    _printf.o                 /mnt/c/cc65/asminc/zeropage.inc(12)
     zerobss.o                 common/zerobss.s(9)
     vcprintf.o                conio/vcprintf.s(10)
     strchr.o                  common/strchr.s(10)
@@ -565,7 +565,7 @@ ptr1 (zeropage.o):
 ptr2 (zeropage.o):
     strlower.o                common/strlower.s(13)
     ltoa.o                    common/ltoa.s(11)
-    _printf.o                 /mnt/l/cc65/asminc/zeropage.inc(12)
+    _printf.o                 /mnt/c/cc65/asminc/zeropage.inc(12)
     vcprintf.o                conio/vcprintf.s(10)
     strlen.o                  common/strlen.s(12)
     strcat.o                  common/strcat.s(10)
@@ -633,7 +633,7 @@ pushw0sp (pushwsp.o):
 pushwysp (pushwsp.o):
     main.o                    src/main.s(3438)
 regbank (zeropage.o):
-    _printf.o                 /mnt/l/cc65/asminc/zeropage.inc(14)
+    _printf.o                 /mnt/c/cc65/asminc/zeropage.inc(14)
 return0 (return0.o):
     color.o                   atmos/color.s(10)
 return1 (return1.o):
@@ -645,7 +645,7 @@ sp (zeropage.o):
     vsnprintf.o               common/vsnprintf.s(11)
     lpush.o                   runtime/lpush.s(13)
     decsp6.o                  runtime/decsp6.s(8)
-    _printf.o                 /mnt/l/cc65/asminc/zeropage.inc(11)
+    _printf.o                 /mnt/c/cc65/asminc/zeropage.inc(11)
     vcprintf.o                conio/vcprintf.s(10)
     subysp.o                  runtime/subysp.s(9)
     sub.o                     runtime/sub.s(9)
@@ -666,7 +666,7 @@ sp (zeropage.o):
     decsp3.o                  runtime/decsp3.s(8)
     decsp2.o                  runtime/decsp2.s(8)
     decsp1.o                  runtime/decsp1.s(8)
-    crt0.o                    /mnt/l/cc65/asminc/zeropage.inc(11)
+    crt0.o                    /mnt/c/cc65/asminc/zeropage.inc(11)
     cprintf.o                 conio/cprintf.s(9)
     addysp.o                  runtime/addysp.s(8)
     addeqsp.o                 runtime/addeqsp.s(8)
@@ -677,7 +677,7 @@ sreg (zeropage.o):
     ltoa.o                    common/ltoa.s(11)
     lpush.o                   runtime/lpush.s(13)
     axlong.o                  runtime/axlong.s(9)
-    _printf.o                 /mnt/l/cc65/asminc/zeropage.inc(11)
+    _printf.o                 /mnt/c/cc65/asminc/zeropage.inc(11)
     icmp.o                    runtime/icmp.s(9)
 stax0sp (staxsp.o):
     main.o                    src/main.s(3438)
@@ -693,7 +693,7 @@ subysp (subysp.o):
     main.o                    src/main.s(3438)
 tmp1 (zeropage.o):
     ltoa.o                    common/ltoa.s(11)
-    _printf.o                 /mnt/l/cc65/asminc/zeropage.inc(13)
+    _printf.o                 /mnt/c/cc65/asminc/zeropage.inc(13)
     vcprintf.o                conio/vcprintf.s(10)
     strchr.o                  common/strchr.s(10)
     cputs.o                   conio/cputs.s(10)
