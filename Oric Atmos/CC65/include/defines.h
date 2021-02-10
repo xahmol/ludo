@@ -40,4 +40,4 @@
 #define C_DELETE    127
 #define C_INVSPACE  160
 
- #endif // __DEFINES_H_
+#endif // __DEFINES_H_

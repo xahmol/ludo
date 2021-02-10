@@ -6,7 +6,6 @@
 #include "defines.h"
 #include "osdklib.h"
 #include "libsedoric.h"
-#include "libmymplayer.h"
 
 /* PEEK POKE */
 #define peek(address)		( *((unsigned char*)address) )
@@ -19,6 +18,8 @@
 void main(void)
 {
     int rc, x, len;
+    unsigned int* saveslots;
+    saveslots = (unsigned int*) malloc(85);
 
     clrscr();
     bgcolor(0);    
@@ -27,20 +28,21 @@ void main(void)
 
     cprintf("Loading config file.\n\r");
     len = 0;
-    rc = loadfile("LUDODATA.COM", (void*)0xb000, &len);
+    rc = loadfile("LUDODATA.COM", (void*)saveslots, &len);
     cprintf("%d bytes loaded, rc=%d\n\r",len,rc);
 
     cprintf("Printing read data:\n\r");
     for(x=0;x<85;x++)
     {
-        cprintf("%2X  ",peek(0xb000+x));
+        cprintf("%2X  ",peek(saveslots+x));
     }
     cputs("\n\r");
     for(x=0;x<85;x++)
     {
-        if(peek(0xb000+x)>31) { cputc(peek(0xb000+x)); }
+        if(peek(saveslots+x)>31) { cputc(peek(saveslots+x)); }
         else { cputs(" "); }
     }
 
     cgetc();
+    free(saveslots);
 }

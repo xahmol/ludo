@@ -47,7 +47,8 @@ struct WindowStruct
 };
 struct WindowStruct Window[9];
 
-unsigned int windowaddress = 0xa100;
+unsigned int* windowmemory;
+unsigned int windowaddress;
 unsigned char windownumber = 1;
 
 //Menu data
@@ -119,6 +120,8 @@ unsigned char dns[6][2][3] = {
     {{C_DICE08,C_DICE12,0},{C_DICE13,C_DICE09,0}},
     {{C_DICE14,C_DICE14,0},{C_DICE15,C_DICE15,0}}
 };
+
+//Game variables
 unsigned char sc[4][4][2];
 unsigned char pm[4];
 unsigned char sps[4][21];
@@ -130,6 +133,9 @@ unsigned char bs;
 unsigned char joyinterface;
 unsigned char musicnumber;
 
+//Save game memory allocation
+unsigned int* saveslots;
+
 /* Main routine */
 
 void main()
@@ -139,6 +145,13 @@ void main()
     joyinterface = 0;
     musicnumber = 1;
     ei = 0;
+
+    //Save game memory allocation
+    saveslots = (unsigned int*) malloc(85);
+
+    //Windows memory allocation
+    windowmemory = (unsigned int*) malloc(2000);
+    windowaddress = (unsigned int)windowmemory;
 
     //Game intro
     clrscr();
@@ -183,6 +196,8 @@ void main()
     for(x=0;x<40;x++) { cputc(0); }
     gotoxy(0,1);
     cprintf("%cThanks for playing, goodbye.",A_FWCYAN);
+    free(saveslots);
+    free(windowmemory);
     endmusic();
 }
 
@@ -191,13 +206,14 @@ void loadintro()
 {
     /* Game intro */
 
-    int rc;
+    int rc, x;
     int len = 0;
 
     rc = loadfile("LUDOTITL.BIN", (void*)0xb500, &len);
     rc = loadfile("LUDOMUS1.BIN", (void*)0x7600, &len);
-    rc = loadfile("LUDODATA.COM", (void*)0xb000, &len);
     startmusic();
+
+    rc = loadfile("LUDODATA.COM", (void*)saveslots, &len);
     cgetc();
 }
 
@@ -306,14 +322,9 @@ void turnhuman()
 
 void savegame(unsigned char autosave)
 {
-    unsigned int baseaddress = 0xb000;
     unsigned char filename[15];
     unsigned char slot, x;
     unsigned char yesno = 1;
-
-    gotoxy(1,3);
-        cprintf("%X,%X,%X", baseaddress, baseaddress+1, peek(baseaddress+slot));
-        cgetc();
 
     if(autosave)
     {
@@ -327,10 +338,7 @@ void savegame(unsigned char autosave)
         gotoxy(9,10);
         cprintf("%cChoose slot:%c", A_FWYELLOW, A_FWRED);
         slot = menupulldown(15,10,8);
-        gotoxy(1,3);
-        cprintf("%u,%X,%X,%X", slot, baseaddress, baseaddress+slot, peek(baseaddress+slot));
-        cgetc();
-        if(peek(baseaddress+slot)==1)
+        if(peek(saveslots+slot)==1)
         {
             gotoxy(9,10);
             cprintf("%cSlot not empty. Sure?%c", A_FWYELLOW, A_FWRED);
@@ -346,16 +354,16 @@ void savegame(unsigned char autosave)
                 pulldownmenutitles[7][slot-1][x] = C_SPACE;
             }
             pulldownmenutitles[7][slot-1][15] = 0;
-            windowrestore();
             sprintf(filename,"LUDOSAV%d.SAV", slot);
-            poke(baseaddress+slot,1);
+            poke(saveslots+slot,1);
             for(x=0;x<16;x++)
             {
-                poke(baseaddress+(slot*16)+5,pulldownmenutitles[7][slot-1][x]);
+                poke(saveslots+(slot*16)+5+x,pulldownmenutitles[7][slot-1][x]);
             }
-            savefile("LUDODATA.COM", (void*)baseaddress, 85);
+            savefile("LUDODATA.COM", (void*)saveslots, 85);
         }
     }
+    windowrestore();
 }
 
 void musicnext()
@@ -684,7 +692,7 @@ int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned c
   
     gotoxy(xpos,ypos+1);
     cputc(A_FWWHITE);
-    for(x=0;x<size;x++) { cputc(C_LOWLINE); }
+    for(x=0;x<size+1;x++) { cputc(C_LOWLINE); }
     cputc(A_FWRED);
 
     cputsxy(xpos+1, ypos+1, str);
@@ -699,7 +707,7 @@ int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned c
                 idx = strlen(str);
                 str[idx] = 0;
                 gotoxy(xpos+1,ypos+1);
-                for(x=0;x<size;x++) {cputc(C_SPACE ); }
+                for(x=0;x<size+1;x++) {cputc(C_SPACE ); }
                 cputsxy(xpos+1, ypos+1, str);
                 return idx;
   
