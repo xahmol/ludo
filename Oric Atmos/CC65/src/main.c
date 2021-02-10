@@ -374,6 +374,7 @@ void savegame(unsigned char autosave)
         {
             gotoxy(9,10);
             cprintf("%cChoose name of save. %c", A_FWYELLOW, A_FWRED);
+            if(peek(saveslots+slot)==0) { pulldownmenutitles[7][slot][0]=0; }
             input(9,10,pulldownmenutitles[7][slot],15);
             for(x=strlen(pulldownmenutitles[7][slot]);x<15;x++)
             {
