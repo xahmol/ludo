@@ -24,6 +24,7 @@ void gamereset();
 void inputofnames();
 void turnhuman();
 void savegame(unsigned char autosave);
+void loadgame();
 void musicnext();
 void windowsave(unsigned char ypos, unsigned char height);
 void windowrestore();
@@ -56,8 +57,8 @@ unsigned char menubaroptions = 4;
 unsigned char pulldownmenunumber = 8;
 unsigned char menubartitles[4][12] = {"Game","Disc","Music","Information"};
 unsigned char menubarcoords[4] = {1,6,11,17};
-unsigned char pulldownmenuoptions[8] = {3,2,3,1,2,2,3,4};
-unsigned char pulldownmenutitles[8][4][16] = {
+unsigned char pulldownmenuoptions[8] = {3,2,3,1,2,2,3,5};
+unsigned char pulldownmenutitles[8][5][16] = {
     {"Throw dice",
      "Restart   ",
      "Stop      "},
@@ -74,7 +75,8 @@ unsigned char pulldownmenutitles[8][4][16] = {
     {"Continue game",
      "New game     ",
      "Stop         "},
-    {"Slot 1: Empty  ",
+    {"Autosave       ",
+     "Slot 1: Empty  ",
      "Slot 2: Empty  ",
      "Slot 3: Empty  ",
      "Slot 4: Empty  "}
@@ -135,6 +137,7 @@ unsigned char musicnumber;
 
 //Save game memory allocation
 unsigned int* saveslots;
+unsigned int* savegamemem;
 
 /* Main routine */
 
@@ -148,6 +151,7 @@ void main()
 
     //Save game memory allocation
     saveslots = (unsigned int*) malloc(85);
+    savegamemem = (unsigned int*) malloc(136);
 
     //Windows memory allocation
     windowmemory = (unsigned int*) malloc(2000);
@@ -166,7 +170,7 @@ void main()
     cprintf("%cLoad old game?%c",A_FWYELLOW, A_FWRED);
     choice = menupulldown(27,11,5);
     windowrestore();
-    //if(choice==1) { loadgame(); }
+    if(choice==1) { loadgame(); }
 
     //Main game loop
     do
@@ -197,6 +201,7 @@ void main()
     gotoxy(0,1);
     cprintf("%cThanks for playing, goodbye.",A_FWCYAN);
     free(saveslots);
+    free(savegamemem);
     free(windowmemory);
     endmusic();
 }
@@ -206,14 +211,26 @@ void loadintro()
 {
     /* Game intro */
 
-    int rc, x;
+    int rc, x, y;
     int len = 0;
 
+    /* Load title screen */
     rc = loadfile("LUDOTITL.BIN", (void*)0xb500, &len);
+
+    /* Load and start first music file */
     rc = loadfile("LUDOMUS1.BIN", (void*)0x7600, &len);
     startmusic();
 
+    /* Load and read game config file */
     rc = loadfile("LUDODATA.COM", (void*)saveslots, &len);
+    for(y=0;y<5;y++)
+    {
+        for(x=0;x<16;x++)
+        {
+            pulldownmenutitles[7][y][x]=peek(saveslots+(y*16)+5+x);
+        }
+    }
+
     cgetc();
 }
 
@@ -301,6 +318,12 @@ void turnhuman()
                 savegame(0);
                 break;
 
+            case 22:
+                yesno = areyousure();
+                if(yesno==1) { loadgame(); }
+                break;
+
+
             case 31:
                 musicnext();
                 break;
@@ -323,7 +346,7 @@ void turnhuman()
 void savegame(unsigned char autosave)
 {
     unsigned char filename[15];
-    unsigned char slot, x;
+    unsigned char slot, x, y;
     unsigned char yesno = 1;
 
     if(autosave)
@@ -337,7 +360,10 @@ void savegame(unsigned char autosave)
         cprintf("%cSave game.%c", A_FWGREEN, A_FWRED);
         gotoxy(9,10);
         cprintf("%cChoose slot:%c", A_FWYELLOW, A_FWRED);
-        slot = menupulldown(15,10,8);
+        do
+        {
+            slot = menupulldown(15,10,8) - 1;
+        } while (slot<1);
         if(peek(saveslots+slot)==1)
         {
             gotoxy(9,10);
@@ -348,22 +374,110 @@ void savegame(unsigned char autosave)
         {
             gotoxy(9,10);
             cprintf("%cChoose name of save. %c", A_FWYELLOW, A_FWRED);
-            input(9,10,pulldownmenutitles[7][slot-1],15);
-            for(x=strlen(pulldownmenutitles[7][slot-1]);x<15;x++)
+            input(9,10,pulldownmenutitles[7][slot],15);
+            for(x=strlen(pulldownmenutitles[7][slot]);x<15;x++)
             {
-                pulldownmenutitles[7][slot-1][x] = C_SPACE;
+                pulldownmenutitles[7][slot][x] = C_SPACE;
             }
-            pulldownmenutitles[7][slot-1][15] = 0;
+            pulldownmenutitles[7][slot][15] = 0;
             sprintf(filename,"LUDOSAV%d.SAV", slot);
             poke(saveslots+slot,1);
             for(x=0;x<16;x++)
             {
-                poke(saveslots+(slot*16)+5+x,pulldownmenutitles[7][slot-1][x]);
+                poke(saveslots+(slot*16)+5+x,pulldownmenutitles[7][slot][x]);
             }
             savefile("LUDODATA.COM", (void*)saveslots, 85);
         }
     }
     windowrestore();
+    if(yesno==1)
+    {
+        poke(savegamemem,bs);
+        for(x=0;x<4;x++)
+        {
+            poke(savegamemem+1+x, np[x] );
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<4;y++)
+            {
+                poke(savegamemem+5+(x*4)+y,sp[x][y]);
+            }
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<4;y++)
+            {
+                poke(savegamemem+21+(x*8)+y,sc[x][y][0]);
+                poke(savegamemem+22+(x*8)+y,sc[x][y][1]);
+            }
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<21;y++)
+            {
+                poke(savegamemem+53+(x*21)+y,sps[x][y]);
+            }
+        }
+        savefile(filename, (void*)savegamemem, 136);
+    }
+}
+
+void loadgame()
+{
+    unsigned char filename[15];
+    unsigned char slot, rc, x, y;
+    unsigned char yesno = 1;
+    int len;
+    
+    menumakeborder(7,5,12,31);
+    gotoxy(9,8);
+    cprintf("%cLoad game.%c", A_FWGREEN, A_FWRED);
+    gotoxy(9,10);
+    cprintf("%cChoose slot:%c", A_FWYELLOW, A_FWRED);
+    slot = menupulldown(15,10,8) - 1;
+    if(peek(saveslots+slot)==0)
+    {
+        gotoxy(9,10);
+        cprintf("%cSlot empty. %c", A_FWYELLOW, A_FWRED);
+        gotoxy(9,11);
+        cprintf("%cPress key. %c", A_FWYELLOW, A_FWRED);
+        cgetc();
+    }
+    windowrestore();
+    if(peek(saveslots+slot)==1)
+    {
+        sprintf(filename,"LUDOSAV%d.SAV", slot);
+        rc = loadfile(filename, (void*)savegamemem, &len);
+        bs=peek(savegamemem);
+        for(x=0;x<4;x++)
+        {
+            np[x]=peek(savegamemem+1+x);
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<4;y++)
+            {
+                sp[x][y]=peek(savegamemem+5+(x*4)+y);
+            }
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<4;y++)
+            {
+                sc[x][y][0]=peek(savegamemem+21+(x*8)+y);
+                sc[x][y][1]=peek(savegamemem+22+(x*8)+y);
+            }
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<21;y++)
+            {
+                sps[x][y]=peek(savegamemem+53+(x*21)+y);
+            }
+        }
+        ei = 2;
+    }
 }
 
 void musicnext()

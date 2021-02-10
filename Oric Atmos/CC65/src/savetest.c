@@ -17,9 +17,13 @@
 
 void main(void)
 {
-    int rc, x, len;
+    int rc, x, y, len;
     unsigned int* saveslots;
+    unsigned int* savegamemem;
+    unsigned char filename[15];
+
     saveslots = (unsigned int*) malloc(85);
+    savegamemem = (unsigned int*) malloc(120);
 
     clrscr();
     bgcolor(0);    
@@ -36,13 +40,41 @@ void main(void)
     {
         cprintf("%2X  ",peek(saveslots+x));
     }
-    cputs("\n\r");
+    cputs("\n\n\r");
     for(x=0;x<85;x++)
     {
         if(peek(saveslots+x)>31) { cputc(peek(saveslots+x)); }
         else { cputs(" "); }
     }
-
     cgetc();
+
+    for(x=0;x<5;x++)
+    {
+        if(peek(saveslots+x))
+        {
+            clrscr();
+            cprintf("Loading slot %d: \n\r", x);
+            sprintf(filename,"LUDOSAV%d.SAV", x);
+            rc = loadfile(filename, (void*)savegamemem, &len);
+            cprintf("%s loaded, %d bytes, rc = %d. \n\r",filename, len, rc);
+            cprintf("Printing read data:\n\r");
+            for(y=0;y<137;y++)
+            {
+                cprintf("%2X  ",peek(savegamemem+y));
+            }
+            cputs("\n\n\r");
+            for(y=0;y<137;y++)
+            {
+                if(peek(savegamemem+y)>31 && peek(savegamemem+y)<128) { cputc(peek(savegamemem+y)); }
+                else { cputs(" "); }
+            }
+            cputs("\n\rPress key.\n\r");
+            cgetc();
+        }
+    }
+
+    clrscr();
+
     free(saveslots);
+    free(savegamemem);
 }
