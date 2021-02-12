@@ -1,3 +1,8 @@
+; OSDK Source by Dbug
+; Convert to CA65 by:
+; - %osdk%/bin/xa -v -cc -R mymplayer-xa65.s
+; - co65 a.o65
+; - rename a.s to mymplayer-ca65.s
 
 	.zero
 
@@ -29,10 +34,10 @@ _FrameLoadBalancer	.dsb 1		; We depack a new frame every 9 VBLs, this way the 14
 
 ;	*=$6500                             ; Actual start address of the player
 
-#define _PlayerBuffer		$6800		; .dsb 256*14 (About 3.5 kilobytes)
-#define _PlayerBufferEnd	$7600
+#define _PlayerBuffer		$7000		; .dsb 256*14 (About 3.5 kilobytes)
+#define _PlayerBufferEnd	$7e00
 
-#define _MusicData			$7600		; Musics are loaded in $7600, between the player buffer and the redefined character sets
+#define _MusicData			$7e00		; Musics are loaded in $7600, between the player buffer and the redefined character sets
 
 _startmusic
 	php

@@ -29,6 +29,10 @@ unsigned char dicethrow();
 void inputofnames();
 void informationcredits();
 void turnhuman();
+void turngeneric();
+unsigned char humanchoosepawn();
+void playerwins();
+unsigned char computerchoosepawn();
 void savegame(unsigned char autosave);
 void loadgame();
 void musicnext();
@@ -43,6 +47,8 @@ unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed);
 int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned char size);
 void wait(unsigned int wait_cs);
 void printcentered(unsigned char* text, unsigned char color, unsigned char xpos, unsigned char ypos, unsigned char width);
+void cspaces(unsigned char number);
+void cleararea(unsigned char xpos, unsigned char ypos, unsigned char height, unsigned char width);
 
 /* Variables */
 
@@ -55,8 +61,7 @@ struct WindowStruct
 };
 struct WindowStruct Window[9];
 
-unsigned int* windowmemory;
-unsigned int windowaddress;
+unsigned int windowaddress = 0xa000;
 unsigned char windownumber = 1;
 
 //Menu data
@@ -127,7 +132,7 @@ unsigned char sc[4][4][2] = {
     {{1,0}, {1,1}, {1,2}, {1,3}}
 };
 unsigned char sps[4][21];
-char np[4] = { -1, -1, -1, -1};
+signed char np[4] = { -1, -1, -1, -1};
 unsigned char dp[4] = { 8, 8, 8, 8 };
 
 //Dice graphics string data
@@ -141,10 +146,13 @@ unsigned char dicegraphics[6][2][3] = {
 };
 
 //Game variables
+signed int pw[3];
 unsigned char pm[4];
-int pw[3];
 unsigned char ei = 0;
 unsigned char bs = 0;
+unsigned char zv = 0;
+unsigned char ns = 0;
+unsigned char throw;
 unsigned char musicnumber = 1;
 unsigned char joyinterface;
 
@@ -163,10 +171,6 @@ void main()
     //Save game memory allocation
     saveslots = (unsigned int*) malloc(85);
     savegamemem = (unsigned int*) malloc(136);
-
-    //Windows memory allocation
-    windowmemory = (unsigned int*) malloc(2000);
-    windowaddress = (unsigned int)windowmemory;
 
     //Game intro
     clrscr();
@@ -197,12 +201,36 @@ void main()
         }
         do
         {
-            turnhuman();
+            cleararea(0,2,3,40);
+            gotoxy(0,3);
+            cprintf("%cPlayer %c%d%c: %c %c\n\r", A_FWYELLOW, A_FWCYAN, bs+1, A_FWYELLOW, 16+sp[bs][2], A_BGBLACK);
+            cprintf("%c%s%c\n\r", A_FWGREEN, sps[bs], A_FWYELLOW);
+            if(sp[bs][0]==0)
+            {
+                turnhuman();
+            }
+            else
+            {
+                cprintf("%cComputer is playimg.", A_FWYELLOW);
+            }
+            if(ei!=0) { break; }
+            turngeneric();
+            if(sp[bs][1]==0) { playerwins(); break; }
+            do
+            {
+                if(zv==1)
+                {
+                    zv=0;
+                }
+                else
+                {
+                    np[ns]=-1;
+                    bs++;
+                    if(bs>3) { bs=0; }
+                }
+            } while (zv==0 && sp[bs][1]==0);
         } while (ei==0);
-        if(ei==3)
-        {
-            gamereset();
-        }
+        if(ei==3) { gamereset(); } /* Reset for game restart */
     } while (ei!=1); 
 
     //End of game
@@ -215,7 +243,6 @@ void main()
     cprintf("%cThanks for playing, goodbye.",A_FWCYAN);
     free(saveslots);
     free(savegamemem);
-    free(windowmemory);
     endmusic();
 }
 
@@ -231,7 +258,7 @@ void loadintro()
     rc = loadfile("LUDOTITL.BIN", (void*)0xb500, &len);
 
     /* Load and start first music file */
-    rc = loadfile("LUDOMUS1.BIN", (void*)0x7600, &len);
+    rc = loadfile("LUDOMUS1.BIN", (void*)0x7e00, &len);
     startmusic();
 
     /* Load and read game config file */
@@ -525,8 +552,302 @@ void turnhuman()
     } while (choice!=11 && choice!=12 && choice!=13 && choice!=22);
 }
 
+void turngeneric()
+{
+    /* Generic turn sequence */
+
+    unsigned char dicethrows = 1;
+    unsigned char validturn = 0;
+    unsigned char mp = 1;
+    signed char pawnnumber = -1;
+    unsigned char ap = 0;
+    signed char as;
+    unsigned char vr, vl, vn, nr, gv, ov, ro, x,y;
+
+    for(x=0;x<4;x++) { pm[x]=0; }
+    if(sp[bs][3]=sp[bs][1])
+    {
+        dicethrows = 3;
+        gotoxy(21,4);
+        cprintf("%cThrow 3 times.", A_FWYELLOW);
+    }
+    for(x=0;x<dicethrows;x++)
+    {
+        throw = dicethrow();
+        if(throw==6) { break; }
+    }
+    cleararea(21,3,1,15);
+    if(sp[bs][3]==sp[bs][1] && throw==6) { validturn=1; }
+    if(np[bs]>=0)
+    {
+        if(sp[bs][3]>0)
+        {
+            pawnnumber=np[bs];
+        }
+        np[bs]=-1;
+    }
+    if(validturn==0 && pawnnumber==-1)
+    {
+        for(x=0;x<4;x++)
+        {
+            vr=sc[bs][x][0];
+            vl=sc[bs][x][1];
+            gv=0;
+            if(vr==1 && vl<4)
+            {
+                gv=1;
+                if(throw==6)
+                {
+                    pawnnumber=x;
+                    np[bs]=x;
+                    x=3;
+                }
+            }
+            if(gv==0)
+            {
+                vn=vl+throw;
+                nr=vr;
+                if(vr==0)
+                {
+                    if(bs==0 && vn>39 && vl<40) { vn-=36; nr=1; }
+                    if(bs==1 && vn> 9 && vl<10) { vn-= 6; nr=1; }
+                    if(bs==2 && vn>19 && vl<20) { vn-=16; nr=1; }
+                    if(bs==3 && vn>29 && vl<30) { vn-=26; nr=1; }
+                }
+                if(nr==1)
+                {
+                    if(vn>7) { gv=1; }
+                    else
+                    {
+                        for(y=0;y<4;y++)
+                        {
+                            if(x!=y && sc[bs][y][0]==1 && sc[bs][y][1]<=vn && sc[bs][y][1]>3)
+                            {
+                                gv=1;
+                                y=3;
+                            }
+                        }
+                    }
+                }
+                if(gv==0) { pm[x]=1; }
+            }
+        }
+    }
+    if(pawnnumber==-1)
+    {
+        for(x=0;x<3;x++)
+        {
+            if(pm[x]==1) { ap++; pawnnumber=x; }
+        }
+    }
+    else { ap=1; }
+    if(ap>1)
+    {
+        if(sp[bs][0]==0) { pawnnumber = humanchoosepawn(); }
+        else { pawnnumber = computerchoosepawn(); }
+    }
+    if(throw==6) { zv=1; }
+    if(ap==0 && validturn==0)
+    {
+        gotoxy(21,3);
+        cprintf("%cNo move possible", A_FWYELLOW);
+        gotoxy(21,4);
+        cprintf("%cPress key", A_FWYELLOW);
+        cgetc();
+        return;
+    }
+    pawnerase(bs,pawnnumber);
+    ov=sc[bs][pawnnumber][1];
+    ro=sc[bs][pawnnumber][0];
+    if(ro==1 && ov<4)
+    {
+        sc[bs][pawnnumber][0]=1;
+        sc[bs][pawnnumber][1]=bs*10;
+        sp[bs][3]--;
+    }
+    else { sc[bs][pawnnumber][1]+=throw; }
+    if(bs==0 && sc[bs][pawnnumber][1]<=39 && ov<40 && ro==0)
+        { sc[bs][pawnnumber][0]=1; sc[bs][pawnnumber][1]-=36; }
+    if(bs==1 && sc[bs][pawnnumber][1]<= 9 && ov<10 && ro==0)
+        { sc[bs][pawnnumber][0]=1; sc[bs][pawnnumber][1]-= 6; }
+    if(bs==2 && sc[bs][pawnnumber][1]<=19 && ov<20 && ro==0)
+        { sc[bs][pawnnumber][0]=1; sc[bs][pawnnumber][1]-=16; }
+    if(bs==3 && sc[bs][pawnnumber][1]<=29 && ov<30 && ro==0)
+        { sc[bs][pawnnumber][0]=1; sc[bs][pawnnumber][1]-=26; }
+    if(sc[bs][pawnnumber][0]==1 && sc[bs][pawnnumber][1]>3)
+        { dp[bs]=sc[bs][pawnnumber][1]; }
+    if(sc[bs][pawnnumber][1]==sp[bs][1]+3 && sc[bs][pawnnumber][0]==1)
+        { sp[bs][1]--; }
+    if(sc[bs][pawnnumber][1]>39) { sc[bs][pawnnumber][1]-=40; }
+    ap=0;
+    as=-1;
+    for(x=0;x<4;x++)
+    {
+        for(y=0;y<4;y++)
+        {
+            if(y!=pawnnumber || x!=bs)
+            {
+                if(sc[x][y][0]==0 && sc[bs][pawnnumber][0]==0)
+                {
+                    if(sc[x][y][1]=sc[bs][pawnnumber][1])
+                    {
+                        ap=y;
+                        as=x;
+                        y=3;
+                        x=3;
+                    }
+                }
+            }
+        }
+    }
+    if(as!=-1)
+    {
+        pawnerase(as,ap);
+        sc[as][ap][0]=1;
+        sc[as][ap][1]=ap;
+        sp[as][3]++;
+        pawnplace(as,ap,0);
+    }
+    pawnplace(bs,pawnnumber,0);
+    if(sp[bs][0]==0) { savegame(1); } /* Autosave on end human turn */
+}
+
+unsigned char humanchoosepawn()
+{
+    /* Human has to choose a pawn, returns pawnnumber chosen */
+
+    signed char pawnnumber = 0;
+    signed char direction;
+    unsigned char key;
+    unsigned char validkeys[5] = { C_LEFT, C_RIGHT, C_UP, C_DOWN, C_ENTER };
+
+    menumakeborder(20,1,2,18);
+    gotoxy(22,3);
+    cprintf("%cWhich pawn?%c", A_FWYELLOW, A_FWRED);
+    gotoxy(22,4);
+    cprintf("%cThrown: %d%c", A_FWYELLOW, throw, A_FWRED);
+    while (pm[++pawnnumber]!=1 && pawnnumber<4);
+    do
+    {
+        pawnplace(bs,pawnnumber,1);
+        key = getkey(validkeys,1);
+        pawnplace(bs,pawnnumber,0);
+        if(key==C_LEFT || key==C_DOWN) { pawnnumber--; direction=-1; }
+        if(key==C_RIGHT || key==C_UP) { pawnnumber++; direction=1; }
+        if(key!=C_ENTER)
+        {
+            if(pawnnumber>3) { pawnnumber = 0; }
+            if(pawnnumber<0) { pawnnumber = 3; }
+            do
+            {
+                if(pm[pawnnumber]!=1)
+                {
+                    pawnnumber+=direction;
+                    if(pawnnumber>3) { pawnnumber = 0; }
+                    if(pawnnumber<0) { pawnnumber = 3; }
+                }
+            } while (pm[pawnnumber]!=1);
+        }
+    } while (key!=C_ENTER);
+    windowrestore();
+    return pawnnumber;
+}
+
+void playerwins()
+{
+    unsigned char choice;
+
+    menumakeborder(3,8,9,35);
+    gotoxy(5,11);
+    cprintf("%c%s%c has won the game!%c", A_FWGREEN, sps[bs], A_FWYELLOW, A_FWRED);
+    gotoxy(5,13);
+    cprintf("%cWhat do you want?%c", A_FWYELLOW, A_FWRED);
+    do
+    {
+        choice = menupulldown(15,13,7);
+        if(choice==2) { ei=3; zv=1; }
+        if(choice==3) { ei=1; zv=1; }
+    } while (choice==1 && sp[0][1]==0 && sp[1][1]==0 && sp[2][1]==0 && sp[3][1]==0);
+    windowrestore();
+}
+
+unsigned char computerchoosepawn()
+{
+    /* Computer has to choose a pawn, returns pawnnumber chosen */
+
+    unsigned char pawnnumber = 0;
+    signed char mw;
+    unsigned char vr, vn, nn, no, nr, x,y,z ;
+
+    for(x=0;x<4;x++) { pw[x]=0; }
+    for(x=0;x<4;x++)
+    {
+        if(pm[x]==0) { pw[x]=-10000; }
+        else{
+            vr=sc[bs][x][0];
+            vn=sc[bs][x][1];
+            nn=vn+throw;
+            no=nn;
+            nr=vr;
+            if(vr==0)
+            {
+                if(bs==0 && nn>39 && vn<40) { nn-=36; nr=1; }
+                if(bs==1 && nn> 9 && vn<10) { nn-= 6; nr=1; }
+                if(bs==2 && nn>19 && vn<20) { nn-=16; nr=1; }
+                if(bs==3 && nn>29 && vn<30) { nn-=26; nr=1; }
+            }
+            if(nr==0 && nn>39) { nn-=40; }
+            if(nr==1 && nn>3 && sp[bs][1]==1) { pw[x]=10000; x=3; }
+            else
+            {
+                if(nr==1 && nn>3) { pw[x]+=6000; }
+                for(y=0;y<4;y++)
+                {
+                    for(z=0;z<4;z++)
+                    {
+                        if(bs==y && sc[y][z][0]==nr && sc[y][z][1]==nn) { pw[x]-=8000; }
+                        if(bs!=y && sc[y][z][0]==nr && sc[y][z][1]==nn)
+                        {
+                            pw[x]+=4000;
+                            if(sc[y][z][0]==0)
+                            {
+                                if(y==0 && sc[y][z][1]>33) { pw[x]+=3000; }
+                                if(y==1 && sc[y][z][1]> 3) { pw[x]+=3000; }
+                                if(y==2 && sc[y][z][1]>13) { pw[x]+=3000; }
+                                if(y==3 && sc[y][z][1]>23) { pw[x]+=3000; }
+                            }
+                        }
+                        if(sc[y][z][0]==0 && nr==0 && bs!=y)
+                        {
+                            if(vn-sc[y][z][1]<6 && vn-sc[y][z][1]>0) { pw[x]+=400; }
+                            if(no-sc[y][z][1]<6 && no-sc[y][z][1]>0) { pw[x]-=200; }
+                            if(sc[y][z][1]-nn<6 && sc[y][z][1]-nn>0) { pw[x]+=100; }
+                        }
+                    }
+                }
+                if(nr==0 && (nn==0 || nn==10 || nn==20 || nn==30)) { pw[x]-=4000; }
+                if(vr==0 && (vn==0 || vn==10 || vn==20 || vn==30)) { pw[x]+=2000; }
+                if(bs==0) { pw[x]+=nn; }
+                if(bs==1) { pw[x]+=no-10; }
+                if(bs==2) { pw[x]+=no-20; }
+                if(bs==3) { pw[x]+=no-30; }
+            }
+        }
+    }
+    mw=-20000;
+    for(x=0;x<4;x++)
+    {
+        if(pw[x]>mw) { mw=pw[x]; pawnnumber=x; }
+    }
+
+    return pawnnumber;
+}
+
 void savegame(unsigned char autosave)
 {
+    /* Save game to a gameslot
+       Input: autosave is 1 for autosave, else 0 */
+
     unsigned char filename[15];
     unsigned char slot, x, y;
     unsigned char yesno = 1;
@@ -608,6 +929,8 @@ void savegame(unsigned char autosave)
 
 void loadgame()
 {
+     /* Load game from a gameslot */
+
     unsigned char filename[15];
     unsigned char slot, rc, x, y;
     unsigned char yesno = 1;
@@ -677,7 +1000,7 @@ void musicnext()
     endmusic();
     if(++musicnumber>3) { musicnumber = 1;}
     sprintf((char*)musicfilename,"LUDOMUS%d.BIN", musicnumber);
-    rc = loadfile(musicfilename, (void*)0x7600, &len);
+    rc = loadfile(musicfilename, (void*)0x7e00, &len);
     startmusic();
 }
 
@@ -730,7 +1053,7 @@ void menumakeborder(unsigned char xpos, unsigned char ypos, unsigned char height
         cputc(A_STD);
         cputc(A_FWRED);
         cputc(C_RIGHTLINE);
-        for(x=0;x<width;x++) { cputc(C_SPACE ); }
+        cspaces(width);
         cputc(C_LEFTLINE);
     }
     gotoxy(xpos-2,ypos+height+2);
@@ -1007,7 +1330,7 @@ int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned c
                 idx = strlen(str);
                 str[idx] = 0;
                 gotoxy(xpos+1,ypos+1);
-                for(x=0;x<size+1;x++) {cputc(C_SPACE ); }
+                cspaces(size+1);
                 cputsxy(xpos+1, ypos+1, str);
                 return idx;
   
@@ -1086,15 +1409,35 @@ void printcentered(unsigned char* text, unsigned char color, unsigned char xpos,
        - Color: Color for text to be printed
        - Width: Width of window to align to    */
 
-    unsigned char x;
-
     gotoxy(xpos,ypos+1);
 
     if(strlen(text)<width)
     {
-        for(x=0;x<(width-strlen(text))/2-1;x++) { cputc(C_SPACE); }
+        cspaces((width-strlen(text))/2-1);
     }
     cputc(color);
     cputs(text);
     cputc(A_FWRED);
 }
+
+void cspaces(unsigned char number)
+{
+    /* Function to print specified number of spaces */
+
+    unsigned char x;
+
+    for(x=0;x<number;x++) { cputc(C_SPACE); }
+}
+
+void cleararea(unsigned char xpos, unsigned char ypos, unsigned char height, unsigned char width)
+{
+    /* Function to clear area */
+
+    unsigned char x;
+
+    for(x=0;x<height;x++)
+    {
+        gotoxy(xpos,ypos+x+1);
+        cspaces(width);
+    }
+} 

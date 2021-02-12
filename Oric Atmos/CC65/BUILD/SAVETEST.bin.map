@@ -150,8 +150,8 @@ Exports list by name:
 __BSS_RUN__               0019B1 RLA    __BSS_SIZE__              000032 REA    
 __CONSTRUCTOR_COUNT__     000003 REA    __CONSTRUCTOR_TABLE__     001A00 RLA    
 __DESTRUCTOR_COUNT__      000001 REA    __DESTRUCTOR_TABLE__      00194C RLA    
-__MAIN_SIZE__             0062FE REA    __MAIN_START__            000501 RLA    
-__ONCE_RUN__              0019B1 RLA    __RAMEND__                0067FF REA    
+__MAIN_SIZE__             006AFE REA    __MAIN_START__            000501 RLA    
+__ONCE_RUN__              0019B1 RLA    __RAMEND__                006FFF REA    
 __STACKSIZE__             000800 REA    __STARTUP__               000001 REA    
 __ctype                   0018C1 RLA    __ctypeidx                0018CC RLA    
 __directerrno             000BC6 RLA    __errno                   0019DF RLA    
@@ -245,7 +245,7 @@ initheap                  0019B1  LAI   __oserror                 0019B2 RLA
 disable_caps              0019C1 RLAI   initlib                   0019CD RLA    
 initcputc                 0019D9  LAI   __errno                   0019DF RLA    
 rvs                       0019E1 RLA    __CONSTRUCTOR_TABLE__     001A00 RLA    
-__MAIN_SIZE__             0062FE REA    __RAMEND__                0067FF REA    
+__MAIN_SIZE__             006AFE REA    __RAMEND__                006FFF REA    
 
 
 

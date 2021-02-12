@@ -37,11 +37,11 @@ IF "%OSDK%"=="" GOTO ErCfg
 ::
 echo %osdk%
 
-SET YM2MYM=%osdk%\Bin\ym2mym.exe -h1 -m15872
+SET YM2MYM=%osdk%\Bin\ym2mym.exe -h1 -m8704
 
-%YM2MYM% "music\R-Type  2 - level 1.ym" build\R-Type.tap    $7600 "LUDOMUS1"
-%YM2MYM% "music\Axel F.ym" build\AxelF.tap                  $7600 "LUDOMUS2"
-%YM2MYM% "music\Wizball 1.ym" build\Wizzball.tap            $7600 "LUDOMUS3"
+%YM2MYM% "music\R-Type  2 - level 1.ym" build\R-Type.tap            $7E00 "LUDOMUS1"
+%YM2MYM% "music\Wizball 1.ym" build\Wizzball.tap                    $7E00 "LUDOMUS2"
+%YM2MYM% "music\Defender of the Crown 1.ym" build\Defender.tap      $7E00 "LUDOMUS3"
 
 ::
 :: Rename files so they have friendly names on the disk
@@ -53,7 +53,7 @@ copy screen\LUDOTITL.tap build\LUDOTITL.tap
 %OSDK%\bin\taptap ren build\LUDOTITL.tap "LUDOTITL" 0
 
 ECHO Building DSK file
-%OSDK%\bin\tap2dsk -iCLS:LUDOMAIN -c20:3 -nLUDO build\LUDOMAIN.tap build\SAVETEST.tap screen\LUDOFOTO.hir build\LUDOTITL.tap build\LUDOSCRM.tap build\LUDODATA.tap build\R-Type.tap build\AxelF.tap build\Wizzball.tap build\LUDO.dsk
+%OSDK%\bin\tap2dsk -iCLS:LUDOMAIN -c20:3 -nLUDO build\LUDOMAIN.tap build\SAVETEST.tap screen\LUDOFOTO.hir build\LUDOTITL.tap build\LUDOSCRM.tap build\LUDODATA.tap build\R-Type.tap build\Defender.tap build\Wizzball.tap build\LUDO.dsk
 %OSDK%\bin\old2mfm build\LUDO.dsk
 
 GOTO End
