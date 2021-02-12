@@ -27,6 +27,7 @@ void pawnerase(unsigned char playernumber, unsigned char pawnnumber);
 void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned char selected);
 unsigned char dicethrow();
 void inputofnames();
+void informationcredits();
 void turnhuman();
 void savegame(unsigned char autosave);
 void loadgame();
@@ -41,6 +42,7 @@ unsigned char areyousure();
 unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed);
 int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned char size);
 void wait(unsigned int wait_cs);
+void printcentered(unsigned char* text, unsigned char color, unsigned char xpos, unsigned char ypos, unsigned char width);
 
 /* Variables */
 
@@ -439,6 +441,29 @@ void inputofnames()
     windowrestore();
 }
 
+void informationcredits()
+{
+    /* Print credits */
+
+    unsigned char version[30];
+    sprintf(version,
+            "Version: v%i%i - %c%c%c%c%c%c%c%c-%c%c%c%c",
+            VERSION_MAJOR, VERSION_MINOR,
+            BUILD_YEAR_CH0, BUILD_YEAR_CH1, BUILD_YEAR_CH2, BUILD_YEAR_CH3, BUILD_MONTH_CH0, BUILD_MONTH_CH1, BUILD_DAY_CH0, BUILD_DAY_CH1,BUILD_HOUR_CH0, BUILD_HOUR_CH1, BUILD_MIN_CH0, BUILD_MIN_CH1);
+    menumakeborder(2,8,14,36);
+    printcentered("L U D O",A_FWCYAN,3,10,36);
+    printcentered(version,A_FWYELLOW,3,11,36);
+    printcentered("Written by Xander Mol",A_FWYELLOW,3,13,36);
+    printcentered("Converted to Oric Atmos, 2020/21",A_FWYELLOW,3,14,36);
+    printcentered("Original on Commodore 128, 1992",A_FWYELLOW,3,15,36);
+    printcentered("Build with and using code of",A_FWYELLOW,3,17,36);
+    printcentered("OSDK, (C) Dbug and OSDK authors.",A_FWYELLOW,3,18,36);
+    printcentered("oricOpenLibrary, (C) raxiss.",A_FWYELLOW,3,19,36);
+    printcentered("Press a key.",A_FWGREEN,3,21,36);
+    cgetc();
+    windowrestore();
+}
+
 void turnhuman()
 {
     /* Turn for the human players */
@@ -482,6 +507,10 @@ void turnhuman()
             case 33:
                 endmusic();
                 startmusic();
+                break;
+
+            case 41:
+                informationcredits();
                 break;
 
             default:
@@ -1034,6 +1063,30 @@ int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned c
 
 void wait(unsigned int wait_cycles)
  {
+    /* Function to wait for the specified number of cycles
+       Input: wait_cycles = numnber of cycles to wait       */
+
     unsigned int starttime = clock();
     while (clock() - starttime < wait_cycles);
+}
+
+void printcentered(unsigned char* text, unsigned char color, unsigned char xpos, unsigned char ypos, unsigned char width)
+{
+    /* Function to print a text centered
+       Input:
+       - Text:  Text to be printed
+       - Color: Color for text to be printed
+       - Width: Width of window to align to    */
+
+    unsigned char x;
+
+    gotoxy(xpos,ypos+1);
+
+    if(strlen(text)<width)
+    {
+        for(x=0;x<(width-strlen(text))/2-1;x++) { cputc(C_SPACE); }
+    }
+    cputc(color);
+    cputs(text);
+    cputc(A_FWRED);
 }
