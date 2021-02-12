@@ -115,11 +115,21 @@ unsigned char homedestcoords[4][8][2] = {
 };
 //Player data
 unsigned char sp[4][4] = {
-    {0,0,A_FWGREEN,0},
-    {0,0,A_FWRED,0},
-    {0,0,A_FWBLUE,0},
-    {0,0,A_FWYELLOW,0}
+    {0,4,A_FWGREEN,4},
+    {0,4,A_FWRED,4},
+    {0,4,A_FWBLUE,4},
+    {0,4,A_FWYELLOW,4}
 };
+unsigned char sc[4][4][2] = {
+    {{1,0}, {1,1}, {1,2}, {1,3}},
+    {{1,0}, {1,1}, {1,2}, {1,3}},
+    {{1,0}, {1,1}, {1,2}, {1,3}},
+    {{1,0}, {1,1}, {1,2}, {1,3}}
+};
+unsigned char sps[4][21];
+char np[4] = { -1, -1, -1, -1};
+unsigned char dp[4] = { 8, 8, 8, 8 };
+
 //Dice graphics string data
 unsigned char dicegraphics[6][2][3] = {
     {{C_DICE01,C_DICE02,0},{C_DICE03,C_DICE04,0}},
@@ -131,16 +141,12 @@ unsigned char dicegraphics[6][2][3] = {
 };
 
 //Game variables
-unsigned char sc[4][4][2];
 unsigned char pm[4];
-unsigned char sps[4][21];
-unsigned char dp[4];
-char np[4];
 int pw[3];
-unsigned char ei;
-unsigned char bs;
+unsigned char ei = 0;
+unsigned char bs = 0;
+unsigned char musicnumber = 1;
 unsigned char joyinterface;
-unsigned char musicnumber;
 
 //Save game memory allocation
 unsigned int* saveslots;
@@ -153,8 +159,6 @@ void main()
     unsigned char x, choice;
 
     joyinterface = 0;
-    musicnumber = 1;
-    ei = 0;
 
     //Save game memory allocation
     saveslots = (unsigned int*) malloc(85);
@@ -183,20 +187,22 @@ void main()
     do
     {
         loadmainscreen();
-        if(ei==2)
+        if(ei>0)
         {
             ei = 0;
-            //placepawnsafterload();
         }
         else
         {
-            gamereset();
             inputofnames();
         }
         do
         {
             turnhuman();
         } while (ei==0);
+        if(ei==3)
+        {
+            gamereset();
+        }
     } while (ei!=1); 
 
     //End of game
@@ -259,7 +265,6 @@ void gamereset()
 
     srand(clock());
     bs=0;
-    ei=0;
     for(n=0;n<4;n++)
     {
         sp[n][1]=4;
@@ -268,8 +273,10 @@ void gamereset()
         dp[n]=8;
         for(m=0;m<4;m++)
         {
+            pawnerase(n,m);
             sc[n][m][0]=1;
-            sc[n][m][1]=1;
+            sc[n][m][1]=m;
+            pawnplace(n,m,0);
         }
     }
 }
@@ -443,7 +450,7 @@ void inputofnames()
 
 void informationcredits()
 {
-    /* Print credits */
+    /* Print version information and credits */
 
     unsigned char version[30];
     sprintf(version,
@@ -495,7 +502,6 @@ void turnhuman()
                 if(yesno==1) { loadgame(); }
                 break;
 
-
             case 31:
                 musicnext();
                 break;
@@ -516,7 +522,7 @@ void turnhuman()
             default:
                 break;
         }
-    } while (choice!=C_UP && choice!=12 && choice!=C_ENTER && choice!=22);
+    } while (choice!=11 && choice!=12 && choice!=13 && choice!=22);
 }
 
 void savegame(unsigned char autosave)
@@ -642,8 +648,10 @@ void loadgame()
         {
             for(y=0;y<4;y++)
             {
+                pawnerase(x,y);
                 sc[x][y][0]=peek(savegamemem+21+(x*8)+y);
                 sc[x][y][1]=peek(savegamemem+22+(x*8)+y);
+                pawnplace(x,y,0);
             }
         }
         for(x=0;x<4;x++)
