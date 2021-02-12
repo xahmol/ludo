@@ -12,6 +12,7 @@ ORIGINAL WRITTEN IN 1992 FOR COMMODORE 128
 #include <stdio.h>
 #include <conio.h>
 #include <string.h>
+#include <time.h>
 #include "defines.h"
 #include "osdklib.h"
 #include "libsedoric.h"
@@ -21,6 +22,10 @@ ORIGINAL WRITTEN IN 1992 FOR COMMODORE 128
 void loadintro();
 void loadmainscreen();
 void gamereset();
+unsigned char pawncoord(unsigned char playernumber, unsigned char pawnnumber, unsigned char xy);
+void pawnerase(unsigned char playernumber, unsigned char pawnnumber);
+void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned char selected);
+unsigned char dicethrow();
 void inputofnames();
 void turnhuman();
 void savegame(unsigned char autosave);
@@ -89,7 +94,7 @@ unsigned char updownenter[4] = {C_DOWN,C_UP,C_ENTER,0};
 unsigned char leftright[3] = {C_LEFT,C_RIGHT,0};
 
 //Pawn position co-ords main field
-unsigned char vc[40][2] = {
+unsigned char fieldcoords[40][2] = {
      { 2,13}, { 5,13}, { 8,13}, {11,13}, {14,13},
      {14,11}, {14, 9}, {14, 7}, {14, 5}, {17, 5},
      {20, 5}, {20, 7}, {20, 9}, {20,11}, {20,13},
@@ -100,7 +105,7 @@ unsigned char vc[40][2] = {
      {11,17}, { 8,17}, { 5,17}, { 2,17}, { 2,15}
 };
 //Pawn posiiion co-ords start and destination
-unsigned char rc[4][8][2] = {
+unsigned char homedestcoords[4][8][2] = {
     {{ 2, 5}, { 5, 5}, { 2, 7}, { 5, 7}, { 5,15}, { 8,15}, {11,15}, {14,15}},
     {{29, 5}, {32, 5}, {29, 7}, {32, 7}, {17, 7}, {17, 9}, {17,11}, {17,13}},
     {{29,23}, {32,23}, {29,25}, {32,25}, {29,15}, {26,15}, {23,15}, {20,15}},
@@ -108,13 +113,13 @@ unsigned char rc[4][8][2] = {
 };
 //Player data
 unsigned char sp[4][4] = {
-    {0,0,2,0},
-    {0,0,1,0},
-    {0,0,4,0},
-    {0,0,3,0}
+    {0,0,A_FWGREEN,0},
+    {0,0,A_FWRED,0},
+    {0,0,A_FWBLUE,0},
+    {0,0,A_FWYELLOW,0}
 };
 //Dice graphics string data
-unsigned char dns[6][2][3] = {
+unsigned char dicegraphics[6][2][3] = {
     {{C_DICE01,C_DICE02,0},{C_DICE03,C_DICE04,0}},
     {{C_DICE05,C_DICE06,0},{C_DICE06,C_DICE07,0}},
     {{C_DICE08,C_DICE02,0},{C_DICE03,C_DICE09,0}},
@@ -250,6 +255,7 @@ void gamereset()
 
     unsigned char n,m;
 
+    srand(clock());
     bs=0;
     ei=0;
     for(n=0;n<4;n++)
@@ -264,6 +270,147 @@ void gamereset()
             sc[n][m][1]=1;
         }
     }
+}
+
+unsigned char pawncoord(unsigned char playernumber, unsigned char pawnnumber, unsigned char xy)
+{
+    /* Obtain pawn coordinates
+       Input:
+       - playernumber and pawnnumber
+       - xy: X (0) or Y (1) coordinate returned
+       Output: the corresponding x or y co-ordinate */
+
+    if(sc[playernumber][pawnnumber][0]==0)
+    {
+        return fieldcoords[sc[playernumber][pawnnumber][1]][xy];
+    }
+    else
+    {
+        return homedestcoords[playernumber][sc[playernumber][pawnnumber][1]][xy];
+    }
+}
+
+void pawnerase(unsigned char playernumber, unsigned char pawnnumber)
+{
+    /* Erase a pawn from the field
+       Input playernumber and pawnnumber */
+
+    unsigned char xpos, ypos;
+
+    xpos = pawncoord(playernumber, pawnnumber, 0);
+    ypos = pawncoord(playernumber, pawnnumber, 1);
+    if(sc[playernumber][pawnnumber][0]==0 && sc[playernumber][pawnnumber][1]%10== 0)
+    {
+        /* Colored start fields */
+        switch (sc[playernumber][pawnnumber][1]/10)
+        {
+        case 0:
+            cputcxy(xpos-1,ypos+1, A_FWGREEN);
+            cputcxy(xpos,ypos+1,C_GSTARTUL);
+            cputcxy(xpos+1,ypos+1,C_GSTARTUR);
+            cputcxy(xpos-1,ypos+2, A_FWGREEN);
+            cputcxy(xpos,ypos+2,C_GSTARTLL);
+            cputcxy(xpos+1,ypos+2,C_GSTARTLR);
+            break;
+
+        case 1:
+            cputcxy(xpos-1,ypos+1, A_FWRED);
+            cputcxy(xpos,ypos+1,C_RSTARTUL);
+            cputcxy(xpos+1,ypos+1,C_RSTARTUR);
+            cputcxy(xpos-1,ypos+2, A_FWRED);
+            cputcxy(xpos,ypos+2,C_RSTARTLL);
+            cputcxy(xpos+1,ypos+2,C_RSTARTLR);
+            break;
+
+        case 2:
+            cputcxy(xpos-1,ypos+1, A_FWBLUE);
+            cputcxy(xpos,ypos+1,C_BSTARTUL);
+            cputcxy(xpos+1,ypos+1,C_BSTARTUR);
+            cputcxy(xpos-1,ypos+2, A_FWBLUE);
+            cputcxy(xpos,ypos+2,C_BSTARTLL);
+            cputcxy(xpos+1,ypos+2,C_BSTARTLR);
+            break;
+
+        case 3:
+            cputcxy(xpos-1,ypos+1, A_FWYELLOW);
+            cputcxy(xpos,ypos+1,C_YSTARTUL);
+            cputcxy(xpos+1,ypos+1,C_YSTARTUR);
+            cputcxy(xpos-1,ypos+2, A_FWYELLOW);
+            cputcxy(xpos,ypos+2,C_YSTARTLL);
+            cputcxy(xpos+1,ypos+2,C_YSTARTLR);
+            break;
+        
+        default:
+            break;
+        }
+    }
+    else
+    {
+        if(sc[playernumber][pawnnumber][0]==0)
+        {
+            /* Normal white field main track */
+            cputcxy(xpos-1,ypos+1, A_FWWHITE);
+            cputcxy(xpos,ypos+1,C_EFIELDUL);
+            cputcxy(xpos+1,ypos+1,C_EFIELDUR);
+            cputcxy(xpos-1,ypos+2, A_FWWHITE);
+            cputcxy(xpos,ypos+2,C_EFIELDLL);
+            cputcxy(xpos+1,ypos+2,C_EFIELDLR);
+        }
+        else
+        {
+            /* Colored home or destination field */
+            cputcxy(xpos-1,ypos+1, sp[playernumber][2]);
+            cputcxy(xpos,ypos+1,C_FFIELDUL);
+            cputcxy(xpos+1,ypos+1,C_FFIELDUR);
+            cputcxy(xpos-1,ypos+2, sp[playernumber][2]);
+            cputcxy(xpos,ypos+2,C_FFIELDLL);
+            cputcxy(xpos+1,ypos+2,C_FFIELDLR);
+        }
+    }
+}
+
+void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned char selected)
+{
+    /* Place a pawn on the field
+       Input playernumber and pawnnumber */
+
+    unsigned char xpos, ypos, color;
+
+    xpos = pawncoord(playernumber, pawnnumber, 0);
+    ypos = pawncoord(playernumber, pawnnumber, 1);
+    color = (selected)? A_FWWHITE : sp[playernumber][2];
+
+    cputcxy(xpos-1,ypos+1, color);
+    cputcxy(xpos,ypos+1,C_PAWNUL);
+    cputcxy(xpos+1,ypos+1,C_PAWNUR);
+    cputcxy(xpos-1,ypos+2, color);
+    cputcxy(xpos,ypos+2,C_PAWNLL);
+    cputcxy(xpos+1,ypos+2,C_PAWNLR);
+}
+
+unsigned char dicethrow()
+{
+    /* Throw the dice. Returns the dice value */
+
+    unsigned char dicethrow, x;
+
+    menumakeborder(30,12,6,8);
+    gotoxy(32,15);
+    cprintf("%c%c%c%c%c%c",A_ALT, A_FWWHITE, C_INVSPACE, C_INVSPACE, A_FWRED, A_STD);
+    gotoxy(32,16);
+    cprintf("%c%c%c%c%c%c",A_ALT, A_FWWHITE, C_INVSPACE, C_INVSPACE, A_FWRED, A_STD);
+    for(x=0;x<10;x++)
+    {
+        dicethrow = rand()%6+1;
+        cputsxy(34,15,dicegraphics[dicethrow-1][0]);
+        cputsxy(34,16,dicegraphics[dicethrow-1][1]);
+        wait(10);
+    }
+    gotoxy(32,18);
+    cprintf("%cKey.%c", A_FWYELLOW, A_FWRED);
+    cgetc();
+    windowrestore();
+    return dicethrow;
 }
 
 void inputofnames()
@@ -478,6 +625,7 @@ void loadgame()
             }
         }
         ei = 2;
+        srand(clock());
     }
 }
 
@@ -884,9 +1032,8 @@ int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned c
     return 0;
 }  
 
-void wait(unsigned int wait_cs)
+void wait(unsigned int wait_cycles)
  {
- 	//we use TIMER3 at adress #276-#277
-	doke(0x0276,wait_cs);
-	while ( deek(0x0276)>0){};
+    unsigned int starttime = clock();
+    while (clock() - starttime < wait_cycles);
 }

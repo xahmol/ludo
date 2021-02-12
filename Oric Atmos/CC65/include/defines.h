@@ -30,6 +30,43 @@
 #define C_LOWRIGHT  125
 #define C_LOWLEFT   126
 
+/* Field and pawn graphics */
+/* Empty field */
+#define C_EFIELDUL  32
+#define C_EFIELDUR  33
+#define C_EFIELDLL  34
+#define C_EFIELDLR  35
+/* Filled field */
+#define C_FFIELDUL  36
+#define C_FFIELDUR  37
+#define C_FFIELDLL  38
+#define C_FFIELDLR  39
+/* Pawn */
+#define C_PAWNUL    40
+#define C_PAWNUR    41
+#define C_PAWNLL    42
+#define C_PAWNLR    43
+/* Start field green */
+#define C_GSTARTUL  44
+#define C_GSTARTUR  45
+#define C_GSTARTLL  46
+#define C_GSTARTLR  47
+/* Start field red */
+#define C_RSTARTUL  48
+#define C_RSTARTUR  49
+#define C_RSTARTLL  50
+#define C_RSTARTLR  51
+/* Start field blue */
+#define C_BSTARTUL  52
+#define C_BSTARTUR  53
+#define C_BSTARTLL  54
+#define C_BSTARTLR  55
+/* Start field yellow */
+#define C_YSTARTUL  56
+#define C_YSTARTUR  57
+#define C_YSTARTLL  58
+#define C_YSTARTLR  59
+
 /* References to steering chars */
 #define C_LEFT      8
 #define C_RIGHT     9
