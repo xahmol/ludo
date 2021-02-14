@@ -119,19 +119,30 @@ unsigned char homedestcoords[4][8][2] = {
     {{29,23}, {32,23}, {29,25}, {32,25}, {29,15}, {26,15}, {23,15}, {20,15}},
     {{ 2,23}, { 5,23}, { 2,25}, { 5,25}, {17,23}, {17,21}, {17,19}, {17,17}}
 };
-//Player data
+/* Player data:
+    [players 0-3]
+    [position 0: human = 0 or computer = 1
+     position 1: number of pawns not at destination
+     position 2: player color
+     position 3: number of pawns at home              */
 unsigned char sp[4][4] = {
     {0,4,A_FWGREEN,4},
     {0,4,A_FWRED,4},
     {0,4,A_FWBLUE,4},
     {0,4,A_FWYELLOW,4}
 };
+/* Player field positions:
+    [players 0-3]
+    [pawnnumber 0-3]
+    [0 position: main field = 0, else 1
+     1 position: fieldnumber]               */
 unsigned char sc[4][4][2] = {
     {{1,0}, {1,1}, {1,2}, {1,3}},
     {{1,0}, {1,1}, {1,2}, {1,3}},
     {{1,0}, {1,1}, {1,2}, {1,3}},
     {{1,0}, {1,1}, {1,2}, {1,3}}
 };
+/* Player names */
 unsigned char sps[4][21];
 signed char np[4] = { -1, -1, -1, -1};
 unsigned char dp[4] = { 8, 8, 8, 8 };
@@ -220,6 +231,17 @@ void main()
             }
             if(ei!=0) { break; }
             turngeneric();
+
+            for(x=0;x<4;x++)
+            {
+                gotoxy(1+22*(x==1 || x==2), 10+11*(x==2 || x==3));
+                cprintf("%d %d %d %d  ", sc[x][0][0],sc[x][0][1],sc[x][1][0],sc[x][1][1]);
+                gotoxy(1+22*(x==1 || x==2), 11+11*(x==2 || x==3));
+                cprintf("%d %d %d %d  ", sc[x][2][0],sc[x][2][1],sc[x][3][0],sc[x][3][1]);
+                gotoxy(1+22*(x==1 || x==2), 12+11*(x==2 || x==3));
+                cprintf("%d %d",sp[x][1],sp[x][3]);
+            }
+
             if(sp[bs][1]==0) { playerwins(); break; }
             do
             {
@@ -234,6 +256,7 @@ void main()
                     if(bs>3) { bs=0; }
                 }
             } while (zv==0 && sp[bs][1]==0);
+
         } while (ei==0);
         if(ei==3) { gamereset(); } /* Reset for game restart */
     } while (ei!=1); 
@@ -340,7 +363,7 @@ void pawnerase(unsigned char playernumber, unsigned char pawnnumber)
 
     xpos = pawncoord(playernumber, pawnnumber, 0);
     ypos = pawncoord(playernumber, pawnnumber, 1);
-    if(sc[playernumber][pawnnumber][0]==0 && sc[playernumber][pawnnumber][1]%10== 0)
+    if(sc[playernumber][pawnnumber][0]==0 && (sc[playernumber][pawnnumber][1]%10)== 0)
     {
         /* Colored start fields */
         switch (sc[playernumber][pawnnumber][1]/10)
@@ -860,10 +883,11 @@ void savegame(unsigned char autosave)
        Input: autosave is 1 for autosave, else 0 */
 
     unsigned char filename[15];
-    unsigned char slot, x, y;
+    unsigned char slot = 0;
+    unsigned char x, y;
     unsigned char yesno = 1;
 
-    if(autosave)
+    if(autosave==1)
     {
         strcpy(filename,"LUDOSAV0.SAV");
     }
@@ -896,17 +920,17 @@ void savegame(unsigned char autosave)
             }
             pulldownmenutitles[7][slot][15] = 0;
             sprintf(filename,"LUDOSAV%d.SAV", slot);
-            poke(saveslots+slot,1);
             for(x=0;x<16;x++)
             {
                 poke(saveslots+(slot*16)+5+x,pulldownmenutitles[7][slot][x]);
             }
-            savefile("LUDODATA.COM", (void*)saveslots, 85);
         }
         windowrestore();
     }
     if(yesno==1)
     {
+        poke(saveslots+slot,1);
+        savefile("LUDODATA.COM", (void*)saveslots, 85);
         poke(savegamemem,bs);
         for(x=0;x<4;x++)
         {
