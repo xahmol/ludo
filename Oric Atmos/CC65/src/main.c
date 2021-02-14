@@ -830,9 +830,9 @@ unsigned char computerchoosepawn()
                         }
                         if(sc[y][z][0]==0 && nr==0 && bs!=y)
                         {
-                            if(vn-sc[y][z][1]<6 && vn-sc[y][z][1]>0) { pw[x]+=400; }
-                            if(no-sc[y][z][1]<6 && no-sc[y][z][1]>0) { pw[x]-=200; }
-                            if(sc[y][z][1]-nn<6 && sc[y][z][1]-nn>0) { pw[x]+=100; }
+                            if((vn-sc[y][z][1])<6 && vn-sc[y][z][1]>0) { pw[x]+=400; }
+                            if((no-sc[y][z][1])<6 && no-sc[y][z][1]>0) { pw[x]-=200; }
+                            if((sc[y][z][1]-nn)<6 && (sc[y][z][1]-nn)>0) { pw[x]+=100; }
                         }
                     }
                 }
