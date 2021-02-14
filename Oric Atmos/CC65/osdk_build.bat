@@ -37,7 +37,7 @@ IF "%OSDK%"=="" GOTO ErCfg
 ::
 echo %osdk%
 
-SET YM2MYM=%osdk%\Bin\ym2mym.exe -h1 -m8704
+SET YM2MYM=%osdk%\Bin\ym2mym.exe -h1 -m8192
 
 %YM2MYM% "music\R-Type  2 - level 1.ym" build\R-Type.tap            $7E00 "LUDOMUS1"
 %YM2MYM% "music\Wizball 1.ym" build\Wizzball.tap                    $7E00 "LUDOMUS2"

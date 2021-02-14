@@ -329,12 +329,12 @@ CODE:
 	.byte	$60
 	.byte	$AE
 	.byte	$00
-	.byte	$7E
+	.byte	$94
 	.byte	$86
 	.byte	<(ZEROPAGE+6)
 	.byte	$AE
 	.byte	$01
-	.byte	$7E
+	.byte	$94
 	.byte	$E8
 	.byte	$86
 	.byte	<(ZEROPAGE+7)
@@ -343,7 +343,7 @@ CODE:
 	.byte	$8D
 	.word	CODE+431
 	.byte	$A9
-	.byte	$7E
+	.byte	$94
 	.byte	$8D
 	.word	CODE+432
 	.byte	$A9
@@ -376,7 +376,7 @@ CODE:
 	.byte	$D0
 	.byte	$FA
 	.byte	$A9
-	.byte	$70
+	.byte	$86
 	.byte	$85
 	.byte	<(ZEROPAGE+4)
 	.byte	$A2
@@ -428,14 +428,14 @@ CODE:
 	.byte	$8D
 	.word	CODE+347
 	.byte	$A9
-	.byte	$70
+	.byte	$86
 	.byte	$8D
 	.word	CODE+348
 	.byte	$A0
 	.byte	$00
 	.byte	$AE
 	.byte	$00
-	.byte	$70
+	.byte	$86
 	.byte	$48
 	.byte	$98
 	.byte	$48
@@ -513,7 +513,7 @@ CODE:
 	.byte	<(ZEROPAGE+1)
 	.byte	$AD
 	.byte	$02
-	.byte	$7E
+	.byte	$94
 	.byte	$85
 	.byte	<(ZEROPAGE+0)
 	.byte	$EE
@@ -532,7 +532,7 @@ CODE:
 	.byte	$68
 	.byte	$60
 	.byte	$A9
-	.byte	$70
+	.byte	$86
 	.byte	$18
 	.byte	$65
 	.byte	<(ZEROPAGE+3)
@@ -564,7 +564,7 @@ CODE:
 	.byte	<(ZEROPAGE+9)
 	.byte	$99
 	.byte	$00
-	.byte	$70
+	.byte	$86
 	.byte	$C8
 	.byte	$CA
 	.byte	$D0
@@ -602,7 +602,7 @@ CODE:
 	.word	CODE+219
 	.byte	$9D
 	.byte	$00
-	.byte	$70
+	.byte	$86
 	.byte	$E6
 	.byte	<(ZEROPAGE+5)
 	.byte	$A5
@@ -642,7 +642,7 @@ CODE:
 	.word	CODE+219
 	.byte	$9D
 	.byte	$00
-	.byte	$70
+	.byte	$86
 	.byte	$E6
 	.byte	<(ZEROPAGE+5)
 	.byte	$4C
@@ -676,11 +676,11 @@ CODE:
 	.byte	<(ZEROPAGE+5)
 	.byte	$B9
 	.byte	$00
-	.byte	$70
+	.byte	$86
 	.byte	$C8
 	.byte	$9D
 	.byte	$00
-	.byte	$70
+	.byte	$86
 	.byte	$E6
 	.byte	<(ZEROPAGE+5)
 	.byte	$E8

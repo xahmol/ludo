@@ -61,8 +61,9 @@ struct WindowStruct
 };
 struct WindowStruct Window[9];
 
-unsigned int windowaddress = 0xa000;
-unsigned char windownumber = 1;
+unsigned int windowaddress;
+unsigned int* windowmemory;
+unsigned char windownumber = 0;
 
 //Menu data
 unsigned char menubaroptions = 4;
@@ -171,6 +172,8 @@ void main()
     //Save game memory allocation
     saveslots = (unsigned int*) malloc(85);
     savegamemem = (unsigned int*) malloc(136);
+    windowmemory = (unsigned int*) malloc(4096);
+    windowaddress = (unsigned int)windowmemory;
 
     //Game intro
     clrscr();
@@ -186,6 +189,8 @@ void main()
     choice = menupulldown(27,11,5);
     windowrestore();
     if(choice==1) { loadgame(); }
+
+    srand(clock());
 
     //Main game loop
     do
@@ -211,7 +216,7 @@ void main()
             }
             else
             {
-                cprintf("%cComputer is playimg.", A_FWYELLOW);
+                cprintf("%cComputer is playing.", A_FWYELLOW);
             }
             if(ei!=0) { break; }
             turngeneric();
@@ -224,7 +229,7 @@ void main()
                 }
                 else
                 {
-                    np[ns]=-1;
+                    np[bs]=-1;
                     bs++;
                     if(bs>3) { bs=0; }
                 }
@@ -243,6 +248,7 @@ void main()
     cprintf("%cThanks for playing, goodbye.",A_FWCYAN);
     free(saveslots);
     free(savegamemem);
+    free(windowmemory);
     endmusic();
 }
 
@@ -258,7 +264,7 @@ void loadintro()
     rc = loadfile("LUDOTITL.BIN", (void*)0xb500, &len);
 
     /* Load and start first music file */
-    rc = loadfile("LUDOMUS1.BIN", (void*)0x7e00, &len);
+    rc = loadfile("LUDOMUS1.BIN", (void*)0x9400, &len);
     startmusic();
 
     /* Load and read game config file */
@@ -290,7 +296,6 @@ void gamereset()
 
     unsigned char n,m;
 
-    srand(clock());
     bs=0;
     for(n=0;n<4;n++)
     {
@@ -557,15 +562,15 @@ void turngeneric()
     /* Generic turn sequence */
 
     unsigned char dicethrows = 1;
-    unsigned char validturn = 0;
-    unsigned char mp = 1;
+    unsigned char noturnpossible = 0;
+    unsigned char mp = 0;
     signed char pawnnumber = -1;
     unsigned char ap = 0;
     signed char as;
     unsigned char vr, vl, vn, nr, gv, ov, ro, x,y;
 
     for(x=0;x<4;x++) { pm[x]=0; }
-    if(sp[bs][3]=sp[bs][1])
+    if(sp[bs][3]==sp[bs][1])
     {
         dicethrows = 3;
         gotoxy(21,4);
@@ -577,7 +582,7 @@ void turngeneric()
         if(throw==6) { break; }
     }
     cleararea(21,3,1,15);
-    if(sp[bs][3]==sp[bs][1] && throw==6) { validturn=1; }
+    if(sp[bs][3]==sp[bs][1] && throw!=6) { noturnpossible=1; }
     if(np[bs]>=0)
     {
         if(sp[bs][3]>0)
@@ -586,7 +591,7 @@ void turngeneric()
         }
         np[bs]=-1;
     }
-    if(validturn==0 && pawnnumber==-1)
+    if(noturnpossible==0 && pawnnumber==-1)
     {
         for(x=0;x<4;x++)
         {
@@ -635,7 +640,7 @@ void turngeneric()
     }
     if(pawnnumber==-1)
     {
-        for(x=0;x<3;x++)
+        for(x=0;x<4;x++)
         {
             if(pm[x]==1) { ap++; pawnnumber=x; }
         }
@@ -647,7 +652,7 @@ void turngeneric()
         else { pawnnumber = computerchoosepawn(); }
     }
     if(throw==6) { zv=1; }
-    if(ap==0 && validturn==0)
+    if(ap==0 && noturnpossible==1)
     {
         gotoxy(21,3);
         cprintf("%cNo move possible", A_FWYELLOW);
@@ -661,18 +666,18 @@ void turngeneric()
     ro=sc[bs][pawnnumber][0];
     if(ro==1 && ov<4)
     {
-        sc[bs][pawnnumber][0]=1;
+        sc[bs][pawnnumber][0]=0;
         sc[bs][pawnnumber][1]=bs*10;
         sp[bs][3]--;
     }
     else { sc[bs][pawnnumber][1]+=throw; }
-    if(bs==0 && sc[bs][pawnnumber][1]<=39 && ov<40 && ro==0)
+    if(bs==0 && sc[bs][pawnnumber][1]>39 && ov<40 && ro==0)
         { sc[bs][pawnnumber][0]=1; sc[bs][pawnnumber][1]-=36; }
-    if(bs==1 && sc[bs][pawnnumber][1]<= 9 && ov<10 && ro==0)
+    if(bs==1 && sc[bs][pawnnumber][1]> 9 && ov<10 && ro==0)
         { sc[bs][pawnnumber][0]=1; sc[bs][pawnnumber][1]-= 6; }
-    if(bs==2 && sc[bs][pawnnumber][1]<=19 && ov<20 && ro==0)
+    if(bs==2 && sc[bs][pawnnumber][1]>19 && ov<20 && ro==0)
         { sc[bs][pawnnumber][0]=1; sc[bs][pawnnumber][1]-=16; }
-    if(bs==3 && sc[bs][pawnnumber][1]<=29 && ov<30 && ro==0)
+    if(bs==3 && sc[bs][pawnnumber][1]>29 && ov<30 && ro==0)
         { sc[bs][pawnnumber][0]=1; sc[bs][pawnnumber][1]-=26; }
     if(sc[bs][pawnnumber][0]==1 && sc[bs][pawnnumber][1]>3)
         { dp[bs]=sc[bs][pawnnumber][1]; }
@@ -689,7 +694,7 @@ void turngeneric()
             {
                 if(sc[x][y][0]==0 && sc[bs][pawnnumber][0]==0)
                 {
-                    if(sc[x][y][1]=sc[bs][pawnnumber][1])
+                    if(sc[x][y][1]==sc[bs][pawnnumber][1])
                     {
                         ap=y;
                         as=x;
@@ -710,6 +715,12 @@ void turngeneric()
     }
     pawnplace(bs,pawnnumber,0);
     if(sp[bs][0]==0) { savegame(1); } /* Autosave on end human turn */
+    else
+    {
+        gotoxy(20,3);
+        cprintf("%cPress key.", A_FWYELLOW);
+        cgetc();
+    }
 }
 
 unsigned char humanchoosepawn()
@@ -892,8 +903,8 @@ void savegame(unsigned char autosave)
             }
             savefile("LUDODATA.COM", (void*)saveslots, 85);
         }
+        windowrestore();
     }
-    windowrestore();
     if(yesno==1)
     {
         poke(savegamemem,bs);
@@ -985,7 +996,6 @@ void loadgame()
             }
         }
         ei = 2;
-        srand(clock());
     }
 }
 
@@ -1000,7 +1010,7 @@ void musicnext()
     endmusic();
     if(++musicnumber>3) { musicnumber = 1;}
     sprintf((char*)musicfilename,"LUDOMUS%d.BIN", musicnumber);
-    rc = loadfile(musicfilename, (void*)0x7e00, &len);
+    rc = loadfile(musicfilename, (void*)0x9400, &len);
     startmusic();
 }
 
@@ -1023,7 +1033,6 @@ void windowsave(unsigned char ypos, unsigned char height)
 void windowrestore()
 {
     /* Function to restore a window */
-
     windowaddress = Window[--windownumber].address;
     memcpy((char*)0xbba8 + Window[windownumber].ypos*40, (char*)windowaddress, Window[windownumber].height*40);
 }

@@ -34,10 +34,10 @@ _FrameLoadBalancer	.dsb 1		; We depack a new frame every 9 VBLs, this way the 14
 
 ;	*=$6500                             ; Actual start address of the player
 
-#define _PlayerBuffer		$7000		; .dsb 256*14 (About 3.5 kilobytes)
-#define _PlayerBufferEnd	$7e00
+#define _PlayerBuffer		$8600		; .dsb 256*14 (About 3.5 kilobytes)
+#define _PlayerBufferEnd	$93ff
 
-#define _MusicData			$7e00		; Musics are loaded in $7600, between the player buffer and the redefined character sets
+#define _MusicData			$9400		; Musics are loaded in $7600, between the player buffer and the redefined character sets
 
 _startmusic
 	php
