@@ -30,9 +30,9 @@ void inputofnames();
 void informationcredits();
 void turnhuman();
 void turngeneric();
-unsigned char humanchoosepawn();
+unsigned char humanchoosepawn(unsigned char playernumber, unsigned char possible[4]);
 void playerwins();
-unsigned char computerchoosepawn();
+unsigned char computerchoosepawn(unsigned char playernumber, unsigned char possible[4]);
 void savegame(unsigned char autosave);
 void loadgame();
 void musicnext();
@@ -125,7 +125,7 @@ unsigned char homedestcoords[4][8][2] = {
      position 1: number of pawns not at destination
      position 2: player color
      position 3: number of pawns at home              */
-unsigned char sp[4][4] = {
+unsigned char playerdata[4][4] = {
     {0,4,A_FWGREEN,4},
     {0,4,A_FWRED,4},
     {0,4,A_FWBLUE,4},
@@ -136,14 +136,15 @@ unsigned char sp[4][4] = {
     [pawnnumber 0-3]
     [0 position: main field = 0, else 1
      1 position: fieldnumber]               */
-unsigned char sc[4][4][2] = {
+unsigned char playerpos[4][4][2] = {
     {{1,0}, {1,1}, {1,2}, {1,3}},
     {{1,0}, {1,1}, {1,2}, {1,3}},
     {{1,0}, {1,1}, {1,2}, {1,3}},
     {{1,0}, {1,1}, {1,2}, {1,3}}
 };
 /* Player names */
-unsigned char sps[4][21];
+unsigned char playername[4][21];
+
 signed char np[4] = { -1, -1, -1, -1};
 unsigned char dp[4] = { 8, 8, 8, 8 };
 
@@ -158,10 +159,8 @@ unsigned char dicegraphics[6][2][3] = {
 };
 
 //Game variables
-signed int pw[3];
-unsigned char pm[4];
-unsigned char ei = 0;
-unsigned char bs = 0;
+unsigned char endofgameflag = 0;
+unsigned char turnofplayernr = 0;
 unsigned char zv = 0;
 unsigned char ns = 0;
 unsigned char throw;
@@ -207,9 +206,9 @@ void main()
     do
     {
         loadmainscreen();
-        if(ei>0)
+        if(endofgameflag>0)
         {
-            ei = 0;
+            endofgameflag = 0;
         }
         else
         {
@@ -219,9 +218,9 @@ void main()
         {
             cleararea(0,2,3,40);
             gotoxy(0,3);
-            cprintf("%cPlayer %c%d%c: %c %c\n\r", A_FWYELLOW, A_FWCYAN, bs+1, A_FWYELLOW, 16+sp[bs][2], A_BGBLACK);
-            cprintf("%c%s%c\n\r", A_FWGREEN, sps[bs], A_FWYELLOW);
-            if(sp[bs][0]==0)
+            cprintf("%cPlayer %c%d%c: %c %c\n\r", A_FWYELLOW, A_FWCYAN, turnofplayernr+1, A_FWYELLOW, 16+playerdata[turnofplayernr][2], A_BGBLACK);
+            cprintf("%c%s%c\n\r", A_FWGREEN, playername[turnofplayernr], A_FWYELLOW);
+            if(playerdata[turnofplayernr][0]==0)
             {
                 turnhuman();
             }
@@ -229,20 +228,21 @@ void main()
             {
                 cprintf("%cComputer is playing.", A_FWYELLOW);
             }
-            if(ei!=0) { break; }
+            if(endofgameflag!=0) { break; }
             turngeneric();
 
+            /* Debugging: printing player data
             for(x=0;x<4;x++)
             {
                 gotoxy(1+22*(x==1 || x==2), 10+11*(x==2 || x==3));
-                cprintf("%d %d %d %d  ", sc[x][0][0],sc[x][0][1],sc[x][1][0],sc[x][1][1]);
+                cprintf("%d %d %d %d  ", playerpos[x][0][0],playerpos[x][0][1],playerpos[x][1][0],playerpos[x][1][1]);
                 gotoxy(1+22*(x==1 || x==2), 11+11*(x==2 || x==3));
-                cprintf("%d %d %d %d  ", sc[x][2][0],sc[x][2][1],sc[x][3][0],sc[x][3][1]);
+                cprintf("%d %d %d %d  ", playerpos[x][2][0],playerpos[x][2][1],playerpos[x][3][0],playerpos[x][3][1]);
                 gotoxy(1+22*(x==1 || x==2), 12+11*(x==2 || x==3));
-                cprintf("%d %d",sp[x][1],sp[x][3]);
-            }
+                cprintf("%d %d",playerdata[x][1],playerdata[x][3]);
+            } */
 
-            if(sp[bs][1]==0) { playerwins(); break; }
+            if(playerdata[turnofplayernr][1]==0) { playerwins(); break; }
             do
             {
                 if(zv==1)
@@ -251,15 +251,15 @@ void main()
                 }
                 else
                 {
-                    np[bs]=-1;
-                    bs++;
-                    if(bs>3) { bs=0; }
+                    np[turnofplayernr]=-1;
+                    turnofplayernr++;
+                    if(turnofplayernr>3) { turnofplayernr=0; }
                 }
-            } while (zv==0 && sp[bs][1]==0);
+            } while (zv==0 && playerdata[turnofplayernr][1]==0);
 
-        } while (ei==0);
-        if(ei==3) { gamereset(); } /* Reset for game restart */
-    } while (ei!=1); 
+        } while (endofgameflag==0);
+        if(endofgameflag==3) { gamereset(); } /* Reset for game restart */
+    } while (endofgameflag!=1); 
 
     //End of game
     clrscr();
@@ -319,18 +319,18 @@ void gamereset()
 
     unsigned char n,m;
 
-    bs=0;
+    turnofplayernr=0;
     for(n=0;n<4;n++)
     {
-        sp[n][1]=4;
-        sp[n][3]=4;
+        playerdata[n][1]=4;
+        playerdata[n][3]=4;
         np[n]=-1;
         dp[n]=8;
         for(m=0;m<4;m++)
         {
             pawnerase(n,m);
-            sc[n][m][0]=1;
-            sc[n][m][1]=m;
+            playerpos[n][m][0]=1;
+            playerpos[n][m][1]=m;
             pawnplace(n,m,0);
         }
     }
@@ -344,13 +344,13 @@ unsigned char pawncoord(unsigned char playernumber, unsigned char pawnnumber, un
        - xy: X (0) or Y (1) coordinate returned
        Output: the corresponding x or y co-ordinate */
 
-    if(sc[playernumber][pawnnumber][0]==0)
+    if(playerpos[playernumber][pawnnumber][0]==0)
     {
-        return fieldcoords[sc[playernumber][pawnnumber][1]][xy];
+        return fieldcoords[playerpos[playernumber][pawnnumber][1]][xy];
     }
     else
     {
-        return homedestcoords[playernumber][sc[playernumber][pawnnumber][1]][xy];
+        return homedestcoords[playernumber][playerpos[playernumber][pawnnumber][1]][xy];
     }
 }
 
@@ -363,10 +363,10 @@ void pawnerase(unsigned char playernumber, unsigned char pawnnumber)
 
     xpos = pawncoord(playernumber, pawnnumber, 0);
     ypos = pawncoord(playernumber, pawnnumber, 1);
-    if(sc[playernumber][pawnnumber][0]==0 && (sc[playernumber][pawnnumber][1]%10)== 0)
+    if(playerpos[playernumber][pawnnumber][0]==0 && (playerpos[playernumber][pawnnumber][1]%10)== 0)
     {
         /* Colored start fields */
-        switch (sc[playernumber][pawnnumber][1]/10)
+        switch (playerpos[playernumber][pawnnumber][1]/10)
         {
         case 0:
             cputcxy(xpos-1,ypos+1, A_FWGREEN);
@@ -410,7 +410,7 @@ void pawnerase(unsigned char playernumber, unsigned char pawnnumber)
     }
     else
     {
-        if(sc[playernumber][pawnnumber][0]==0)
+        if(playerpos[playernumber][pawnnumber][0]==0)
         {
             /* Normal white field main track */
             cputcxy(xpos-1,ypos+1, A_FWWHITE);
@@ -423,10 +423,10 @@ void pawnerase(unsigned char playernumber, unsigned char pawnnumber)
         else
         {
             /* Colored home or destination field */
-            cputcxy(xpos-1,ypos+1, sp[playernumber][2]);
+            cputcxy(xpos-1,ypos+1, playerdata[playernumber][2]);
             cputcxy(xpos,ypos+1,C_FFIELDUL);
             cputcxy(xpos+1,ypos+1,C_FFIELDUR);
-            cputcxy(xpos-1,ypos+2, sp[playernumber][2]);
+            cputcxy(xpos-1,ypos+2, playerdata[playernumber][2]);
             cputcxy(xpos,ypos+2,C_FFIELDLL);
             cputcxy(xpos+1,ypos+2,C_FFIELDLR);
         }
@@ -442,7 +442,7 @@ void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned ch
 
     xpos = pawncoord(playernumber, pawnnumber, 0);
     ypos = pawncoord(playernumber, pawnnumber, 1);
-    color = (selected)? A_FWWHITE : sp[playernumber][2];
+    color = (selected)? A_FWWHITE : playerdata[playernumber][2];
 
     cputcxy(xpos-1,ypos+1, color);
     cputcxy(xpos,ypos+1,C_PAWNUL);
@@ -490,15 +490,15 @@ void inputofnames()
         choice = menupulldown(28,11,5);
         if(choice==1)
         {
-            sp[x][0]=1;
+            playerdata[x][0]=1;
         }
         else
         {
-            sp[x][0]=0;
+            playerdata[x][0]=0;
         }
         gotoxy(6,11);
         cprintf("%cInput name for player%c %d%c:    %c",A_FWYELLOW,A_FWCYAN,x+1,A_FWYELLOW,A_FWRED);
-        input(6,12,sps[x],20);
+        input(6,12,playername[x],20);
     }
     windowrestore();
 }
@@ -540,12 +540,12 @@ void turnhuman()
         {
             case 12:
                 yesno = areyousure();
-                if(yesno==1) { ei=3; }
+                if(yesno==1) { endofgameflag=3; }
                 break;
 
             case 13:
                 yesno = areyousure();
-                if(yesno==1) { ei=1; }
+                if(yesno==1) { endofgameflag=1; }
                 break;
 
             case 21:
@@ -584,6 +584,7 @@ void turngeneric()
 {
     /* Generic turn sequence */
 
+    unsigned char pawnpossible[4] = { 0,0,0,0 };
     unsigned char dicethrows = 1;
     unsigned char noturnpossible = 0;
     unsigned char mp = 0;
@@ -592,12 +593,25 @@ void turngeneric()
     signed char as;
     unsigned char vr, vl, vn, nr, gv, ov, ro, x,y;
 
-    for(x=0;x<4;x++) { pm[x]=0; }
-    if(sp[bs][3]==sp[bs][1])
+    if(playerdata[turnofplayernr][3]==playerdata[turnofplayernr][1])
     {
         dicethrows = 3;
-        gotoxy(21,4);
-        cprintf("%cThrow 3 times.", A_FWYELLOW);
+        for(x=0;x<4;x++)
+        {
+            if(playerpos[turnofplayernr][x][0]==0)
+            {
+                dicethrows = 1;
+            }
+            if(playerpos[turnofplayernr][x][0]==1 && playerpos[turnofplayernr][x][1]<playerdata[turnofplayernr][1]+4 && playerpos[turnofplayernr][x][1]<playerdata[turnofplayernr][1]>3)
+            {
+                dicethrows = 1;
+            }
+        }
+        if(dicethrows == 3)
+        {
+            gotoxy(21,4);
+            cprintf("%cThrow 3 times.", A_FWYELLOW);
+        }
     }
     for(x=0;x<dicethrows;x++)
     {
@@ -605,21 +619,21 @@ void turngeneric()
         if(throw==6) { break; }
     }
     cleararea(21,3,1,15);
-    if(sp[bs][3]==sp[bs][1] && throw!=6) { noturnpossible=1; }
-    if(np[bs]>=0)
+    if(playerdata[turnofplayernr][3]==playerdata[turnofplayernr][1] && dicethrows == 3 && throw!=6) { noturnpossible=1; }
+    if(np[turnofplayernr]>=0)
     {
-        if(sp[bs][3]>0)
+        if(playerdata[turnofplayernr][3]>0)
         {
-            pawnnumber=np[bs];
+            pawnnumber=np[turnofplayernr];
         }
-        np[bs]=-1;
+        np[turnofplayernr]=-1;
     }
     if(noturnpossible==0 && pawnnumber==-1)
     {
         for(x=0;x<4;x++)
         {
-            vr=sc[bs][x][0];
-            vl=sc[bs][x][1];
+            vr=playerpos[turnofplayernr][x][0];
+            vl=playerpos[turnofplayernr][x][1];
             gv=0;
             if(vr==1 && vl<4)
             {
@@ -627,7 +641,7 @@ void turngeneric()
                 if(throw==6)
                 {
                     pawnnumber=x;
-                    np[bs]=x;
+                    np[turnofplayernr]=x;
                     x=3;
                 }
             }
@@ -637,10 +651,10 @@ void turngeneric()
                 nr=vr;
                 if(vr==0)
                 {
-                    if(bs==0 && vn>39 && vl<40) { vn-=36; nr=1; }
-                    if(bs==1 && vn> 9 && vl<10) { vn-= 6; nr=1; }
-                    if(bs==2 && vn>19 && vl<20) { vn-=16; nr=1; }
-                    if(bs==3 && vn>29 && vl<30) { vn-=26; nr=1; }
+                    if(turnofplayernr==0 && vn>39 && vl<40) { vn-=36; nr=1; }
+                    if(turnofplayernr==1 && vn> 9 && vl<10) { vn-= 6; nr=1; }
+                    if(turnofplayernr==2 && vn>19 && vl<20) { vn-=16; nr=1; }
+                    if(turnofplayernr==3 && vn>29 && vl<30) { vn-=26; nr=1; }
                 }
                 if(nr==1)
                 {
@@ -649,7 +663,7 @@ void turngeneric()
                     {
                         for(y=0;y<4;y++)
                         {
-                            if(x!=y && sc[bs][y][0]==1 && sc[bs][y][1]<=vn && sc[bs][y][1]>3)
+                            if(x!=y && playerpos[turnofplayernr][y][0]==1 && playerpos[turnofplayernr][y][1]<=vn && playerpos[turnofplayernr][y][1]>3)
                             {
                                 gv=1;
                                 y=3;
@@ -657,7 +671,7 @@ void turngeneric()
                         }
                     }
                 }
-                if(gv==0) { pm[x]=1; }
+                if(gv==0) { pawnpossible[x]=1; }
             }
         }
     }
@@ -665,17 +679,17 @@ void turngeneric()
     {
         for(x=0;x<4;x++)
         {
-            if(pm[x]==1) { ap++; pawnnumber=x; }
+            if(pawnpossible[x]==1) { ap++; pawnnumber=x; }
         }
     }
     else { ap=1; }
     if(ap>1)
     {
-        if(sp[bs][0]==0) { pawnnumber = humanchoosepawn(); }
-        else { pawnnumber = computerchoosepawn(); }
+        if(playerdata[turnofplayernr][0]==0) { pawnnumber = humanchoosepawn(turnofplayernr,pawnpossible); }
+        else { pawnnumber = computerchoosepawn(turnofplayernr,pawnpossible); }
     }
     if(throw==6) { zv=1; }
-    if(ap==0 && noturnpossible==1)
+    if(ap==0 || noturnpossible==1)
     {
         gotoxy(21,3);
         cprintf("%cNo move possible", A_FWYELLOW);
@@ -684,40 +698,40 @@ void turngeneric()
         cgetc();
         return;
     }
-    pawnerase(bs,pawnnumber);
-    ov=sc[bs][pawnnumber][1];
-    ro=sc[bs][pawnnumber][0];
+    pawnerase(turnofplayernr,pawnnumber);
+    ov=playerpos[turnofplayernr][pawnnumber][1];
+    ro=playerpos[turnofplayernr][pawnnumber][0];
     if(ro==1 && ov<4)
     {
-        sc[bs][pawnnumber][0]=0;
-        sc[bs][pawnnumber][1]=bs*10;
-        sp[bs][3]--;
+        playerpos[turnofplayernr][pawnnumber][0]=0;
+        playerpos[turnofplayernr][pawnnumber][1]=turnofplayernr*10;
+        playerdata[turnofplayernr][3]--;
     }
-    else { sc[bs][pawnnumber][1]+=throw; }
-    if(bs==0 && sc[bs][pawnnumber][1]>39 && ov<40 && ro==0)
-        { sc[bs][pawnnumber][0]=1; sc[bs][pawnnumber][1]-=36; }
-    if(bs==1 && sc[bs][pawnnumber][1]> 9 && ov<10 && ro==0)
-        { sc[bs][pawnnumber][0]=1; sc[bs][pawnnumber][1]-= 6; }
-    if(bs==2 && sc[bs][pawnnumber][1]>19 && ov<20 && ro==0)
-        { sc[bs][pawnnumber][0]=1; sc[bs][pawnnumber][1]-=16; }
-    if(bs==3 && sc[bs][pawnnumber][1]>29 && ov<30 && ro==0)
-        { sc[bs][pawnnumber][0]=1; sc[bs][pawnnumber][1]-=26; }
-    if(sc[bs][pawnnumber][0]==1 && sc[bs][pawnnumber][1]>3)
-        { dp[bs]=sc[bs][pawnnumber][1]; }
-    if(sc[bs][pawnnumber][1]==sp[bs][1]+3 && sc[bs][pawnnumber][0]==1)
-        { sp[bs][1]--; }
-    if(sc[bs][pawnnumber][1]>39) { sc[bs][pawnnumber][1]-=40; }
+    else { playerpos[turnofplayernr][pawnnumber][1]+=throw; }
+    if(turnofplayernr==0 && playerpos[turnofplayernr][pawnnumber][1]>39 && ov<40 && ro==0)
+        { playerpos[turnofplayernr][pawnnumber][0]=1; playerpos[turnofplayernr][pawnnumber][1]-=36; }
+    if(turnofplayernr==1 && playerpos[turnofplayernr][pawnnumber][1]> 9 && ov<10 && ro==0)
+        { playerpos[turnofplayernr][pawnnumber][0]=1; playerpos[turnofplayernr][pawnnumber][1]-= 6; }
+    if(turnofplayernr==2 && playerpos[turnofplayernr][pawnnumber][1]>19 && ov<20 && ro==0)
+        { playerpos[turnofplayernr][pawnnumber][0]=1; playerpos[turnofplayernr][pawnnumber][1]-=16; }
+    if(turnofplayernr==3 && playerpos[turnofplayernr][pawnnumber][1]>29 && ov<30 && ro==0)
+        { playerpos[turnofplayernr][pawnnumber][0]=1; playerpos[turnofplayernr][pawnnumber][1]-=26; }
+    if(playerpos[turnofplayernr][pawnnumber][0]==1 && playerpos[turnofplayernr][pawnnumber][1]>3)
+        { dp[turnofplayernr]=playerpos[turnofplayernr][pawnnumber][1]; }
+    if(playerpos[turnofplayernr][pawnnumber][1]==playerdata[turnofplayernr][1]+3 && playerpos[turnofplayernr][pawnnumber][0]==1)
+        { playerdata[turnofplayernr][1]--; }
+    if(playerpos[turnofplayernr][pawnnumber][1]>39) { playerpos[turnofplayernr][pawnnumber][1]-=40; }
     ap=0;
     as=-1;
     for(x=0;x<4;x++)
     {
         for(y=0;y<4;y++)
         {
-            if(y!=pawnnumber || x!=bs)
+            if(y!=pawnnumber || x!=turnofplayernr)
             {
-                if(sc[x][y][0]==0 && sc[bs][pawnnumber][0]==0)
+                if(playerpos[x][y][0]==0 && playerpos[turnofplayernr][pawnnumber][0]==0)
                 {
-                    if(sc[x][y][1]==sc[bs][pawnnumber][1])
+                    if(playerpos[x][y][1]==playerpos[turnofplayernr][pawnnumber][1])
                     {
                         ap=y;
                         as=x;
@@ -731,13 +745,13 @@ void turngeneric()
     if(as!=-1)
     {
         pawnerase(as,ap);
-        sc[as][ap][0]=1;
-        sc[as][ap][1]=ap;
-        sp[as][3]++;
+        playerpos[as][ap][0]=1;
+        playerpos[as][ap][1]=ap;
+        playerdata[as][3]++;
         pawnplace(as,ap,0);
     }
-    pawnplace(bs,pawnnumber,0);
-    if(sp[bs][0]==0) { savegame(1); } /* Autosave on end human turn */
+    pawnplace(turnofplayernr,pawnnumber,0);
+    if(playerdata[turnofplayernr][0]==0) { savegame(1); } /* Autosave on end human turn */
     else
     {
         gotoxy(20,3);
@@ -746,7 +760,7 @@ void turngeneric()
     }
 }
 
-unsigned char humanchoosepawn()
+unsigned char humanchoosepawn(unsigned char playernumber, unsigned char possible[4])
 {
     /* Human has to choose a pawn, returns pawnnumber chosen */
 
@@ -760,12 +774,12 @@ unsigned char humanchoosepawn()
     cprintf("%cWhich pawn?%c", A_FWYELLOW, A_FWRED);
     gotoxy(22,4);
     cprintf("%cThrown: %d%c", A_FWYELLOW, throw, A_FWRED);
-    while (pm[++pawnnumber]!=1 && pawnnumber<4);
+    while (possible[++pawnnumber]!=1 && pawnnumber<4);
     do
     {
-        pawnplace(bs,pawnnumber,1);
+        pawnplace(playernumber,pawnnumber,1);
         key = getkey(validkeys,1);
-        pawnplace(bs,pawnnumber,0);
+        pawnplace(playernumber,pawnnumber,0);
         if(key==C_LEFT || key==C_DOWN) { pawnnumber--; direction=-1; }
         if(key==C_RIGHT || key==C_UP) { pawnnumber++; direction=1; }
         if(key!=C_ENTER)
@@ -774,13 +788,13 @@ unsigned char humanchoosepawn()
             if(pawnnumber<0) { pawnnumber = 3; }
             do
             {
-                if(pm[pawnnumber]!=1)
+                if(possible[pawnnumber]!=1)
                 {
                     pawnnumber+=direction;
                     if(pawnnumber>3) { pawnnumber = 0; }
                     if(pawnnumber<0) { pawnnumber = 3; }
                 }
-            } while (pm[pawnnumber]!=1);
+            } while (possible[pawnnumber]!=1);
         }
     } while (key!=C_ENTER);
     windowrestore();
@@ -793,85 +807,88 @@ void playerwins()
 
     menumakeborder(3,8,9,35);
     gotoxy(5,11);
-    cprintf("%c%s%c has won the game!%c", A_FWGREEN, sps[bs], A_FWYELLOW, A_FWRED);
+    cprintf("%c%s%c has won the game!%c", A_FWGREEN, playername[turnofplayernr], A_FWYELLOW, A_FWRED);
     gotoxy(5,13);
     cprintf("%cWhat do you want?%c", A_FWYELLOW, A_FWRED);
     do
     {
         choice = menupulldown(15,13,7);
-        if(choice==2) { ei=3; zv=1; }
-        if(choice==3) { ei=1; zv=1; }
-    } while (choice==1 && sp[0][1]==0 && sp[1][1]==0 && sp[2][1]==0 && sp[3][1]==0);
+        if(choice==2) { endofgameflag=3; zv=1; }
+        if(choice==3) { endofgameflag=1; zv=1; }
+    } while (choice==1 && playerdata[0][1]==0 && playerdata[1][1]==0 && playerdata[2][1]==0 && playerdata[3][1]==0);
     windowrestore();
 }
 
-unsigned char computerchoosepawn()
+unsigned char computerchoosepawn(unsigned char playernumber, unsigned char possible[4])
 {
     /* Computer has to choose a pawn, returns pawnnumber chosen */
 
+    signed int pawnscore[4] = { 0,0,0,0 };
     unsigned char pawnnumber = 0;
-    signed char mw;
+    signed int minimumpawnscore;
     unsigned char vr, vn, nn, no, nr, x,y,z ;
 
-    for(x=0;x<4;x++) { pw[x]=0; }
     for(x=0;x<4;x++)
     {
-        if(pm[x]==0) { pw[x]=-10000; }
+        if(possible[x]==0)
+        {
+            pawnscore[x]=-10000;
+        }
         else{
-            vr=sc[bs][x][0];
-            vn=sc[bs][x][1];
+            vr=playerpos[playernumber][x][0];
+            vn=playerpos[playernumber][x][1];
             nn=vn+throw;
             no=nn;
             nr=vr;
             if(vr==0)
             {
-                if(bs==0 && nn>39 && vn<40) { nn-=36; nr=1; }
-                if(bs==1 && nn> 9 && vn<10) { nn-= 6; nr=1; }
-                if(bs==2 && nn>19 && vn<20) { nn-=16; nr=1; }
-                if(bs==3 && nn>29 && vn<30) { nn-=26; nr=1; }
+                if(playernumber==0 && nn>39 && vn<40) { nn-=36; nr=1; }
+                if(playernumber==1 && nn> 9 && vn<10) { nn-= 6; nr=1; }
+                if(playernumber==2 && nn>19 && vn<20) { nn-=16; nr=1; }
+                if(playernumber==3 && nn>29 && vn<30) { nn-=26; nr=1; }
             }
             if(nr==0 && nn>39) { nn-=40; }
-            if(nr==1 && nn>3 && sp[bs][1]==1) { pw[x]=10000; x=3; }
+            if(nr==1 && nn>3 && playerdata[playernumber][1]==1) { pawnscore[x]=10000; x=3; }
             else
             {
-                if(nr==1 && nn>3) { pw[x]+=6000; }
+                if(nr==1 && nn>3) { pawnscore[x]+=6000; }
                 for(y=0;y<4;y++)
                 {
                     for(z=0;z<4;z++)
                     {
-                        if(bs==y && sc[y][z][0]==nr && sc[y][z][1]==nn) { pw[x]-=8000; }
-                        if(bs!=y && sc[y][z][0]==nr && sc[y][z][1]==nn)
+                        if(playernumber==y && playerpos[y][z][0]==nr && playerpos[y][z][1]==nn) { pawnscore[x]-=8000; }
+                        if(playernumber!=y && playerpos[y][z][0]==nr && playerpos[y][z][1]==nn)
                         {
-                            pw[x]+=4000;
-                            if(sc[y][z][0]==0)
+                            pawnscore[x]+=4000;
+                            if(playerpos[y][z][0]==0)
                             {
-                                if(y==0 && sc[y][z][1]>33) { pw[x]+=3000; }
-                                if(y==1 && sc[y][z][1]> 3) { pw[x]+=3000; }
-                                if(y==2 && sc[y][z][1]>13) { pw[x]+=3000; }
-                                if(y==3 && sc[y][z][1]>23) { pw[x]+=3000; }
+                                if(y==0 && playerpos[y][z][1]>33) { pawnscore[x]+=3000; }
+                                if(y==1 && playerpos[y][z][1]> 3) { pawnscore[x]+=3000; }
+                                if(y==2 && playerpos[y][z][1]>13) { pawnscore[x]+=3000; }
+                                if(y==3 && playerpos[y][z][1]>23) { pawnscore[x]+=3000; }
                             }
                         }
-                        if(sc[y][z][0]==0 && nr==0 && bs!=y)
+                        if(playerpos[y][z][0]==0 && nr==0 && playernumber!=y)
                         {
-                            if((vn-sc[y][z][1])<6 && vn-sc[y][z][1]>0) { pw[x]+=400; }
-                            if((no-sc[y][z][1])<6 && no-sc[y][z][1]>0) { pw[x]-=200; }
-                            if((sc[y][z][1]-nn)<6 && (sc[y][z][1]-nn)>0) { pw[x]+=100; }
+                            if((vn-playerpos[y][z][1])<6 && vn-playerpos[y][z][1]>0) { pawnscore[x]+=400; }
+                            if((no-playerpos[y][z][1])<6 && no-playerpos[y][z][1]>0) { pawnscore[x]-=200; }
+                            if((playerpos[y][z][1]-nn)<6 && (playerpos[y][z][1]-nn)>0) { pawnscore[x]+=100; }
                         }
                     }
                 }
-                if(nr==0 && (nn==0 || nn==10 || nn==20 || nn==30)) { pw[x]-=4000; }
-                if(vr==0 && (vn==0 || vn==10 || vn==20 || vn==30)) { pw[x]+=2000; }
-                if(bs==0) { pw[x]+=nn; }
-                if(bs==1) { pw[x]+=no-10; }
-                if(bs==2) { pw[x]+=no-20; }
-                if(bs==3) { pw[x]+=no-30; }
+                if(nr==0 && (nn==0 || nn==10 || nn==20 || nn==30)) { pawnscore[x]-=4000; }
+                if(vr==0 && (vn==0 || vn==10 || vn==20 || vn==30)) { pawnscore[x]+=2000; }
+                if(playernumber==0) { pawnscore[x]+=nn; }
+                if(playernumber==1) { pawnscore[x]+=no-10; }
+                if(playernumber==2) { pawnscore[x]+=no-20; }
+                if(playernumber==3) { pawnscore[x]+=no-30; }
             }
         }
     }
-    mw=-20000;
+    minimumpawnscore=-20000;
     for(x=0;x<4;x++)
     {
-        if(pw[x]>mw) { mw=pw[x]; pawnnumber=x; }
+        if(pawnscore[x]>minimumpawnscore && possible[x]==1) { minimumpawnscore=pawnscore[x]; pawnnumber=x; }
     }
 
     return pawnnumber;
@@ -931,7 +948,7 @@ void savegame(unsigned char autosave)
     {
         poke(saveslots+slot,1);
         savefile("LUDODATA.COM", (void*)saveslots, 85);
-        poke(savegamemem,bs);
+        poke(savegamemem,turnofplayernr);
         for(x=0;x<4;x++)
         {
             poke(savegamemem+1+x, np[x] );
@@ -940,22 +957,22 @@ void savegame(unsigned char autosave)
         {
             for(y=0;y<4;y++)
             {
-                poke(savegamemem+5+(x*4)+y,sp[x][y]);
+                poke(savegamemem+5+(x*4)+y,playerdata[x][y]);
             }
         }
         for(x=0;x<4;x++)
         {
             for(y=0;y<4;y++)
             {
-                poke(savegamemem+21+(x*8)+y,sc[x][y][0]);
-                poke(savegamemem+22+(x*8)+y,sc[x][y][1]);
+                poke(savegamemem+21+(x*8)+y,playerpos[x][y][0]);
+                poke(savegamemem+22+(x*8)+y,playerpos[x][y][1]);
             }
         }
         for(x=0;x<4;x++)
         {
             for(y=0;y<21;y++)
             {
-                poke(savegamemem+53+(x*21)+y,sps[x][y]);
+                poke(savegamemem+53+(x*21)+y,playername[x][y]);
             }
         }
         savefile(filename, (void*)savegamemem, 136);
@@ -990,7 +1007,7 @@ void loadgame()
     {
         sprintf(filename,"LUDOSAV%d.SAV", slot);
         rc = loadfile(filename, (void*)savegamemem, &len);
-        bs=peek(savegamemem);
+        turnofplayernr=peek(savegamemem);
         for(x=0;x<4;x++)
         {
             np[x]=peek(savegamemem+1+x);
@@ -999,7 +1016,7 @@ void loadgame()
         {
             for(y=0;y<4;y++)
             {
-                sp[x][y]=peek(savegamemem+5+(x*4)+y);
+                playerdata[x][y]=peek(savegamemem+5+(x*4)+y);
             }
         }
         for(x=0;x<4;x++)
@@ -1007,8 +1024,8 @@ void loadgame()
             for(y=0;y<4;y++)
             {
                 pawnerase(x,y);
-                sc[x][y][0]=peek(savegamemem+21+(x*8)+y);
-                sc[x][y][1]=peek(savegamemem+22+(x*8)+y);
+                playerpos[x][y][0]=peek(savegamemem+21+(x*8)+y);
+                playerpos[x][y][1]=peek(savegamemem+22+(x*8)+y);
                 pawnplace(x,y,0);
             }
         }
@@ -1016,10 +1033,10 @@ void loadgame()
         {
             for(y=0;y<21;y++)
             {
-                sps[x][y]=peek(savegamemem+53+(x*21)+y);
+                playername[x][y]=peek(savegamemem+53+(x*21)+y);
             }
         }
-        ei = 2;
+        endofgameflag = 2;
     }
 }
 
