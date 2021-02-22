@@ -1,5 +1,5 @@
 SOURCES = src/main.c
-LIBOBJECTS = include/libsedoric-ca65.s include/mymplayer-ca65.s
+LIBOBJECTS = include/libsedoric-ca65.s include/mymplayer-ca65.s include/ijkdriver-ca65.s
 
 TESTSOURCES = src/savetest.c
 TESTOBJECTS = include/libsedoric-ca65.s

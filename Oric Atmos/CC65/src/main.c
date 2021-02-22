@@ -1,10 +1,60 @@
 /*
-L U D O   MAIN PROGRAM
-WRITTEN BY XANDER MOL
-CONVERTED TO ORIC ATMOS BASIC IN 2020
-CONVERTED TO ORIC ATMOS C IN 2021
-ORIGINAL WRITTEN IN 1992 FOR COMMODORE 128
-(C)2020 IDREAMTIN8BITS.COM
+L U D O
+Written in 1992,2020, 2021 by Xander Mol
+
+https://github.com/xahmol/ludo
+https://www.idreamtin8bits.com/
+
+Originally written in 1992 in Commodore BASIC 7.0 for the Commodore 128
+Rewritten for Oric Atmos in BASIC in 2020
+Rewritten for Oric Atmos in C using CC65 in 2021
+
+Code and resources from others used:
+
+-   oricOpenLibrary for IJK joystick driver code and Sedoric routines
+                 _
+     ___ ___ _ _|_|___ ___
+    |  _| .'|_'_| |_ -|_ -|
+    |_| |__,|_,_|_|___|___|
+            raxiss (c) 2021
+    GNU General Public License v3.0
+    See https://github.com/iss000/oricOpenLibrary/blob/main/LICENSE
+
+-   OSDK for MYMPlayer music player and building tools
+    (C) Dbug and OSDK authors
+    https://osdk.org/
+
+-   Original windowing system code on Commodore 128 by unknown author.
+
+-   Music credits:
+    R-Type level 1 by Wally Beben/Alain Derpin
+    Defender of the Crown by David Whittaker/Aldn
+    Wizzball by Peter Johnson/Aldn
+    
+-   Documentation used:
+    OSDK.org, forum.defence-force.org, defence-force.org.
+
+-   ORIC software development tooling:
+    CC65 from CC65 contributors, see https://cc65.github.io/
+    OSDK from DBug/OSDK Authors
+    CD2 from Twilighte
+    Oric Explorer by Scott Davies
+    ORIC Character Generater by Pe@ceR
+    HxCFloppyEmulator Software by Jean-Francois del Nero.
+    
+-   Tooling to transfer original Commodore software code: "
+    VICE by VICE authors
+    DirMaster by The Wiz/Elwix
+    CharPad Free by Subchrist software
+    UltimateII+ cartridge by Gideon Zweijtzer
+    
+-   Tested using Oricuton emulator and an Oric Atmos with a Cumana Reborn. 
+
+The code can be used freely as long as you retain
+a notice describing original source and author.
+
+THE PROGRAMS ARE DISTRIBUTED IN THE HOPE THAT THEY WILL BE USEFUL,
+BUT WITHOUT ANY WARRANTY. USE THEM AT YOUR OWN RISK!
 */
 
 /* Includes */
@@ -17,6 +67,7 @@ ORIGINAL WRITTEN IN 1992 FOR COMMODORE 128
 #include "osdklib.h"
 #include "libsedoric.h"
 #include "libmymplayer.h"
+#include "libijkdriver.h"
 
 /* Functions */
 void loadintro();
@@ -177,7 +228,8 @@ void main()
 {
     unsigned char x, choice;
 
-    joyinterface = 0;
+    ijk_detect();
+    joyinterface = ijk_present;
 
     //Save game memory allocation
     saveslots = (unsigned int*) malloc(85);
@@ -282,6 +334,11 @@ void loadintro()
 
     int rc, x, y;
     int len = 0;
+    unsigned char buffer[40];
+    unsigned char joys[4];
+    unsigned char music[4];
+    unsigned char validkeys[4] = {'j','m', C_ENTER, 0 };
+    unsigned char key;
 
     /* Load title screen */
     rc = loadfile("LUDOTITL.BIN", (void*)0xb500, &len);
@@ -300,7 +357,40 @@ void loadintro()
         }
     }
 
-    cgetc();
+    /* Wait for ENTER of FIRE while player can toggle joystick and music */
+    
+    printcentered("Press ENTER/FIRE to start game.", A_FWWHITE,2,22,38);
+    printcentered("J=toggle joystick, M=toggle music.", A_FWWHITE,2,23,38);
+
+    do
+    {
+        if(joyinterface) { strcpy(joys,"Yes"); } else { strcpy(joys,"No"); }
+        if(musicnumber) { strcpy(music,"Yes"); } else { strcpy(music,"No"); }
+        sprintf(buffer,"Joystick: %s  Music: %s", joys,music);
+        printcentered(buffer,A_FWWHITE,2,20,38);
+        key = getkey(validkeys,1);
+        switch (key)
+        {
+        case 'j':
+            joyinterface = (joyinterface)? 0 : ijk_present;
+            break;
+
+        case 'm':
+            if(musicnumber)
+            {
+                endmusic();
+                musicnumber = 0;
+            }
+            else{
+                musicnumber = 1;
+                startmusic();
+            }
+            break;
+        
+        default:
+            break;
+        }
+    } while (key != C_ENTER);
 }
 
 void loadmainscreen()
@@ -460,9 +550,9 @@ unsigned char dicethrow()
 
     menumakeborder(30,12,6,8);
     gotoxy(32,15);
-    cprintf("%c%c%c%c%c%c",A_ALT, A_FWWHITE, C_INVSPACE, C_INVSPACE, A_FWRED, A_STD);
+    cprintf("%c%c%c%c%c%c",A_ALT, A_FWWHITE, C_SPACE, C_SPACE, A_FWRED, A_STD);
     gotoxy(32,16);
-    cprintf("%c%c%c%c%c%c",A_ALT, A_FWWHITE, C_INVSPACE, C_INVSPACE, A_FWRED, A_STD);
+    cprintf("%c%c%c%c%c%c",A_ALT, A_FWWHITE, C_SPACE, C_SPACE, A_FWRED, A_STD);
     for(x=0;x<10;x++)
     {
         dicethrow = rand()%6+1;
@@ -1312,7 +1402,7 @@ unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
     do
     {
         key = 0;
-        /*if(ijk_present && joyallowed)
+        if(joyinterface && joyallowed)
         {
             ijk_read();
             if(ijk_ljoy&4) { key = C_ENTER; }
@@ -1323,15 +1413,15 @@ unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
             if(ijk_rjoy&4) { key = C_ENTER; }
             if(ijk_rjoy&1) { key = C_RIGHT; }
             if(ijk_rjoy&2) { key = C_LEFT; }
-            if(ijk_rjoy&8) { key = 10; }
-            if(ijk_rjoy&16) { key = 11; }
+            if(ijk_rjoy&8) { key = C_DOWN; }
+            if(ijk_rjoy&16) { key = C_UP; }
             if(key){
                 do
                 {
                    ijk_read();
                 } while (ijk_ljoy || ijk_rjoy);
             }
-        }*/
+        }
         if(key == 0)
         {
             if(kbhit()) { key = cgetc();}
