@@ -228,6 +228,8 @@ void main()
 {
     unsigned char x, choice;
 
+    setflags(SCREEN);
+
     ijk_detect();
     joyinterface = ijk_present;
 
@@ -253,11 +255,11 @@ void main()
     if(choice==1) { loadgame(); }
 
     srand(clock());
+    loadmainscreen();
 
     //Main game loop
     do
     {
-        loadmainscreen();
         if(endofgameflag>0)
         {
             endofgameflag = 0;
@@ -310,7 +312,6 @@ void main()
             } while (zv==0 && playerdata[turnofplayernr][1]==0);
 
         } while (endofgameflag==0);
-        if(endofgameflag==3) { gamereset(); } /* Reset for game restart */
     } while (endofgameflag!=1); 
 
     //End of game
@@ -630,7 +631,7 @@ void turnhuman()
         {
             case 12:
                 yesno = areyousure();
-                if(yesno==1) { endofgameflag=3; }
+                if(yesno==1) { endofgameflag=3;  gamereset(); }
                 break;
 
             case 13:
@@ -1054,8 +1055,8 @@ void savegame(unsigned char autosave)
         {
             for(y=0;y<4;y++)
             {
-                poke(savegamemem+21+(x*8)+y,playerpos[x][y][0]);
-                poke(savegamemem+22+(x*8)+y,playerpos[x][y][1]);
+                poke(savegamemem+21+(x*8)+(y*2),playerpos[x][y][0]);
+                poke(savegamemem+22+(x*8)+(y*2),playerpos[x][y][1]);
             }
         }
         for(x=0;x<4;x++)
@@ -1114,8 +1115,8 @@ void loadgame()
             for(y=0;y<4;y++)
             {
                 pawnerase(x,y);
-                playerpos[x][y][0]=peek(savegamemem+21+(x*8)+y);
-                playerpos[x][y][1]=peek(savegamemem+22+(x*8)+y);
+                playerpos[x][y][0]=peek(savegamemem+21+(x*8)+(y*2));
+                playerpos[x][y][1]=peek(savegamemem+22+(x*8)+(y*2));
                 pawnplace(x,y,0);
             }
         }
