@@ -1,5 +1,8 @@
+#ifndef __LIBJOYSTICK_H_
+#define __LIBJOYSTICK_H_
+
 /*
- * Copyright (c) 2018 Anthony Beaucamp.
+ * Copyright (c) 2020 Anthony Beaucamp.
  *
  * This software is provided 'as-is', without any express or implied warranty.
  * In no event will the authors be held liable for any damages arising from
@@ -24,17 +27,15 @@
  *   specific prior written permission.
  */
 
-#ifndef __LIBMYMPLAYER_H__
-#define __LIBMYMPLAYER_H__
+unsigned char InitPaseIJK(unsigned char);	// see Oric/paseIJK.s
+unsigned char GetPaseIJK(unsigned char);	// see Oric/paseIJK.s
 
-extern unsigned char musicPaused;
+#define JOY_1       0
+#define JOY_2       1
+#define JOY_UP      1
+#define JOY_DOWN    2
+#define JOY_LEFT    4
+#define JOY_RIGHT   8
+#define JOY_BTN1   16
 
-extern void PlayMusic(void);
-extern void StopMusic(void);
-
-void PauseMusic(unsigned char state)
-{
-	musicPaused = state;
-}
-
-#endif /* __LIBMYMPLAYER_H__ */
+#endif // __LIBJOYSTICK_H_

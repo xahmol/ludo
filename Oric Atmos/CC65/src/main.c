@@ -24,6 +24,32 @@ Code and resources from others used:
     (C) Dbug and OSDK authors
     https://osdk.org/
 
+-   8Bit Unity for adaptation of OSDK MYM player
+    https://github.com/8bit-Dude/8bit-Unity
+     * Copyright (c) 2018 Anthony Beaucamp.
+     *
+     * This software is provided 'as-is', without any express or implied warranty.
+     * In no event will the authors be held liable for any damages arising from
+     * the use of this software.
+     *
+     * Permission is granted to anyone to use this software for any purpose,
+     * including commercial applications, and to alter it and redistribute it
+     * freely, subject to the following restrictions:
+     *
+     *   1. The origin of this software must not be misrepresented * you must not
+     *   claim that you wrote the original software. If you use this software in a
+     *   product, an acknowledgment in the product documentation would be
+     *   appreciated but is not required.
+     *
+     *   2. Altered source versions must be plainly marked as such, and must not
+     *   be misrepresented as being the original software.
+     *
+     *   3. This notice may not be removed or altered from any distribution.
+     *
+     *   4. The names of this software and/or it's copyright holders may not be
+     *   used to endorse or promote products derived from this software without
+     *   specific prior written permission.
+
 -   Original windowing system code on Commodore 128 by unknown author.
 
 -   Music credits:
@@ -121,13 +147,14 @@ unsigned char menubaroptions = 4;
 unsigned char pulldownmenunumber = 8;
 unsigned char menubartitles[4][12] = {"Game","Disc","Music","Information"};
 unsigned char menubarcoords[4] = {1,6,11,17};
-unsigned char pulldownmenuoptions[8] = {3,2,3,1,2,2,3,5};
+unsigned char pulldownmenuoptions[8] = {3,3,3,1,2,2,3,5};
 unsigned char pulldownmenutitles[8][5][16] = {
     {"Throw dice",
      "Restart   ",
      "Stop      "},
-    {"Save game",
-     "Load game"},
+    {"Save game   ",
+     "Load game   ",
+     "Autosave off"},
     {"Next   ",
      "Stop   ",
      "Restart"},
@@ -217,6 +244,7 @@ unsigned char ns = 0;
 unsigned char throw;
 unsigned char musicnumber = 1;
 unsigned char joyinterface;
+unsigned char autosavetoggle = 1;
 
 //Save game memory allocation
 unsigned int* saveslots;
@@ -296,7 +324,7 @@ void main()
                 cprintf("%d %d",playerdata[x][1],playerdata[x][3]);
             } */
 
-            if(playerdata[turnofplayernr][1]==0) { playerwins(); break; }
+            if(playerdata[turnofplayernr][1]==0) { playerwins(); }
             do
             {
                 if(zv==1)
@@ -310,7 +338,6 @@ void main()
                     if(turnofplayernr>3) { turnofplayernr=0; }
                 }
             } while (zv==0 && playerdata[turnofplayernr][1]==0);
-
         } while (endofgameflag==0);
     } while (endofgameflag!=1); 
 
@@ -325,7 +352,7 @@ void main()
     free(saveslots);
     free(savegamemem);
     free(windowmemory);
-    endmusic();
+    StopMusic();
 }
 
 /* Game routines */
@@ -344,10 +371,6 @@ void loadintro()
     /* Load title screen */
     rc = loadfile("LUDOTITL.BIN", (void*)0xb500, &len);
 
-    /* Load and start first music file */
-    rc = loadfile("LUDOMUS1.BIN", (void*)0x9400, &len);
-    startmusic();
-
     /* Load and read game config file */
     rc = loadfile("LUDODATA.COM", (void*)saveslots, &len);
     for(y=0;y<5;y++)
@@ -357,6 +380,10 @@ void loadintro()
             pulldownmenutitles[7][y][x]=peek(saveslots+(y*16)+5+x);
         }
     }
+
+    /* Load and start first music file */
+    rc = loadfile("LUDOMUS1.BIN", (void*)0x9400, &len);
+    PlayMusic(); 
 
     /* Wait for ENTER of FIRE while player can toggle joystick and music */
     
@@ -379,12 +406,12 @@ void loadintro()
         case 'm':
             if(musicnumber)
             {
-                endmusic();
+                StopMusic();
                 musicnumber = 0;
             }
             else{
                 musicnumber = 1;
-                startmusic();
+                PlayMusic();
             }
             break;
         
@@ -400,7 +427,9 @@ void loadmainscreen()
 
     int rc;
     int len = 0;
+    if(musicnumber) { PauseMusic(1); }
     rc = loadfile("LUDOSCRM.BIN", (void*)0xb500, &len);
+    if(musicnumber) { PauseMusic(0); }
     menuplacebar();
 }
 
@@ -408,8 +437,9 @@ void gamereset()
 {
     /* Reset all player data */
 
-    unsigned char n,m;
+    unsigned char n;
 
+    loadmainscreen();
     turnofplayernr=0;
     for(n=0;n<4;n++)
     {
@@ -417,13 +447,6 @@ void gamereset()
         playerdata[n][3]=4;
         np[n]=-1;
         dp[n]=8;
-        for(m=0;m<4;m++)
-        {
-            pawnerase(n,m);
-            playerpos[n][m][0]=1;
-            playerpos[n][m][1]=m;
-            pawnplace(n,m,0);
-        }
     }
 }
 
@@ -612,6 +635,7 @@ void informationcredits()
     printcentered("Build with and using code of",A_FWYELLOW,3,17,36);
     printcentered("OSDK, (C) Dbug and OSDK authors.",A_FWYELLOW,3,18,36);
     printcentered("oricOpenLibrary, (C) raxiss.",A_FWYELLOW,3,19,36);
+    printcentered("8Bit Unity, (C) Anthony Beaucamp.",A_FWYELLOW,3,20,36);
     printcentered("Press a key.",A_FWGREEN,3,21,36);
     cgetc();
     windowrestore();
@@ -648,17 +672,30 @@ void turnhuman()
                 if(yesno==1) { loadgame(); }
                 break;
 
+            case 23:
+                if(autosavetoggle==1)
+                {
+                    autosavetoggle=0;
+                    strcpy(pulldownmenutitles[1][2],"Autosave on ");
+                }
+                else
+                {
+                    autosavetoggle=1;
+                    strcpy(pulldownmenutitles[1][2],"Autosave off");
+                }
+                break;
+
             case 31:
                 musicnext();
                 break;
 
             case 32:
-                endmusic();
+                StopMusic();
                 break;
 
             case 33:
-                endmusic();
-                startmusic();
+                StopMusic();
+                PlayMusic();
                 break;
 
             case 41:
@@ -842,7 +879,7 @@ void turngeneric()
         pawnplace(as,ap,0);
     }
     pawnplace(turnofplayernr,pawnnumber,0);
-    if(playerdata[turnofplayernr][0]==0) { savegame(1); } /* Autosave on end human turn */
+    if(playerdata[turnofplayernr][0]==0 && autosavetoggle==1) { savegame(1); } /* Autosave on end human turn */
     else
     {
         gotoxy(20,3);
@@ -904,7 +941,7 @@ void playerwins()
     do
     {
         choice = menupulldown(15,13,7);
-        if(choice==2) { endofgameflag=3; zv=1; }
+        if(choice==2) { endofgameflag=3; gamereset(); zv=1; }
         if(choice==3) { endofgameflag=1; zv=1; }
     } while (choice==1 && playerdata[0][1]==0 && playerdata[1][1]==0 && playerdata[2][1]==0 && playerdata[3][1]==0);
     windowrestore();
@@ -1037,6 +1074,7 @@ void savegame(unsigned char autosave)
     }
     if(yesno==1)
     {
+        if(musicnumber) { PauseMusic(1); }
         poke(saveslots+slot,1);
         savefile("LUDODATA.COM", (void*)saveslots, 85);
         poke(savegamemem,turnofplayernr);
@@ -1067,6 +1105,7 @@ void savegame(unsigned char autosave)
             }
         }
         savefile(filename, (void*)savegamemem, 136);
+        if(musicnumber) { PauseMusic(0); }
     }
 }
 
@@ -1096,8 +1135,10 @@ void loadgame()
     windowrestore();
     if(peek(saveslots+slot)==1)
     {
+        if(musicnumber) { PauseMusic(1); }
         sprintf(filename,"LUDOSAV%d.SAV", slot);
         rc = loadfile(filename, (void*)savegamemem, &len);
+        if(musicnumber) { PauseMusic(0); }
         turnofplayernr=peek(savegamemem);
         for(x=0;x<4;x++)
         {
@@ -1139,11 +1180,11 @@ void musicnext()
     int len = 0;
     unsigned char musicfilename[15];
 
-    endmusic();
+    StopMusic();
     if(++musicnumber>3) { musicnumber = 1;}
     sprintf((char*)musicfilename,"LUDOMUS%d.BIN", musicnumber);
     rc = loadfile(musicfilename, (void*)0x9400, &len);
-    startmusic();
+    PlayMusic();
 }
 
 /* Functions for windowing and menu system */
@@ -1421,6 +1462,7 @@ unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
                 {
                    ijk_read();
                 } while (ijk_ljoy || ijk_rjoy);
+                wait(10);
             }
         }
         if(key == 0)
