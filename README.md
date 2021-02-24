@@ -4,10 +4,18 @@ Ludo game for 8 bit computers. By Xander Mol.
 
 Latest build for Oric Atmos:
 
+C version:
 - DSK version:
-  https://github.com/xahmol/ludo/raw/main/Oric%20Atmos/BUILD/LUDO.dsk
+  https://github.com/xahmol/ludo/raw/main/Oric%20Atmos/CC65/BUILD/LUDO.dsk
 - HFE version (for Cumana Reborn):
-  https://github.com/xahmol/ludo/raw/main/Oric%20Atmos/BUILD/LUDO_dsk.hfe
+  https://github.com/xahmol/ludo/raw/main/Oric%20Atmos/CC65/BUILD/LUDO_dsk.hfe
+
+BASIC version:
+
+- DSK version:
+  https://github.com/xahmol/ludo/raw/main/Oric%20Atmos/BASIC/BUILD/LUDO.dsk
+- HFE version (for Cumana Reborn):
+  https://github.com/xahmol/ludo/raw/main/Oric%20Atmos/BASIC/BUILD/LUDO_dsk.hfe
 
 Original Commodore 128 version (in Dutch):
 
@@ -34,41 +42,88 @@ Enjoy!
 
 **Credits**:
 
-Original written in 1992 on the Commodore 128, converted in 2020 to the Oric Atmos.
+L U D O
+Written in 1992,2020, 2021 by Xander Mol
 
-Oric version build with and using code from OSDK (https://osdk.org/). [Copyright](https://osdk.org/index.php?page=documentation&subpage=copyright).
+https://github.com/xahmol/ludo
+https://www.idreamtin8bits.com/
 
-Music player routine used from https://osdk.org/index.php?page=articles&ref=ART5
+Originally written in 1992 in Commodore BASIC 7.0 for the Commodore 128
+Rewritten for Oric Atmos in BASIC in 2020
+Rewritten for Oric Atmos in C using CC65 in 2021
 
-Original windowing system code on Commodore 128 by unknown author.
+Code and resources from others used:
 
-Music credits:
+-   oricOpenLibrary for IJK joystick driver code and Sedoric routines
+                 _
+     ___ ___ _ _|_|___ ___
+    |  _| .'|_'_| |_ -|_ -|
+    |_| |__,|_,_|_|___|___|
+            raxiss (c) 2021
+    GNU General Public License v3.0
+    See https://github.com/iss000/oricOpenLibrary/blob/main/LICENSE
 
-- R-Type level 1 by Wally Beben/Alain Derpin
-- Axel F by Jochen Hippel/ Oedipus
-- Wizzball by Peter Johnson/Aldn.
+-   OSDK for MYMPlayer music player and building tools
+    (C) Dbug and OSDK authors
+    https://osdk.org/
 
-Documentation used:
+-   8Bit Unity for adaptation of OSDK MYM player
+    https://github.com/8bit-Dude/8bit-Unity
+     * Copyright (c) 2018 Anthony Beaucamp.
+     *
+     * This software is provided 'as-is', without any express or implied warranty.
+     * In no event will the authors be held liable for any damages arising from
+     * the use of this software.
+     *
+     * Permission is granted to anyone to use this software for any purpose,
+     * including commercial applications, and to alter it and redistribute it
+     * freely, subject to the following restrictions:
+     *
+     *   1. The origin of this software must not be misrepresented * you must not
+     *   claim that you wrote the original software. If you use this software in a
+     *   product, an acknowledgment in the product documentation would be
+     *   appreciated but is not required.
+     *
+     *   2. Altered source versions must be plainly marked as such, and must not
+     *   be misrepresented as being the original software.
+     *
+     *   3. This notice may not be removed or altered from any distribution.
+     *
+     *   4. The names of this software and/or it's copyright holders may not be
+     *   used to endorse or promote products derived from this software without
+     *   specific prior written permission.
 
-- [OSDK.org]() 
-- [forum.defence-force.org]()
-- [defence-force.org]()
+-   Original windowing system code on Commodore 128 by unknown author.
 
-Oric development tooling used (next to OSDK):
+-   Music credits:
+    R-Type level 1 by Wally Beben/Alain Derpin
+    Defender of the Crown by David Whittaker/Aldn
+    Wizzball by Peter Johnson/Aldn
+    
+-   Documentation used:
+    OSDK.org, forum.defence-force.org, defence-force.org.
 
-- CD2 from Twilighte http://twilighte.oric.org/twinew/start.htm
-- Oric Explorer by Scott Davies https://github.com/oric-software/OricExplorer
-- ORIC Character Generater by Pe@ceR https://forum.defence-force.org/viewtopic.php?t=1695
-- HxCFloppyEmulator Software by Jean-Francois del Nero https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft.zip
+-   ORIC software development tooling:
+    CC65 from CC65 contributors, see https://cc65.github.io/
+    OSDK from DBug/OSDK Authors
+    CD2 from Twilighte
+    Oric Explorer by Scott Davies
+    ORIC Character Generater by Pe@ceR
+    HxCFloppyEmulator Software by Jean-Francois del Nero.
+    
+-   Tooling to transfer original Commodore software code: "
+    VICE by VICE authors
+    DirMaster by The Wiz/Elwix
+    CharPad Free by Subchrist software
+    UltimateII+ cartridge by Gideon Zweijtzer
+    
+-   Tested using Oricuton emulator and an Oric Atmos with a Cumana Reborn. 
 
-Tooling to transfer original Commodore software code: 
+The code can be used freely as long as you retain
+a notice describing original source and author.
 
-- VICE by VICE authors https://vice-emu.sourceforge.io/
-- DirMaster by The Wiz/Elwix https://style64.org/dirmaster
-- CharPad Free by Subchrist software https://subchristsoftware.itch.io/charpad-free-edition
-- UltimateII+ cartridge by Gideon Zweijtzer https://ultimate64.com/U2P_Cartridge_Black
-
-Tested using Oricuton emulator and an Oric Atmos with a Cumana Reborn.
+THE PROGRAMS ARE DISTRIBUTED IN THE HOPE THAT THEY WILL BE USEFUL,
+BUT WITHOUT ANY WARRANTY. USE THEM AT YOUR OWN RISK!
 
 
 
