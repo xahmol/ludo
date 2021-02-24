@@ -586,7 +586,7 @@ unsigned char dicethrow()
     }
     gotoxy(32,18);
     cprintf("%cKey.%c", A_FWYELLOW, A_FWRED);
-    cgetc();
+    getkey("",1);
     windowrestore();
     return dicethrow;
 }
@@ -637,7 +637,7 @@ void informationcredits()
     printcentered("oricOpenLibrary, (C) raxiss.",A_FWYELLOW,3,19,36);
     printcentered("8Bit Unity, (C) Anthony Beaucamp.",A_FWYELLOW,3,20,36);
     printcentered("Press a key.",A_FWGREEN,3,21,36);
-    cgetc();
+    getkey("",1);
     windowrestore();
 }
 
@@ -823,7 +823,7 @@ void turngeneric()
         cprintf("%cNo move possible", A_FWYELLOW);
         gotoxy(21,4);
         cprintf("%cPress key", A_FWYELLOW);
-        cgetc();
+        getkey("",1);
         return;
     }
     pawnerase(turnofplayernr,pawnnumber);
@@ -884,7 +884,7 @@ void turngeneric()
     {
         gotoxy(20,3);
         cprintf("%cPress key.", A_FWYELLOW);
-        cgetc();
+        getkey("",1);
     }
 }
 
@@ -1130,7 +1130,7 @@ void loadgame()
         cprintf("%cSlot empty. %c", A_FWYELLOW, A_FWRED);
         gotoxy(9,11);
         cprintf("%cPress key. %c", A_FWYELLOW, A_FWRED);
-        cgetc();
+        getkey("",1);
     }
     windowrestore();
     if(peek(saveslots+slot)==1)
@@ -1436,7 +1436,8 @@ unsigned char areyousure()
 unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
 {
     /* Function to wait on valid key or joystick press/move
-       Input: allowedkeys = string with valid key press options
+       Input: allowedkeys = String with valid key press options
+                            Empty string means any key allowed
        Output: key value (or joystick converted to key value)    */
 
     unsigned char key;
@@ -1467,9 +1468,13 @@ unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
         }
         if(key == 0)
         {
-            if(kbhit()) { key = cgetc();}
+            if(kbhit())
+            {
+                key = cgetc();
+                if(strlen(allowedkeys)==0) { key = C_ENTER; }
+            }
         }
-    } while (strchr(allowedkeys, key)==0 || key == 0);
+    } while ( (strchr(allowedkeys, key)==0 && key != C_ENTER) || key == 0);
     return key;
 }
 
