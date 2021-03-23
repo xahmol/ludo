@@ -35,10 +35,10 @@
 
 /* Field and pawn graphics */
 /* Empty field */
-#define C_EFIELDUL  160
-#define C_EFIELDUR  161
-#define C_EFIELDLL  162
-#define C_EFIELDLR  163
+#define C_EFIELDUL  164
+#define C_EFIELDUR  165
+#define C_EFIELDLL  166
+#define C_EFIELDLR  167
 /* Filled field green */
 #define C_GFIELDUL  132
 #define C_GFIELDUR  133
@@ -79,6 +79,11 @@
 #define C_YPAWNUR   153
 #define C_YPAWNLL   154
 #define C_YPAWNLR   155
+/* Pawn white*/
+#define C_WPAWNUL   160
+#define C_WPAWNUR   161
+#define C_WPAWNLL   162
+#define C_WPAWNLR   163
 /* Start field green */
 #define C_GSTARTUL  172
 #define C_GSTARTUR  173
@@ -100,6 +105,12 @@
 #define C_YSTARTLL  198
 #define C_YSTARTLR  199
 
+/* References to player color spaces */
+#define C_GINVSPACE 168
+#define C_RINVSPACE 176
+#define C_BINVSPACE 184
+#define C_YINVSPACE 192
+
 /* References to steering chars */
 #define C_LEFT      8
 #define C_RIGHT     9
@@ -112,13 +123,15 @@
 #define C_ESCAPE    27
 
 /* References to white input chars */
-#define C_INVSPACE  165
-#define C_WUNDERL   164
+#define C_INVSPACE  25
+#define C_WUNDERL   26
 
 /* Defines for versioning */
 /* Version number */
-#define VERSION_MAJOR 1
-#define VERSION_MINOR 99
+#define VERSION_MAJOR_CH0   '1'
+#define VERSION_MINOR_CH0   '9'
+#define VERSION_MINOR_CH1   '9'
+
 /* Build year */
 #define BUILD_YEAR_CH0 (__DATE__[ 7])
 #define BUILD_YEAR_CH1 (__DATE__[ 8])
