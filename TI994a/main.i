@@ -10,6 +10,33 @@ void halt() __attribute__ ((noreturn));
 
 void exit() __attribute__ ((noreturn));
 # 61 "main.c" 2
+# 1 "/home/xahmol/libti99/files.h" 1
+# 60 "/home/xahmol/libti99/files.h"
+struct __attribute__((__packed__)) PAB {
+ unsigned char OpCode;
+ unsigned char Status;
+ unsigned int VDPBuffer;
+ unsigned char RecordLength;
+ unsigned char CharCount;
+ unsigned int RecordNumber;
+ unsigned char ScreenOffset;
+ unsigned char NameLength;
+ unsigned char *pName;
+};
+
+
+
+
+void files(unsigned char count);
+# 88 "/home/xahmol/libti99/files.h"
+unsigned char dsrlnk(struct PAB *pab, unsigned int vdp);
+
+
+
+
+
+void dsrlnkraw(unsigned int vdppab);
+# 62 "main.c" 2
 # 1 "/home/xahmol/libti99/conio.h" 1
 # 15 "/home/xahmol/libti99/conio.h"
 # 1 "/home/xahmol/libti99/vdp.h" 1
@@ -408,7 +435,7 @@ inline int wherex() { return conio_x; }
 
 
 inline int wherey() { return conio_y; }
-# 62 "main.c" 2
+# 63 "main.c" 2
 # 1 "/home/xahmol/libti99/kscan.h" 1
 # 54 "/home/xahmol/libti99/kscan.h"
 unsigned char kscan(unsigned char mode);
@@ -422,7 +449,7 @@ void kscanfast(int mode);
 
 
 void joystfast(int unit);
-# 63 "main.c" 2
+# 64 "main.c" 2
 # 1 "/home/xahmol/libti99/string.h" 1
 
 
@@ -470,9 +497,9 @@ char* uint2hex(unsigned int x);
 
 
 void gets(char *buf, int maxlen);
-# 64 "main.c" 2
-# 1 "/home/xahmol/libti99/vdp.h" 1
 # 65 "main.c" 2
+# 1 "/home/xahmol/libti99/vdp.h" 1
+# 66 "main.c" 2
 # 1 "graphics.h" 1
 static const unsigned char colorset[] = {
 0x81,
@@ -729,9 +756,9 @@ static const unsigned char mainscreen[] = {
 0x98,0x99,0x98,0x99,0x20,0x20,0x20,0x20,0xc4,0xc5,0xa4,0xa5,0xa4,0xa5,0x20,0x20,0x20,0x20,0x90,0x91,0x90,0x91,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
 0x9a,0x9b,0x9a,0x9b,0x20,0x20,0x20,0x20,0xc6,0xc7,0xa6,0xa7,0xa6,0xa7,0x20,0x20,0x20,0x20,0x92,0x93,0x92,0x93,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
 };
-# 66 "main.c" 2
-# 1 "defines.h" 1
 # 67 "main.c" 2
+# 1 "defines.h" 1
+# 68 "main.c" 2
 
 
 
@@ -850,7 +877,8 @@ unsigned char ns = 0;
 unsigned char throw;
 unsigned char musicnumber = 0;
 unsigned char joyinterface = 1;
-unsigned char autosavetoggle = 0;
+unsigned char autosavetoggle = 1;
+unsigned char tipienabled = 1;
 
 
 unsigned char saveslots[85];
@@ -910,6 +938,73 @@ void wait(unsigned int jiffies)
     for(int i=0; i < jiffies; i++) {
         __asm__( "clr r12\n\ttb 2\n\tjeq -4\n\tmovb @>8802,r12" : : : "r12" );;
     }
+}
+
+
+
+void initPab(struct PAB* pab, unsigned int reclen)
+{
+
+
+
+    pab->OpCode = 0x00;
+    pab->Status = 0x00 | 0x10 | 0x00 | 0x04;
+    pab->RecordLength = reclen;
+    pab->RecordNumber = 0;
+    pab->ScreenOffset = 0;
+    pab->NameLength = 0;
+    pab->CharCount = 0;
+}
+
+unsigned char dsr_openDV(struct PAB* pab, char* fname, unsigned int reclen, int vdpbuffer, unsigned char flags)
+{
+
+
+
+    initPab(pab, reclen);
+    pab->OpCode = 0x00;
+    pab->Status = 0x00 | 0x10 | 0x00 | flags;
+    pab->RecordLength = reclen;
+    pab->pName = fname;
+    pab->VDPBuffer = vdpbuffer;
+    return dsrlnk(pab, 0x3000);
+}
+
+unsigned char dsr_close(struct PAB* pab)
+{
+
+
+
+    pab->OpCode = 0x01;
+    return dsrlnk(pab, 0x3000);
+}
+
+unsigned char dsr_read(struct PAB* pab, int recordNumber)
+{
+
+
+
+
+
+
+    pab->OpCode = 0x02;
+    pab->RecordNumber = recordNumber;
+    pab->CharCount = 0;
+    unsigned char result = dsrlnk(pab, 0x3000);
+    vdpmemread(0x3000 + 5, (&pab->CharCount), 1);
+    return result;
+}
+
+unsigned char dsr_write(struct PAB* pab, unsigned char* record)
+{
+
+
+
+    pab->OpCode = 0x03;
+    int len = strlen(record);
+    vdpmemcpy(pab->VDPBuffer, record, len);
+    pab->CharCount = len;
+    return dsrlnk(pab, 0x3000);
 }
 
 
@@ -1019,7 +1114,7 @@ unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
 
 int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned char size)
 {
-# 366 "main.c"
+# 435 "main.c"
     unsigned char idx = strlen(str);
     unsigned char c, x, b, flag;
     unsigned char validkeys[70] = {32 ,3,0};
@@ -1201,7 +1296,7 @@ unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char
     unsigned char exit = 0;
     unsigned char menuchoice = 1;
 
-    windowsave(ypos, pulldownmenuoptions[menunumber]+4);
+    windowsave(ypos, pulldownmenuoptions[menunumber-1]+4);
     if(menunumber>menubaroptions)
     {
         vdpchar(gImage+xpos+(ypos*32),6);
@@ -1347,6 +1442,72 @@ unsigned char areyousure()
     choice = menupulldown(20,8,5);
     windowrestore();
     return choice;
+}
+
+void fileerrormessage(unsigned char ferr)
+{
+
+
+    menumakeborder(10,5,6,20);
+    cputsxy(12,7,"File error!");
+    conio_x = (12); conio_y = (8);
+    cprintf("Error nr.: %2X",ferr);
+    cputsxy(12,10,"Press key.");
+    getkey("",1);
+    windowrestore();
+}
+
+void tipinotenabledmessage()
+{
+
+
+    menumakeborder(10,5,5,20);
+    cputsxy(12,7,"TIPI not enabled!");
+    conio_x = (12); conio_y = (8);
+    cputsxy(12,9,"Press key.");
+    getkey("",1);
+    windowrestore();
+}
+
+
+
+void saveconfigfile()
+{
+
+
+    struct PAB pab;
+    unsigned char fname[13] = "TIPI.LUDOCFG";
+
+    unsigned char ferr = dsr_openDV(&pab, fname, 85, 0x3200, 0x06);
+    if (ferr) { fileerrormessage(ferr); return; }
+    ferr = dsr_write(&pab, saveslots);
+    if (ferr) { fileerrormessage(ferr); }
+    ferr = dsr_close(&pab);
+    if (ferr) { fileerrormessage(ferr); }
+}
+
+void loadconfigfile()
+{
+
+
+    struct PAB pab;
+    unsigned char fname[13] = "TIPI.LUDOCFG";
+    unsigned char x,y;
+
+    unsigned char ferr = dsr_openDV(&pab, fname, 85, 0x3200, 0x04);
+    ferr = dsr_read(&pab, 0);
+    if (ferr == 0x00) { vdpmemread(0x3200, saveslots, 85); }
+    else { fileerrormessage(ferr); }
+    ferr = dsr_close(&pab);
+    if (ferr) { fileerrormessage(ferr); }
+
+    for(y=0;y<5;y++)
+    {
+        for(x=0;x<16;x++)
+        {
+            pulldownmenutitles[7][y][x]=saveslots[(y*16)+5+x]-1;
+        }
+    }
 }
 
 
@@ -1565,6 +1726,163 @@ void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned ch
     }
 }
 
+void savegame(unsigned char autosave)
+{
+
+
+
+    struct PAB pab;
+    unsigned char fname[14] = "TIPI.LUDOSAV";
+    unsigned char slot = 0;
+    unsigned char x, y, len, ferr;
+    unsigned char yesno = 1;
+
+    len = strlen(fname);
+
+    if(autosave==1)
+    {
+        fname[len]=48;
+        fname[len+1]=0;
+    }
+    else
+    {
+        menumakeborder(2,5,12,28);
+        cputsxy(4,7,"Save game.");
+        cputsxy(4,8,"Choose slot:");
+        do
+        {
+            slot = menupulldown(10,10,8) - 1;
+        } while (slot<1);
+        if(saveslots[slot]==2)
+        {
+            cputsxy(4,9,"Slot not empty. Sure?");
+            yesno = menupulldown(15,10,5);
+        }
+        if(yesno==1)
+        {
+            cputsxy(4,9,"Choose name of save. ");
+            if(saveslots[slot]==1) { pulldownmenutitles[7][slot][0]=0; }
+            input(4,10,pulldownmenutitles[7][slot],15);
+            for(x=strlen(pulldownmenutitles[7][slot]);x<15;x++)
+            {
+                pulldownmenutitles[7][slot][x] = 32;
+            }
+            pulldownmenutitles[7][slot][15] = 0;
+            fname[len]=48+slot;
+            fname[len+1]=0;
+            for(x=0;x<16;x++)
+            {
+                saveslots[(slot*16)+5+x]=pulldownmenutitles[7][slot][x]+1;
+            }
+        }
+        windowrestore();
+    }
+    if(yesno==1)
+    {
+        saveslots[slot]==2;
+        saveconfigfile();
+        savegamemem[0]=turnofplayernr+1;
+        for(x=0;x<4;x++)
+        {
+            savegamemem[x+1] = np[x]+128;
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<4;y++)
+            {
+                savegamemem[5+(x*4)+y]=playerdata[x][y]+1;
+            }
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<4;y++)
+            {
+                savegamemem[21+(x*8)+(y*2)]=playerpos[x][y][0]+1;
+                savegamemem[22+(x*8)+(y*2)]=playerpos[x][y][1]+1;
+            }
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<21;y++)
+            {
+                savegamemem[53+(x*21)+y]=playername[x][y]+1;
+            }
+        }
+        ferr = dsr_openDV(&pab, fname, 136, 0x3200, 0x06);
+        if (ferr) { fileerrormessage(ferr); return; }
+        ferr = dsr_write(&pab, savegamemem);
+        if (ferr) { fileerrormessage(ferr); }
+        ferr = dsr_close(&pab);
+        if (ferr) { fileerrormessage(ferr); }
+    }
+}
+
+void loadgame()
+{
+
+
+    struct PAB pab;
+    unsigned char fname[14] = "TIPI.LUDOSAV";
+    unsigned char slot, x, y, ferr, len;
+    unsigned char yesno = 1;
+
+    len = strlen(fname);
+
+    menumakeborder(2,5,12,28);
+    cputsxy(4,7,"Load game.");
+    cputsxy(4,9,"Choose slot:");
+    slot = menupulldown(10,10,8) - 1;
+    if(saveslots[slot]==1)
+    {
+        cputsxy(4,9,"Slot empty.");
+        cputsxy(4,10,"Press key.");
+        getkey("",1);
+    }
+    windowrestore();
+    if(saveslots[slot]==2)
+    {
+        fname[len]=48+slot;
+        fname[len+1]=0;
+        ferr = dsr_openDV(&pab, fname, 136, 0x3200, 0x04);
+        ferr = dsr_read(&pab, 0);
+        if (ferr == 0x00) { vdpmemread(0x3200, savegamemem, 136); }
+        else { fileerrormessage(ferr); return; }
+        ferr = dsr_close(&pab);
+        if (ferr) { fileerrormessage(ferr); return; }
+
+        turnofplayernr=savegamemem[0]-1;
+        for(x=0;x<4;x++)
+        {
+            np[x]=savegamemem[1+x]-128;
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<4;y++)
+            {
+                playerdata[x][y]=savegamemem[5+(x*4)+y]-1;
+            }
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<4;y++)
+            {
+                pawnerase(x,y);
+                playerpos[x][y][0]=savegamemem[21+(x*8)+(y*2)]-1;
+                playerpos[x][y][1]=savegamemem[22+(x*8)+(y*2)]-1;
+                pawnplace(x,y,0);
+            }
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<21;y++)
+            {
+                playername[x][y]=savegamemem[53+(x*21)+y]-1;
+            }
+        }
+        endofgameflag = 2;
+    }
+}
+
 void inputofnames()
 {
 
@@ -1597,9 +1915,9 @@ void informationcredits()
 
     unsigned char version[30] = {
         'v','1','9','9',' ','-',' ',
-        ("Mar 23 2021"[ 7]),("Mar 23 2021"[ 8]),("Mar 23 2021"[ 9]),("Mar 23 2021"[10]),
-        ((("Mar 23 2021"[0] == 'O') || ("Mar 23 2021"[0] == 'N') || ("Mar 23 2021"[0] == 'D')) ? '1' : '0'),( (("Mar 23 2021"[0] == 'J' && "Mar 23 2021"[1] == 'a' && "Mar 23 2021"[2] == 'n')) ? '1' : (("Mar 23 2021"[0] == 'F')) ? '2' : (("Mar 23 2021"[0] == 'M' && "Mar 23 2021"[1] == 'a' && "Mar 23 2021"[2] == 'r')) ? '3' : (("Mar 23 2021"[0] == 'A' && "Mar 23 2021"[1] == 'p')) ? '4' : (("Mar 23 2021"[0] == 'M' && "Mar 23 2021"[1] == 'a' && "Mar 23 2021"[2] == 'y')) ? '5' : (("Mar 23 2021"[0] == 'J' && "Mar 23 2021"[1] == 'u' && "Mar 23 2021"[2] == 'n')) ? '6' : (("Mar 23 2021"[0] == 'J' && "Mar 23 2021"[1] == 'u' && "Mar 23 2021"[2] == 'l')) ? '7' : (("Mar 23 2021"[0] == 'A' && "Mar 23 2021"[1] == 'u')) ? '8' : (("Mar 23 2021"[0] == 'S')) ? '9' : (("Mar 23 2021"[0] == 'O')) ? '0' : (("Mar 23 2021"[0] == 'N')) ? '1' : (("Mar 23 2021"[0] == 'D')) ? '2' : '?' ),(("Mar 23 2021"[4] >= '0') ? ("Mar 23 2021"[4]) : '0'),("Mar 23 2021"[ 5]),'-',
-        ("15:52:58"[0]),("15:52:58"[1]),("15:52:58"[3]),("15:52:58"[4]) };
+        ("Mar 24 2021"[ 7]),("Mar 24 2021"[ 8]),("Mar 24 2021"[ 9]),("Mar 24 2021"[10]),
+        ((("Mar 24 2021"[0] == 'O') || ("Mar 24 2021"[0] == 'N') || ("Mar 24 2021"[0] == 'D')) ? '1' : '0'),( (("Mar 24 2021"[0] == 'J' && "Mar 24 2021"[1] == 'a' && "Mar 24 2021"[2] == 'n')) ? '1' : (("Mar 24 2021"[0] == 'F')) ? '2' : (("Mar 24 2021"[0] == 'M' && "Mar 24 2021"[1] == 'a' && "Mar 24 2021"[2] == 'r')) ? '3' : (("Mar 24 2021"[0] == 'A' && "Mar 24 2021"[1] == 'p')) ? '4' : (("Mar 24 2021"[0] == 'M' && "Mar 24 2021"[1] == 'a' && "Mar 24 2021"[2] == 'y')) ? '5' : (("Mar 24 2021"[0] == 'J' && "Mar 24 2021"[1] == 'u' && "Mar 24 2021"[2] == 'n')) ? '6' : (("Mar 24 2021"[0] == 'J' && "Mar 24 2021"[1] == 'u' && "Mar 24 2021"[2] == 'l')) ? '7' : (("Mar 24 2021"[0] == 'A' && "Mar 24 2021"[1] == 'u')) ? '8' : (("Mar 24 2021"[0] == 'S')) ? '9' : (("Mar 24 2021"[0] == 'O')) ? '0' : (("Mar 24 2021"[0] == 'N')) ? '1' : (("Mar 24 2021"[0] == 'D')) ? '2' : '?' ),(("Mar 24 2021"[4] >= '0') ? ("Mar 24 2021"[4]) : '0'),("Mar 24 2021"[ 5]),'-',
+        ("17:17:39"[0]),("17:17:39"[1]),("17:17:39"[3]),("17:17:39"[4]) };
     menumakeborder(0,5,14,30);
     printcentered("L U D O",2,7,28);
     printcentered(version,2,8,28);
@@ -1655,12 +1973,12 @@ void turnhuman()
                 break;
 
             case 21:
-
+                savegame(0);
                 break;
 
             case 22:
                 yesno = areyousure();
-
+                if(yesno==1) { loadgame(); }
                 break;
 
             case 23:
@@ -1749,7 +2067,7 @@ void playerwins()
     cputsxy(5,9,"Your choice?");
     do
     {
-        choice = menupulldown(15,10,7);
+        choice = menupulldown(10,10,7);
         if(choice==2) { endofgameflag=3; gamereset(); zv=1; }
         if(choice==3) { endofgameflag=1; zv=1; }
     } while (choice==1 && playerdata[0][1]==0 && playerdata[1][1]==0 && playerdata[2][1]==0 && playerdata[3][1]==0);
@@ -2022,11 +2340,16 @@ int main()
 
 
 
-    menumakeborder(8,5,6,20);
-    cputsxy(10,7,"Load old game?");
-    choice = menupulldown(17,8,5);
-    windowrestore();
-
+    if(tipienabled)
+    {
+        loadconfigfile();
+        menumakeborder(8,5,6,20);
+        cputsxy(10,7,"Load old game?");
+        choice = menupulldown(17,8,5);
+        windowrestore();
+        if(choice==1) { loadgame(); }
+    }
+    else { autosavetoggle = 0; }
 
     loadmainscreen();
 

@@ -1,6 +1,10 @@
 #ifndef __DEFINES_H_
 #define __DEFINES_H_
 
+/* File management */
+#define VPAB 0x3000
+#define FBUF 0x3200
+
 /* References to redefined chars */
 /* Dice graphics */
 #define C_DICE01    8

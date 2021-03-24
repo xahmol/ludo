@@ -57,11 +57,12 @@ BUT WITHOUT ANY WARRANTY. USE THEM AT YOUR OWN RISK!
 */
 
 /* Includes */
-#include "system.h"
-#include "conio.h"
-#include "kscan.h"
-#include "string.h"
-#include "vdp.h"
+#include <system.h>
+#include <files.h>
+#include <conio.h>
+#include <kscan.h>
+#include <string.h>
+#include <vdp.h>
 #include "graphics.h"
 #include "defines.h"
 
@@ -182,7 +183,8 @@ unsigned char ns = 0;
 unsigned char throw;
 unsigned char musicnumber = 0;
 unsigned char joyinterface = 1;
-unsigned char autosavetoggle = 0;
+unsigned char autosavetoggle = 1;
+unsigned char tipienabled = 1;
 
 //Save game memory allocation
 unsigned char saveslots[85];
@@ -242,6 +244,73 @@ void wait(unsigned int jiffies)
     for(int i=0; i < jiffies; i++) {
         VDP_WAIT_VBLANK_CRU;
     }
+}
+
+/*  File management functions */
+
+void initPab(struct PAB* pab, unsigned int reclen)
+{
+    /*  Intiliatise PAB
+        Source: https://github.com/jedimatt42/tipi/tree/master/clients/tipicfg */
+
+    pab->OpCode = DSR_OPEN;
+    pab->Status = DSR_TYPE_DISPLAY | DSR_TYPE_VARIABLE | DSR_TYPE_SEQUENTIAL | DSR_TYPE_INPUT;
+    pab->RecordLength = reclen;
+    pab->RecordNumber = 0;
+    pab->ScreenOffset = 0;
+    pab->NameLength = 0;
+    pab->CharCount = 0;
+}
+
+unsigned char dsr_openDV(struct PAB* pab, char* fname, unsigned int reclen, int vdpbuffer, unsigned char flags)
+{
+    /*  Configures a PAB for filename and DV80, and opens the file
+        Source: https://github.com/jedimatt42/tipi/tree/master/clients/tipicfg */
+
+    initPab(pab, reclen);
+    pab->OpCode = DSR_OPEN;
+    pab->Status = DSR_TYPE_DISPLAY | DSR_TYPE_VARIABLE | DSR_TYPE_SEQUENTIAL | flags;
+    pab->RecordLength = reclen;
+    pab->pName = fname;
+    pab->VDPBuffer = vdpbuffer;
+    return dsrlnk(pab, VPAB);
+}
+
+unsigned char dsr_close(struct PAB* pab)
+{
+    /*  Close the file
+        Source: https://github.com/jedimatt42/tipi/tree/master/clients/tipicfg */
+
+    pab->OpCode = DSR_CLOSE;    
+    return dsrlnk(pab, VPAB);
+}
+
+unsigned char dsr_read(struct PAB* pab, int recordNumber)
+{
+    /*  Read data from the file.
+        The data read is in FBUF, the length read in pab->CharCount
+        typically passing 0 in for record number will let the controller
+        auto-increment it.
+        Source: https://github.com/jedimatt42/tipi/tree/master/clients/tipicfg */
+
+    pab->OpCode = DSR_READ;
+    pab->RecordNumber = recordNumber;
+    pab->CharCount = 0; 
+    unsigned char result = dsrlnk(pab, VPAB);
+    vdpmemread(VPAB + 5, (&pab->CharCount), 1);
+    return result;
+}
+
+unsigned char dsr_write(struct PAB* pab, unsigned char* record)
+{
+    /*  Write data tothe file.
+        Source: https://github.com/jedimatt42/tipi/tree/master/clients/tipicfg */
+
+    pab->OpCode = DSR_WRITE;
+    int len = strlen(record);
+    vdpmemcpy(pab->VDPBuffer, record, len);
+    pab->CharCount = len;   
+    return dsrlnk(pab, VPAB);
 }
 
 /* General screen functions */
@@ -544,7 +613,7 @@ unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char
     unsigned char exit = 0;
     unsigned char menuchoice = 1;
 
-    windowsave(ypos, pulldownmenuoptions[menunumber]+4);
+    windowsave(ypos, pulldownmenuoptions[menunumber-1]+4);
     if(menunumber>menubaroptions)
     {
         vdpchar(gImage+xpos+(ypos*32),C_LOWRIGHT);
@@ -690,6 +759,72 @@ unsigned char areyousure()
     choice = menupulldown(20,8,5);
     windowrestore();
     return choice;
+}
+
+void fileerrormessage(unsigned char ferr)
+{
+    /* Show message for file error encountered */
+
+    menumakeborder(10,5,6,20);
+    cputsxy(12,7,"File error!");
+    gotoxy(12,8);
+    cprintf("Error nr.: %2X",ferr);
+    cputsxy(12,10,"Press key.");
+    getkey("",1);
+    windowrestore();    
+}
+
+void tipinotenabledmessage()
+{
+    /* Show message when TIPI is not enabled on trying file menu options */
+
+    menumakeborder(10,5,5,20);
+    cputsxy(12,7,"TIPI not enabled!");
+    gotoxy(12,8);
+    cputsxy(12,9,"Press key.");
+    getkey("",1);
+    windowrestore();   
+}
+
+/* Config file and save game functions */
+
+void saveconfigfile()
+{
+    /* Save configuration file */
+
+    struct PAB pab;
+    unsigned char fname[13] = "TIPI.LUDOCFG";
+
+    unsigned char ferr = dsr_openDV(&pab, fname, 85, FBUF, DSR_TYPE_APPEND);
+    if (ferr) { fileerrormessage(ferr); return; }
+    ferr = dsr_write(&pab, saveslots);
+    if (ferr) { fileerrormessage(ferr); }
+    ferr = dsr_close(&pab);
+    if (ferr) { fileerrormessage(ferr); }
+}
+
+void loadconfigfile()
+{
+    /* Load configuration file or create one if not present */
+
+    struct PAB pab;
+    unsigned char fname[13] = "TIPI.LUDOCFG";
+    unsigned char x,y;
+
+    unsigned char ferr = dsr_openDV(&pab, fname, 85, FBUF, DSR_TYPE_INPUT);
+    ferr = dsr_read(&pab, 0);
+    if (ferr == DSR_ERR_NONE) { vdpmemread(FBUF, saveslots, 85); }
+    else { fileerrormessage(ferr); }
+    ferr = dsr_close(&pab);
+    if (ferr) { fileerrormessage(ferr); }
+
+    for(y=0;y<5;y++)
+    {
+        for(x=0;x<16;x++)
+        {
+            pulldownmenutitles[7][y][x]=saveslots[(y*16)+5+x]-1;
+        }
+    }
 }
 
 /* Graphics and screen initialisation functions */
@@ -908,6 +1043,163 @@ void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned ch
     }
 }
 
+void savegame(unsigned char autosave)
+{
+    /* Save game to a gameslot
+       Input: autosave is 1 for autosave, else 0 */
+
+    struct PAB pab;
+    unsigned char fname[14] = "TIPI.LUDOSAV";
+    unsigned char slot = 0;
+    unsigned char x, y, len, ferr;
+    unsigned char yesno = 1;
+
+    len = strlen(fname);
+
+    if(autosave==1)
+    {
+        fname[len]=48;
+        fname[len+1]=0;
+    }
+    else
+    {
+        menumakeborder(2,5,12,28);
+        cputsxy(4,7,"Save game.");
+        cputsxy(4,8,"Choose slot:");
+        do
+        {
+            slot = menupulldown(10,10,8) - 1;
+        } while (slot<1);
+        if(saveslots[slot]==2)
+        {
+            cputsxy(4,9,"Slot not empty. Sure?");
+            yesno = menupulldown(15,10,5);
+        }
+        if(yesno==1)
+        {
+            cputsxy(4,9,"Choose name of save. ");
+            if(saveslots[slot]==1) { pulldownmenutitles[7][slot][0]=0; }
+            input(4,10,pulldownmenutitles[7][slot],15);
+            for(x=strlen(pulldownmenutitles[7][slot]);x<15;x++)
+            {
+                pulldownmenutitles[7][slot][x] = C_SPACE;
+            }
+            pulldownmenutitles[7][slot][15] = 0;
+            fname[len]=48+slot;
+            fname[len+1]=0;
+            for(x=0;x<16;x++)
+            {
+                saveslots[(slot*16)+5+x]=pulldownmenutitles[7][slot][x]+1;
+            }
+        }
+        windowrestore();
+    }
+    if(yesno==1)
+    {
+        saveslots[slot]==2;
+        saveconfigfile();
+        savegamemem[0]=turnofplayernr+1;
+        for(x=0;x<4;x++)
+        {
+            savegamemem[x+1] = np[x]+128;
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<4;y++)
+            {
+                savegamemem[5+(x*4)+y]=playerdata[x][y]+1;
+            }
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<4;y++)
+            {
+                savegamemem[21+(x*8)+(y*2)]=playerpos[x][y][0]+1;
+                savegamemem[22+(x*8)+(y*2)]=playerpos[x][y][1]+1;
+            }
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<21;y++)
+            {
+                savegamemem[53+(x*21)+y]=playername[x][y]+1;
+            }
+        }
+        ferr = dsr_openDV(&pab, fname, 136, FBUF, DSR_TYPE_APPEND);
+        if (ferr) { fileerrormessage(ferr); return; }
+        ferr = dsr_write(&pab, savegamemem);
+        if (ferr) { fileerrormessage(ferr); }
+        ferr = dsr_close(&pab);
+        if (ferr) { fileerrormessage(ferr); }
+    }
+}
+
+void loadgame()
+{
+     /* Load game from a gameslot */
+    
+    struct PAB pab;
+    unsigned char fname[14] = "TIPI.LUDOSAV";
+    unsigned char slot, x, y, ferr, len;
+    unsigned char yesno = 1;
+    
+    len = strlen(fname);
+    
+    menumakeborder(2,5,12,28);
+    cputsxy(4,7,"Load game.");
+    cputsxy(4,9,"Choose slot:");
+    slot = menupulldown(10,10,8) - 1;
+    if(saveslots[slot]==1)
+    {
+        cputsxy(4,9,"Slot empty.");
+        cputsxy(4,10,"Press key.");
+        getkey("",1);
+    }
+    windowrestore();
+    if(saveslots[slot]==2)
+    {
+        fname[len]=48+slot;
+        fname[len+1]=0;
+        ferr = dsr_openDV(&pab, fname, 136, FBUF, DSR_TYPE_INPUT);
+        ferr = dsr_read(&pab, 0);
+        if (ferr == DSR_ERR_NONE) { vdpmemread(FBUF, savegamemem, 136); }
+        else { fileerrormessage(ferr); return; }
+        ferr = dsr_close(&pab);
+        if (ferr) { fileerrormessage(ferr); return; }
+
+        turnofplayernr=savegamemem[0]-1;
+        for(x=0;x<4;x++)
+        {
+            np[x]=savegamemem[1+x]-128;
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<4;y++)
+            {
+                playerdata[x][y]=savegamemem[5+(x*4)+y]-1;
+            }
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<4;y++)
+            {
+                pawnerase(x,y);
+                playerpos[x][y][0]=savegamemem[21+(x*8)+(y*2)]-1;
+                playerpos[x][y][1]=savegamemem[22+(x*8)+(y*2)]-1;
+                pawnplace(x,y,0);
+            }
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<21;y++)
+            {
+                playername[x][y]=savegamemem[53+(x*21)+y]-1;
+            }
+        }
+        endofgameflag = 2;
+    }
+}
+
 void inputofnames()
 {
     /* Enter player nanes */
@@ -998,12 +1290,12 @@ void turnhuman()
                 break;
 
             case 21:
-                //savegame(0);
+                savegame(0);
                 break;
 
             case 22:
                 yesno = areyousure();
-                //if(yesno==1) { loadgame(); }
+                if(yesno==1) { loadgame(); }
                 break;
 
             case 23:
@@ -1092,7 +1384,7 @@ void playerwins()
     cputsxy(5,9,"Your choice?");
     do
     {
-        choice = menupulldown(15,10,7);
+        choice = menupulldown(10,10,7);
         if(choice==2) { endofgameflag=3; gamereset(); zv=1; }
         if(choice==3) { endofgameflag=1; zv=1; }
     } while (choice==1 && playerdata[0][1]==0 && playerdata[1][1]==0 && playerdata[2][1]==0 && playerdata[3][1]==0);
@@ -1365,11 +1657,16 @@ int main()
     //loadintro();
 
     //Ask for loading save game
-    menumakeborder(8,5,6,20);
-    cputsxy(10,7,"Load old game?");
-    choice = menupulldown(17,8,5);
-    windowrestore();
-    //if(choice==1) { loadgame(); }
+    if(tipienabled)
+    {
+        loadconfigfile();
+        menumakeborder(8,5,6,20);
+        cputsxy(10,7,"Load old game?");
+        choice = menupulldown(17,8,5);
+        windowrestore();
+        if(choice==1) { loadgame(); }
+    }
+    else { autosavetoggle = 0; }
 
     loadmainscreen();
 

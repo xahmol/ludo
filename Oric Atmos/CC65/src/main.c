@@ -1276,7 +1276,7 @@ unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char
     unsigned char exit = 0;
     unsigned char menuchoice = 1;
 
-    windowsave(ypos, pulldownmenuoptions[menunumber]+4);
+    windowsave(ypos, pulldownmenuoptions[menunumber-1]+4);
     if(menunumber>menubaroptions)
     {
         gotoxy(xpos,ypos+1);
