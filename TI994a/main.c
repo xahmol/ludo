@@ -248,69 +248,54 @@ void wait(unsigned int jiffies)
 
 /*  File management functions */
 
-void initPab(struct PAB* pab, unsigned int reclen)
+unsigned char dsr_load(unsigned char* filename, unsigned char* dest, unsigned char numbytes)
 {
-    /*  Intiliatise PAB
-        Source: https://github.com/jedimatt42/tipi/tree/master/clients/tipicfg */
+    /*  Load file.
+        Inspired by Jedimatt42 and Tursi
+        Source: https://atariage.com/forums/topic/164295-gcc-for-the-ti/page/25/?tab=comments#comment-4786953 */
 
-    pab->OpCode = DSR_OPEN;
-    pab->Status = DSR_TYPE_DISPLAY | DSR_TYPE_VARIABLE | DSR_TYPE_SEQUENTIAL | DSR_TYPE_INPUT;
-    pab->RecordLength = reclen;
-    pab->RecordNumber = 0;
-    pab->ScreenOffset = 0;
-    pab->NameLength = 0;
-    pab->CharCount = 0;
+    struct PAB pab;
+    unsigned char ferr;
+
+    // not relavent, but lets initialize all the bits
+    pab.ScreenOffset = 0; 
+    pab.Status = 0;
+    pab.RecordLength = 0;
+    pab.CharCount = 0;
+    // the stuff that matters...
+    pab.OpCode = DSR_LOAD; // DSR_LOAD for LOAD
+    pab.VDPBuffer = FBUF; // where in VDP you want to load (or save from)
+    pab.RecordNumber = numbytes; // size to load since we aren't using records
+    pab.NameLength = strlen(filename);
+    pab.pName = filename;
+ 
+    ferr = dsrlnk(&pab, VPAB);
+    if(!ferr) { vdpmemread(FBUF, dest, numbytes); }
+    return ferr;
 }
 
-unsigned char dsr_openDV(struct PAB* pab, char* fname, unsigned int reclen, int vdpbuffer, unsigned char flags)
+unsigned char dsr_save(unsigned char* filename, unsigned char* source, unsigned char numbytes)
 {
-    /*  Configures a PAB for filename and DV80, and opens the file
-        Source: https://github.com/jedimatt42/tipi/tree/master/clients/tipicfg */
+    /*  Save file.
+        Inspired by Jedimatt42 and Tursi
+        Source: https://atariage.com/forums/topic/164295-gcc-for-the-ti/page/25/?tab=comments#comment-4786953 */
 
-    initPab(pab, reclen);
-    pab->OpCode = DSR_OPEN;
-    pab->Status = DSR_TYPE_DISPLAY | DSR_TYPE_VARIABLE | DSR_TYPE_SEQUENTIAL | flags;
-    pab->RecordLength = reclen;
-    pab->pName = fname;
-    pab->VDPBuffer = vdpbuffer;
-    return dsrlnk(pab, VPAB);
-}
+    struct PAB pab;
 
-unsigned char dsr_close(struct PAB* pab)
-{
-    /*  Close the file
-        Source: https://github.com/jedimatt42/tipi/tree/master/clients/tipicfg */
-
-    pab->OpCode = DSR_CLOSE;    
-    return dsrlnk(pab, VPAB);
-}
-
-unsigned char dsr_read(struct PAB* pab, int recordNumber)
-{
-    /*  Read data from the file.
-        The data read is in FBUF, the length read in pab->CharCount
-        typically passing 0 in for record number will let the controller
-        auto-increment it.
-        Source: https://github.com/jedimatt42/tipi/tree/master/clients/tipicfg */
-
-    pab->OpCode = DSR_READ;
-    pab->RecordNumber = recordNumber;
-    pab->CharCount = 0; 
-    unsigned char result = dsrlnk(pab, VPAB);
-    vdpmemread(VPAB + 5, (&pab->CharCount), 1);
-    return result;
-}
-
-unsigned char dsr_write(struct PAB* pab, unsigned char* record)
-{
-    /*  Write data tothe file.
-        Source: https://github.com/jedimatt42/tipi/tree/master/clients/tipicfg */
-
-    pab->OpCode = DSR_WRITE;
-    int len = strlen(record);
-    vdpmemcpy(pab->VDPBuffer, record, len);
-    pab->CharCount = len;   
-    return dsrlnk(pab, VPAB);
+    // not relavent, but lets initialize all the bits
+    pab.ScreenOffset = 0; 
+    pab.Status = 0;
+    pab.RecordLength = 0;
+    pab.CharCount = 0;
+    // the stuff that matters...
+    pab.OpCode = DSR_SAVE; // DSR_SAVE for SAVE
+    pab.VDPBuffer = FBUF; // where in VDP you want to load (or save from)
+    pab.RecordNumber = numbytes; // size to save since we aren't using records
+    pab.NameLength = strlen(filename);
+    pab.pName = filename;
+    
+    vdpmemcpy(FBUF, source, numbytes);
+    return dsrlnk(&pab, VPAB);
 }
 
 /* General screen functions */
@@ -792,14 +777,9 @@ void saveconfigfile()
 {
     /* Save configuration file */
 
-    struct PAB pab;
     unsigned char fname[13] = "TIPI.LUDOCFG";
 
-    unsigned char ferr = dsr_openDV(&pab, fname, 85, FBUF, DSR_TYPE_APPEND);
-    if (ferr) { fileerrormessage(ferr); return; }
-    ferr = dsr_write(&pab, saveslots);
-    if (ferr) { fileerrormessage(ferr); }
-    ferr = dsr_close(&pab);
+    unsigned char ferr = dsr_save(fname,saveslots,85);
     if (ferr) { fileerrormessage(ferr); }
 }
 
@@ -807,24 +787,84 @@ void loadconfigfile()
 {
     /* Load configuration file or create one if not present */
 
-    struct PAB pab;
     unsigned char fname[13] = "TIPI.LUDOCFG";
     unsigned char x,y;
 
-    unsigned char ferr = dsr_openDV(&pab, fname, 85, FBUF, DSR_TYPE_INPUT);
-    ferr = dsr_read(&pab, 0);
-    if (ferr == DSR_ERR_NONE) { vdpmemread(FBUF, saveslots, 85); }
-    else { fileerrormessage(ferr); }
-    ferr = dsr_close(&pab);
+    unsigned char ferr = dsr_load(fname,saveslots,85);
+    if (ferr) { fileerrormessage(ferr); }
+    else
+    {
+        for(y=0;y<5;y++)
+        {
+            for(x=0;x<16;x++)
+            {
+                pulldownmenutitles[7][y][x]=saveslots[(y*16)+5+x];
+            }
+        }
+    }
+}
+
+void savetest()
+{
+    struct PAB pab;
+    unsigned char x,y, ferr;
+    unsigned char configfile[85];
+    unsigned char configload[85];
+    unsigned char fname1[14] = "TIPI.LUDOTST1";
+    unsigned char fname2[14] = "TIPI.LUDOTST2";
+
+    clrscr();
+    cputsxy(0,0,"Writing test data to memory:");
+    gotoxy(0,1);
+    for(x=0;x<85;x++)
+    {
+        configfile[x] = random()%256;
+        cprintf("%2X  ",configfile[x]);
+    }
+    
+    cputsxy(0,15,"Saving test data:");
+    
+    ferr = dsr_save(fname1,configfile,85);
     if (ferr) { fileerrormessage(ferr); }
 
+    cputsxy(0,16,"File saved. Key.");
+
+    getkey("",1);
+
+    clrscr();
+    cputsxy(0,0,"Loading test data from file:");
+
+    ferr = dsr_load(fname1,configload,85);
+    if (ferr) { fileerrormessage(ferr); }
+
+    cputsxy(0,1,"File loaded. Printing read data:");
+    gotoxy(0,2);
+    for(x=0;x<85;x++)
+    {
+        cprintf("%2X%s ", configload[x],(configload[x]==configfile[x])? "+":"-");
+    }
+
+    cputsxy(0,20,"Key.");
+    getkey("",1);
+    clrscr();
+}
+
+void createconfigfile()
+{
+    unsigned char x,y;
+    
+    for(y=0;y<5;y++)
+    {
+        saveslots[y]=0;
+    }
     for(y=0;y<5;y++)
     {
         for(x=0;x<16;x++)
         {
-            pulldownmenutitles[7][y][x]=saveslots[(y*16)+5+x]-1;
+            saveslots[(y*16)+5+x]=pulldownmenutitles[7][y][x];
         }
     }
+    saveconfigfile();
 }
 
 /* Graphics and screen initialisation functions */
@@ -834,7 +874,7 @@ void graphicsinit()
     /* Initialize graphics mode and load colors and patterns */
 
     set_graphics(0);
-    windowaddress = 0x2020;
+    windowaddress = WINDOWBASE;
     bgcolor(COLOR_BLACK);
     vdpmemcpy(gColor, colorset, sizeof(colorset));
     vdpmemcpy(gPattern, patterns, sizeof(patterns));
@@ -1048,7 +1088,6 @@ void savegame(unsigned char autosave)
     /* Save game to a gameslot
        Input: autosave is 1 for autosave, else 0 */
 
-    struct PAB pab;
     unsigned char fname[14] = "TIPI.LUDOSAV";
     unsigned char slot = 0;
     unsigned char x, y, len, ferr;
@@ -1070,7 +1109,7 @@ void savegame(unsigned char autosave)
         {
             slot = menupulldown(10,10,8) - 1;
         } while (slot<1);
-        if(saveslots[slot]==2)
+        if(saveslots[slot]==1)
         {
             cputsxy(4,9,"Slot not empty. Sure?");
             yesno = menupulldown(15,10,5);
@@ -1089,47 +1128,43 @@ void savegame(unsigned char autosave)
             fname[len+1]=0;
             for(x=0;x<16;x++)
             {
-                saveslots[(slot*16)+5+x]=pulldownmenutitles[7][slot][x]+1;
+                saveslots[(slot*16)+5+x]=pulldownmenutitles[7][slot][x];
             }
         }
         windowrestore();
     }
     if(yesno==1)
     {
-        saveslots[slot]==2;
+        saveslots[slot]=1;
         saveconfigfile();
-        savegamemem[0]=turnofplayernr+1;
+        savegamemem[0]=turnofplayernr;
         for(x=0;x<4;x++)
         {
-            savegamemem[x+1] = np[x]+128;
+            savegamemem[x+1] = np[x];
         }
         for(x=0;x<4;x++)
         {
             for(y=0;y<4;y++)
             {
-                savegamemem[5+(x*4)+y]=playerdata[x][y]+1;
+                savegamemem[5+(x*4)+y]=playerdata[x][y];
             }
         }
         for(x=0;x<4;x++)
         {
             for(y=0;y<4;y++)
             {
-                savegamemem[21+(x*8)+(y*2)]=playerpos[x][y][0]+1;
-                savegamemem[22+(x*8)+(y*2)]=playerpos[x][y][1]+1;
+                savegamemem[21+(x*8)+(y*2)]=playerpos[x][y][0];
+                savegamemem[22+(x*8)+(y*2)]=playerpos[x][y][1];
             }
         }
         for(x=0;x<4;x++)
         {
             for(y=0;y<21;y++)
             {
-                savegamemem[53+(x*21)+y]=playername[x][y]+1;
+                savegamemem[53+(x*21)+y]=playername[x][y];
             }
         }
-        ferr = dsr_openDV(&pab, fname, 136, FBUF, DSR_TYPE_APPEND);
-        if (ferr) { fileerrormessage(ferr); return; }
-        ferr = dsr_write(&pab, savegamemem);
-        if (ferr) { fileerrormessage(ferr); }
-        ferr = dsr_close(&pab);
+        ferr = dsr_save(fname,savegamemem,136);
         if (ferr) { fileerrormessage(ferr); }
     }
 }
@@ -1138,7 +1173,6 @@ void loadgame()
 {
      /* Load game from a gameslot */
     
-    struct PAB pab;
     unsigned char fname[14] = "TIPI.LUDOSAV";
     unsigned char slot, x, y, ferr, len;
     unsigned char yesno = 1;
@@ -1149,34 +1183,30 @@ void loadgame()
     cputsxy(4,7,"Load game.");
     cputsxy(4,9,"Choose slot:");
     slot = menupulldown(10,10,8) - 1;
-    if(saveslots[slot]==1)
+    if(saveslots[slot]==0)
     {
         cputsxy(4,9,"Slot empty.");
         cputsxy(4,10,"Press key.");
         getkey("",1);
     }
     windowrestore();
-    if(saveslots[slot]==2)
+    if(saveslots[slot]==1)
     {
         fname[len]=48+slot;
         fname[len+1]=0;
-        ferr = dsr_openDV(&pab, fname, 136, FBUF, DSR_TYPE_INPUT);
-        ferr = dsr_read(&pab, 0);
-        if (ferr == DSR_ERR_NONE) { vdpmemread(FBUF, savegamemem, 136); }
-        else { fileerrormessage(ferr); return; }
-        ferr = dsr_close(&pab);
+        ferr = dsr_load(fname,savegamemem,136);
         if (ferr) { fileerrormessage(ferr); return; }
 
-        turnofplayernr=savegamemem[0]-1;
+        turnofplayernr=savegamemem[0];
         for(x=0;x<4;x++)
         {
-            np[x]=savegamemem[1+x]-128;
+            np[x]=savegamemem[1+x];
         }
         for(x=0;x<4;x++)
         {
             for(y=0;y<4;y++)
             {
-                playerdata[x][y]=savegamemem[5+(x*4)+y]-1;
+                playerdata[x][y]=savegamemem[5+(x*4)+y];
             }
         }
         for(x=0;x<4;x++)
@@ -1184,8 +1214,8 @@ void loadgame()
             for(y=0;y<4;y++)
             {
                 pawnerase(x,y);
-                playerpos[x][y][0]=savegamemem[21+(x*8)+(y*2)]-1;
-                playerpos[x][y][1]=savegamemem[22+(x*8)+(y*2)]-1;
+                playerpos[x][y][0]=savegamemem[21+(x*8)+(y*2)];
+                playerpos[x][y][1]=savegamemem[22+(x*8)+(y*2)];
                 pawnplace(x,y,0);
             }
         }
@@ -1193,7 +1223,7 @@ void loadgame()
         {
             for(y=0;y<21;y++)
             {
-                playername[x][y]=savegamemem[53+(x*21)+y]-1;
+                playername[x][y]=savegamemem[53+(x*21)+y];
             }
         }
         endofgameflag = 2;
@@ -1636,7 +1666,7 @@ void turngeneric()
     pawnplace(turnofplayernr,pawnnumber,0);
     if(playerdata[turnofplayernr][0]==0 && autosavetoggle==1)
     {
-    //    savegame(1); /* Autosave on end human turn */
+        savegame(1); /* Autosave on end human turn */
     }
     else
     {
@@ -1654,6 +1684,9 @@ int main()
     //Game intro
     graphicsinit();
 
+    //savetest();
+    //createconfigfile();
+
     //loadintro();
 
     //Ask for loading save game
@@ -1664,11 +1697,11 @@ int main()
         cputsxy(10,7,"Load old game?");
         choice = menupulldown(17,8,5);
         windowrestore();
-        if(choice==1) { loadgame(); }
+        if(choice==1) { loadmainscreen(); loadgame(); }
     }
     else { autosavetoggle = 0; }
 
-    loadmainscreen();
+    if(endofgameflag=0) { loadmainscreen(); }
 
     //Main game loop
     do

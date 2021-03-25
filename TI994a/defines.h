@@ -1,9 +1,15 @@
 #ifndef __DEFINES_H_
 #define __DEFINES_H_
 
-/* File management */
-#define VPAB 0x3000
-#define FBUF 0x3200
+/* VDP memory assignments */
+/* Done by vdp.h lib setting set_graphics(0): */
+/* gImage           0x0000                        */
+/* gColor           0x0380                        */
+/* gPattern         0x0800                        */
+
+#define WINDOWBASE  0x1000      // Window save memory base
+#define VPAB        0x1800      // PAB memory base
+#define FBUF        0x1A00      // Filebuffer memory base
 
 /* References to redefined chars */
 /* Dice graphics */
