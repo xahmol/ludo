@@ -47,6 +47,7 @@ $(GRAPHICS): $(SCREENNAME) Makefile
 $(FNAME): $(FNAME).bin
 	$(EA5SPLIT) $(FNAME).bin
 	zip $(ZIP) $(shell echo $(UCFNAME)| rev| cut -c2-| rev)?*
+	cp $(shell echo $(UCFNAME)| rev| cut -c2-| rev)?* $(CLASSIC99_DSK1)
 
 $(FNAME).bin: $(FNAME).elf
 	$(ELF2EA5) $(FNAME).elf $(FNAME).bin

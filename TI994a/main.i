@@ -1529,25 +1529,13 @@ void fileerrormessage(unsigned char ferr)
     windowrestore();
 }
 
-void tipinotenabledmessage()
-{
-
-
-    menumakeborder(10,5,5,20);
-    cputsxy(12,7,"TIPI not enabled!");
-    conio_x = (12); conio_y = (8);
-    cputsxy(12,9,"Press key.");
-    getkey("",1);
-    windowrestore();
-}
-
 
 
 void saveconfigfile()
 {
 
 
-    unsigned char fname[13] = "TIPI.LUDOCFG";
+    unsigned char fname[13] = "DSK1.LUDOCFG";
 
     unsigned char ferr = dsr_save(fname,saveslots,85);
     if (ferr) { fileerrormessage(ferr); }
@@ -1557,7 +1545,7 @@ void loadconfigfile()
 {
 
 
-    unsigned char fname[13] = "TIPI.LUDOCFG";
+    unsigned char fname[13] = "DSK1.LUDOCFG";
     unsigned char x,y;
 
     unsigned char ferr = dsr_load(fname,saveslots,85);
@@ -1801,7 +1789,7 @@ void savegame(unsigned char autosave)
 
 
 
-    unsigned char fname[14] = "TIPI.LUDOSAV";
+    unsigned char fname[14] = "DSK1.LUDOSAV";
     unsigned char slot = 0;
     unsigned char x, y, len, ferr;
     unsigned char yesno = 1;
@@ -1886,7 +1874,7 @@ void loadgame()
 {
 
 
-    unsigned char fname[14] = "TIPI.LUDOSAV";
+    unsigned char fname[14] = "DSK1.LUDOSAV";
     unsigned char slot, x, y, ferr, len;
     unsigned char yesno = 1;
 
@@ -1973,7 +1961,7 @@ void musicnext()
 {
 
 
-    unsigned char fname[14] = "TIPI.LUDOMUS";
+    unsigned char fname[14] = "DSK1.LUDOMUS";
     unsigned char len, ferr;
 
     len = strlen(fname);
@@ -1996,7 +1984,7 @@ void informationcredits()
         'v','1','9','9',' ','-',' ',
         ("Mar 26 2021"[ 7]),("Mar 26 2021"[ 8]),("Mar 26 2021"[ 9]),("Mar 26 2021"[10]),
         ((("Mar 26 2021"[0] == 'O') || ("Mar 26 2021"[0] == 'N') || ("Mar 26 2021"[0] == 'D')) ? '1' : '0'),( (("Mar 26 2021"[0] == 'J' && "Mar 26 2021"[1] == 'a' && "Mar 26 2021"[2] == 'n')) ? '1' : (("Mar 26 2021"[0] == 'F')) ? '2' : (("Mar 26 2021"[0] == 'M' && "Mar 26 2021"[1] == 'a' && "Mar 26 2021"[2] == 'r')) ? '3' : (("Mar 26 2021"[0] == 'A' && "Mar 26 2021"[1] == 'p')) ? '4' : (("Mar 26 2021"[0] == 'M' && "Mar 26 2021"[1] == 'a' && "Mar 26 2021"[2] == 'y')) ? '5' : (("Mar 26 2021"[0] == 'J' && "Mar 26 2021"[1] == 'u' && "Mar 26 2021"[2] == 'n')) ? '6' : (("Mar 26 2021"[0] == 'J' && "Mar 26 2021"[1] == 'u' && "Mar 26 2021"[2] == 'l')) ? '7' : (("Mar 26 2021"[0] == 'A' && "Mar 26 2021"[1] == 'u')) ? '8' : (("Mar 26 2021"[0] == 'S')) ? '9' : (("Mar 26 2021"[0] == 'O')) ? '0' : (("Mar 26 2021"[0] == 'N')) ? '1' : (("Mar 26 2021"[0] == 'D')) ? '2' : '?' ),(("Mar 26 2021"[4] >= '0') ? ("Mar 26 2021"[4]) : '0'),("Mar 26 2021"[ 5]),'-',
-        ("16:05:23"[0]),("16:05:23"[1]),("16:05:23"[3]),("16:05:23"[4]) };
+        ("18:56:11"[0]),("18:56:11"[1]),("18:56:11"[3]),("18:56:11"[4]) };
     menumakeborder(0,5,14,30);
     printcentered("L U D O",2,7,28);
     printcentered(version,2,8,28);
@@ -2432,7 +2420,7 @@ void loadintro()
     loadconfigfile();
 
 
-    ferr = dsr_load("TIPI.LUDOMUS1",musicmem,3200);
+    ferr = dsr_load("DSK1.LUDOMUS1",musicmem,3200);
     if (ferr) { fileerrormessage(ferr); }
     StartSong(musicmem,0);
 

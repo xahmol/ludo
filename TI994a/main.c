@@ -775,25 +775,13 @@ void fileerrormessage(unsigned char ferr)
     windowrestore();    
 }
 
-void tipinotenabledmessage()
-{
-    /* Show message when TIPI is not enabled on trying file menu options */
-
-    menumakeborder(10,5,5,20);
-    cputsxy(12,7,"TIPI not enabled!");
-    gotoxy(12,8);
-    cputsxy(12,9,"Press key.");
-    getkey("",1);
-    windowrestore();   
-}
-
 /* Config file and save game functions */
 
 void saveconfigfile()
 {
     /* Save configuration file */
 
-    unsigned char fname[13] = "TIPI.LUDOCFG";
+    unsigned char fname[13] = "DSK1.LUDOCFG";
 
     unsigned char ferr = dsr_save(fname,saveslots,85);
     if (ferr) { fileerrormessage(ferr); }
@@ -803,7 +791,7 @@ void loadconfigfile()
 {
     /* Load configuration file or create one if not present */
 
-    unsigned char fname[13] = "TIPI.LUDOCFG";
+    unsigned char fname[13] = "DSK1.LUDOCFG";
     unsigned char x,y;
 
     unsigned char ferr = dsr_load(fname,saveslots,85);
@@ -1047,7 +1035,7 @@ void savegame(unsigned char autosave)
     /* Save game to a gameslot
        Input: autosave is 1 for autosave, else 0 */
 
-    unsigned char fname[14] = "TIPI.LUDOSAV";
+    unsigned char fname[14] = "DSK1.LUDOSAV";
     unsigned char slot = 0;
     unsigned char x, y, len, ferr;
     unsigned char yesno = 1;
@@ -1132,7 +1120,7 @@ void loadgame()
 {
      /* Load game from a gameslot */
     
-    unsigned char fname[14] = "TIPI.LUDOSAV";
+    unsigned char fname[14] = "DSK1.LUDOSAV";
     unsigned char slot, x, y, ferr, len;
     unsigned char yesno = 1;
     
@@ -1219,7 +1207,7 @@ void musicnext()
 {
     /* Funtion to load and start next music track */
 
-    unsigned char fname[14] = "TIPI.LUDOMUS";
+    unsigned char fname[14] = "DSK1.LUDOMUS";
     unsigned char len, ferr;
 
     len = strlen(fname);
@@ -1678,7 +1666,7 @@ void loadintro()
     loadconfigfile();
 
     /* Load and start first music file */
-    ferr = dsr_load("TIPI.LUDOMUS1",musicmem,3200);
+    ferr = dsr_load("DSK1.LUDOMUS1",musicmem,3200);
     if (ferr) { fileerrormessage(ferr); }
     StartSong(musicmem,0);
 
