@@ -1666,6 +1666,7 @@ void loadintro()
     loadconfigfile();
 
     /* Load and start first music file */
+    memset(musicmem,0,3200);
     ferr = dsr_load("DSK1.LUDOMUS1",musicmem,3200);
     if (ferr) { fileerrormessage(ferr); }
     StartSong(musicmem,0);

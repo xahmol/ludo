@@ -2298,11 +2298,11 @@ informationcredits
 	movb r6, @>12(r10)
 	swpb r6
 	movb r6, @>13(r10)
-	li   r5, >3138
+	li   r5, >3139
 	movb r5, @>14(r10)
 	swpb r5
 	movb r5, @>15(r10)
-	li   r4, >3536
+	li   r4, >3331
 	movb r4, @>16(r10)
 	swpb r4
 	movb r4, @>17(r10)
@@ -5436,6 +5436,10 @@ loadintro
 	li   r3, >240
 	bl   @vdpmemcpy
 	bl   @loadconfigfile
+	li   r1, musicmem
+	clr  r2
+	li   r3, >C80
+	bl   @memset
 	li   r1, LC37
 	li   r2, musicmem
 	li   r3, >C80
@@ -9310,6 +9314,8 @@ musicmem
 
 	ref	cputs
 
+	ref	memset
+
 	ref	vdpmemcpy
 
 	ref	gImage
@@ -9317,8 +9323,6 @@ musicmem
 	ref	memcpy
 
 	ref	strlen
-
-	ref	memset
 
 	ref	vdpmemread
 
