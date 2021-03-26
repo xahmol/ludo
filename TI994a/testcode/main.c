@@ -192,7 +192,7 @@ unsigned char saveslots[85];
 unsigned char savegamemem[136];
 
 //Music memory allocation
-unsigned char musicmem[3200];
+unsigned char musicmem[3072];
 
 /* Functions not present in LIBTI99 */
 unsigned char* strcat(unsigned char *dest, unsigned const char *src)
@@ -247,11 +247,6 @@ void wait(unsigned int jiffies)
 
     for(int i=0; i < jiffies; i++) {
         VDP_WAIT_VBLANK_CRU;
-        if(musicnumber)
-        {
-            CALL_PLAYER_SN;
-            if (!isSNPlaying) { StartSong(musicmem,0); }
-        }
     }
 }
 
@@ -820,6 +815,69 @@ void loadconfigfile()
     }
 }
 
+void savetest()
+{
+    struct PAB pab;
+    unsigned char x,y, ferr;
+    unsigned char configfile[85];
+    unsigned char configload[85];
+    unsigned char fname1[14] = "TIPI.LUDOTST1";
+    unsigned char fname2[14] = "TIPI.LUDOTST2";
+
+    clrscr();
+    cputsxy(0,0,"Writing test data to memory:");
+    gotoxy(0,1);
+    for(x=0;x<85;x++)
+    {
+        configfile[x] = random()%256;
+        cprintf("%2X  ",configfile[x]);
+    }
+    
+    cputsxy(0,15,"Saving test data:");
+    
+    ferr = dsr_save(fname1,configfile,85);
+    if (ferr) { fileerrormessage(ferr); }
+
+    cputsxy(0,16,"File saved. Key.");
+
+    getkey("",1);
+
+    clrscr();
+    cputsxy(0,0,"Loading test data from file:");
+
+    ferr = dsr_load(fname1,configload,85);
+    if (ferr) { fileerrormessage(ferr); }
+
+    cputsxy(0,1,"File loaded. Printing read data:");
+    gotoxy(0,2);
+    for(x=0;x<85;x++)
+    {
+        cprintf("%2X%s ", configload[x],(configload[x]==configfile[x])? "+":"-");
+    }
+
+    cputsxy(0,20,"Key.");
+    getkey("",1);
+    clrscr();
+}
+
+void createconfigfile()
+{
+    unsigned char x,y;
+    
+    for(y=0;y<5;y++)
+    {
+        saveslots[y]=0;
+    }
+    for(y=0;y<5;y++)
+    {
+        for(x=0;x<16;x++)
+        {
+            saveslots[(y*16)+5+x]=pulldownmenutitles[7][y][x];
+        }
+    }
+    saveconfigfile();
+}
+
 /* Graphics and screen initialisation functions */
 
 void graphicsinit()
@@ -1228,8 +1286,8 @@ void musicnext()
     if(++musicnumber>3) { musicnumber = 1;}
     fname[len]=48+musicnumber;
     fname[len+1]=0;
-    memset(musicmem,0,3200);
-    ferr = dsr_load(fname,musicmem,3200);
+    memset(musicmem,0,3072);
+    ferr = dsr_load(fname,musicmem,3072);
     if (ferr) { fileerrormessage(ferr); }
     StartSong(musicmem,0);
 }
@@ -1320,25 +1378,16 @@ void turnhuman()
                 break;
 
             case 31:
-                musicnext();
+                //musicnext();
                 break;
 
             case 32:
-                StopSong();
-                MUTE_SOUND();
-                musicnumber=0;
+                //StopMusic();
                 break;
 
             case 33:
-                if(musicnumber)
-                { 
-                    StopSong();
-                }
-                else
-                {
-                    musicnumber=1;
-                }
-                StartSong(musicmem,0);
+                //StopMusic();
+                //PlayMusic();
                 break;
 
             case 41:
@@ -1668,32 +1717,39 @@ void loadintro()
 
     int x, y, ferr;
     int len = 0;
-    unsigned char validkeys[4] = {'m', 'M', C_ENTER, 0 };
+    unsigned char validkeys[6] = {'j','m', 'J', 'M', C_ENTER, 0 };
     unsigned char key;
 
     /* Load title screen */
-    vdpmemcpy(gImage, titlescreen, sizeof(titlescreen));
+    //rc = loadfile("LUDOTITL.BIN", (void*)0xb500, &len);
 
     /* Load and read game config file */
     loadconfigfile();
 
     /* Load and start first music file */
-    ferr = dsr_load("TIPI.LUDOMUS1",musicmem,3200);
+    ferr = dsr_load("TIPI.LUDOMUS1",musicmem,3072);
     if (ferr) { fileerrormessage(ferr); }
     StartSong(musicmem,0);
 
     /* Wait for ENTER of FIRE while player can toggle joystick and music */
     
     cputsxy(1,21,"Press ENTER/FIRE to start game.");
-    cputsxy(1,22,"M=toggle music.");
+    cputsxy(1,22,"J=toggle joy, M=toggle music.");
 
     do
     {
-        cputsxy(1,20,"Music: ");
+        cputsxy(1,20,"Joystick: ");
+        if(joyinterface) { cputs("Yes "); } else { cputs("No "); }
+        cputs("\tMusic: ");
         if(musicnumber) { cputs("Yes "); } else { cputs("No "); }
         key = getkey(validkeys,1);
         switch (key)
         {
+        case 'j':
+        case 'J':
+            joyinterface = (joyinterface)? 0 : 1;
+            break;
+
         case 'm':
         case 'M':
             if(musicnumber)
@@ -1722,6 +1778,9 @@ int main()
 
     //Game intro
     graphicsinit();
+
+    //savetest();
+    //createconfigfile();
 
     loadintro();
 

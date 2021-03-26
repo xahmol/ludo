@@ -1,5 +1,6 @@
 TMS9900_DIR?=/home/xahmol/tms9900gcc/bin
 LIBTI99?=/home/xahmol/libti99
+LIBTIVGM2?=/home/xahmol/vgmcomp2/Players/libtivgm2
 
 # Paths to TMS9900 compilation tools
 GAS=$(TMS9900_DIR)/tms9900-as
@@ -18,6 +19,7 @@ FNAME=ludo
 UCFNAME=$(shell echo -n $(FNAME) | tr 'a-z' 'A-Z')
 GRAPHICS=graphics.h
 SCREENNAME=ludo_mainscreen.mag
+ZIP = LudoTI994a-v199-$(shell date "+%Y%m%d-%H%M").zip
 
 LDFLAGS=\
   --script=linkfile
@@ -36,18 +38,21 @@ $(GRAPHICS): $(SCREENNAME) Makefile
 	gawk -F: -e '$$1=="CH" { if (i>=0 && i<200) { print gensub(/(..)/,"0x\\1,","g",$$2) } i++ }' $(SCREENNAME) ;\
 	echo "};" ;\
 	echo "static const unsigned char mainscreen[] = {" ;\
-	gawk -F: -e '$$1=="MP" { split($$2, a, "|"); for( b in a ) { printf("0x%02x,", a[b]); } print "" }' $(SCREENNAME) ;\
+	gawk -F: -e '$$1=="MP" { if (i>=0 && i<24) { split($$2, a, "|"); for( b in a ) { printf("0x%02x,", a[b]); } print "" } i++ }' $(SCREENNAME) ;\
+  echo "};" ;\
+  echo "static const unsigned char titlescreen[] = {" ;\
+	gawk -F: -e '$$1=="MP" { if (i>=24 && i<42) { split($$2, a, "|"); for( b in a ) { printf("0x%02x,", a[b]); } print "" } i++ }' $(SCREENNAME) ;\
 	echo "};" ) > $@
 
 $(FNAME): $(FNAME).bin
 	$(EA5SPLIT) $(FNAME).bin
-	cp $(shell echo $(UCFNAME)| rev| cut -c2-| rev)? $(CLASSIC99_DSK1)
+	zip $(ZIP) $(shell echo $(UCFNAME)| rev| cut -c2-| rev)?*
 
 $(FNAME).bin: $(FNAME).elf
 	$(ELF2EA5) $(FNAME).elf $(FNAME).bin
 
 $(FNAME).elf: $(OBJECT_LIST)
-	$(LD) $(OBJECT_LIST) $(LDFLAGS) -L$(LIBTI99) -lti99 -o $(FNAME).elf -Map=mapfile
+	$(LD) $(OBJECT_LIST) $(LDFLAGS) -L$(LIBTI99) -lti99 -L$(LIBTIVGM2) -ltivgm2 -o $(FNAME).elf -Map=mapfile
 
 .phony clean:
 	rm -f *.o
@@ -62,4 +67,4 @@ $(FNAME).elf: $(OBJECT_LIST)
 	$(GAS) $< -o $@
 
 %.o: %.c
-	$(CC) -c $< -std=c99 -O2 --save-temp -I$(LIBTI99) -o $@
+	$(CC) -c $< -std=c99 -O2 --save-temp -I$(LIBTI99) -I$(LIBTIVGM2) -o $@

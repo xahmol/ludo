@@ -1,76 +1,841 @@
-/*
-L U D O
-Written in 1992,2020, 2021 by Xander Mol
+# 1 "main.c"
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 "main.c"
+# 60 "main.c"
+# 1 "/home/xahmol/libti99/system.h" 1
+# 9 "/home/xahmol/libti99/system.h"
+void halt() __attribute__ ((noreturn));
 
-https://github.com/xahmol/ludo
-https://www.idreamtin8bits.com/
 
-Originally written in 1992 in Commodore BASIC 7.0 for the Commodore 128
-Rewritten for Oric Atmos in BASIC in 2020
-Rewritten for Oric Atmos in C using CC65 in 2021
-Rewritten for TI-99/4a in C using TMS9900-GCC in 2021
+void exit() __attribute__ ((noreturn));
+# 61 "main.c" 2
+# 1 "/home/xahmol/libti99/files.h" 1
+# 60 "/home/xahmol/libti99/files.h"
+struct __attribute__((__packed__)) PAB {
+ unsigned char OpCode;
+ unsigned char Status;
+ unsigned int VDPBuffer;
+ unsigned char RecordLength;
+ unsigned char CharCount;
+ unsigned int RecordNumber;
+ unsigned char ScreenOffset;
+ unsigned char NameLength;
+ unsigned char *pName;
+};
 
-Code and resources from others used:
 
--   TMS9900 modification of GCC by Insomnia
-    https://atariage.com/forums/topic/164295-gcc-for-the-ti/
 
--   LIBTI99 library by Tursi aka Mike Brent
-    https://github.com/tursilion/libti99
 
--   Jedimatt42 for:
-    - TMS9900-GCC installation script and instructions
-      https://atariage.com/forums/topic/164295-gcc-for-the-ti/page/24/?tab=comments#comment-4776745
-    - TIPI software and code examples
-      https://github.com/jedimatt42/tipi
+void files(unsigned char count);
+# 88 "/home/xahmol/libti99/files.h"
+unsigned char dsrlnk(struct PAB *pab, unsigned int vdp);
 
--   PeteE on Makefile code to adapt Magellan screens and random() function:
-    https://github.com/peberlein/turmoil
 
--   TheCodex for Magellan tool to create screens
-    https://atariage.com/forums/topic/161356-magellan/
 
--   Original windowing system code on Commodore 128 by unknown author.
 
--   Music credits:
-    R-Type level 1 by Wally Beben/Alain Derpin
-    Defender of the Crown by David Whittaker/Aldn
-    Wizzball by Peter Johnson/Aldn
-    
--   Documentation used:
-    AtariAge TI-99/4a community
-    https://atariage.com/forums/forum/164-ti-994a-computers/
- 
--   Tooling to transfer original Commodore software code: "
-    VICE by VICE authors
-    DirMaster by The Wiz/Elwix
-    CharPad Free by Subchrist software
-    UltimateII+ cartridge by Gideon Zweijtzer
-    
--   Tested using Classic99 emulator and original TI-99/4a with TIPI. 
 
-The code can be used freely as long as you retain
-a notice describing original source and author.
+void dsrlnkraw(unsigned int vdppab);
+# 62 "main.c" 2
+# 1 "/home/xahmol/libti99/conio.h" 1
+# 15 "/home/xahmol/libti99/conio.h"
+# 1 "/home/xahmol/libti99/vdp.h" 1
+# 27 "/home/xahmol/libti99/vdp.h"
+inline void VDP_SET_ADDRESS(unsigned int x) { *((volatile unsigned char*)0x8C02)=((x)&0xff); *((volatile unsigned char*)0x8C02)=((x)>>8); }
 
-THE PROGRAMS ARE DISTRIBUTED IN THE HOPE THAT THEY WILL BE USEFUL,
-BUT WITHOUT ANY WARRANTY. USE THEM AT YOUR OWN RISK!
-*/
 
-/* Includes */
-#include <system.h>
-#include <files.h>
-#include <conio.h>
-#include <kscan.h>
-#include <string.h>
-#include <vdp.h>
-#include <TISNPlay.h>
-#include <sound.h>
-#include "graphics.h"
-#include "defines.h"
+inline void VDP_SET_ADDRESS_WRITE(unsigned int x) { *((volatile unsigned char*)0x8C02)=((x)&0xff); *((volatile unsigned char*)0x8C02)=(((x)>>8)|0x40); }
 
-/* Variables */
 
-//Window data
+inline void VDP_SET_REGISTER(unsigned char r, unsigned char v) { *((volatile unsigned char*)0x8C02)=(v); *((volatile unsigned char*)0x8C02)=(0x80|(r)); }
+
+
+inline int VDP_SCREEN_POS(unsigned int r, unsigned int c) { return (((r)<<5)+(c)); }
+
+
+inline int VDP_SCREEN_TEXT(unsigned int r, unsigned int c) { return (((r)<<5)+((r)<<3)+(c)); }
+
+
+inline int VDP_SCREEN_TEXT80(unsigned int r, unsigned int c) { return (((r)<<6)+((r)<<4)+(c)); }
+
+
+
+
+inline int VDP_SCREEN_TEXT64(unsigned int r, unsigned int c) { return (((r)<<6)+(c)); }
+# 174 "/home/xahmol/libti99/vdp.h"
+int set_graphics_raw(int sprite_mode);
+
+void set_graphics(int sprite_mode);
+
+
+
+
+
+int set_text_raw();
+
+void set_text();
+
+
+
+
+
+int set_text80_raw();
+
+void set_text80();
+
+
+
+
+
+
+
+int set_text80_color_raw();
+
+void set_text80_color();
+
+
+
+
+
+
+
+int set_text80x30_color_raw();
+
+void set_text80x30_color();
+
+
+
+
+
+void set_text64_color();
+
+
+
+
+
+
+
+int set_multicolor_raw(int sprite_mode);
+
+void set_multicolor(int sprite_mode);
+
+
+
+
+
+int set_bitmap_raw(int sprite_mode);
+
+void set_bitmap(int sprite_mode);
+
+
+
+
+void writestring(int row, int col, char *pStr);
+
+
+
+void vdpmemset(int pAddr, int ch, int cnt);
+
+
+
+void vdpmemcpy(int pAddr, const unsigned char *pSrc, int cnt);
+
+
+
+void vdpmemread(int pAddr, unsigned char *pDest, int cnt);
+
+
+
+
+
+void vdpwriteinc(int pAddr, int nStart, int cnt);
+
+
+
+
+extern void (*vdpchar)(int pAddr, int ch);
+void vdpchar_default(int pAddr, int ch);
+
+
+
+
+unsigned char vdpreadchar(int pAddr);
+
+
+
+void vdpwritescreeninc(int pAddr, int nStart, int cnt);
+
+
+
+void vdpscreenchar(int pAddr, int ch);
+
+
+
+void vdpwaitvint();
+
+
+
+
+
+
+
+int putchar(int x);
+
+
+
+
+
+
+
+void putstring(char *s);
+
+
+
+int puts(char *s);
+
+
+
+
+
+
+int printf(char *str, ...);
+
+
+void hexprint(unsigned char x);
+
+
+
+void fast_hexprint(unsigned char x);
+
+
+
+void faster_hexprint(unsigned char x);
+
+
+
+void scrn_scroll_default();
+extern void (*scrn_scroll)();
+
+
+void fast_scrn_scroll();
+
+
+
+
+void hchar(int r, int c, int ch, int cnt);
+
+
+
+
+void vchar(int r, int c, int ch, int cnt);
+
+
+
+
+unsigned char gchar(int r, int c);
+
+
+
+
+
+
+void sprite(int n, int ch, int col, int r, int c);
+
+
+
+void delsprite(int n);
+
+
+
+void charset();
+
+
+
+
+void charsetlc();
+# 372 "/home/xahmol/libti99/vdp.h"
+void gplvdp(int vect, int adr, int cnt);
+
+
+void bm_setforeground(int c);
+
+
+void bm_setbackground(int c);
+
+
+
+void bm_clearscreen();
+
+
+
+
+void bm_setpixel(unsigned int x, unsigned int y);
+
+
+
+
+void bm_clearpixel(unsigned int x, unsigned int y);
+
+
+void bm_drawline(int x0, int y0, int x1, int y1);
+
+
+
+
+
+
+
+void bm_drawlinefast(int x0, int y0, int x1, int y1, int mode);
+
+
+
+void bm_sethlinefast(unsigned int x0, unsigned int y0, unsigned int x1);
+
+
+void bm_clearhlinefast(unsigned int x0, unsigned int y0, unsigned int x1);
+
+
+
+
+void bm_consolefont();
+
+
+
+
+void bm_putc(int c, int r, unsigned char alphanum);
+
+
+
+
+
+void bm_puts(int c, int r, unsigned char* str);
+
+
+
+
+void bm_placetile(int c, int r, const unsigned char* pattern);
+
+
+
+
+
+
+extern unsigned char gBitmapColor;
+
+
+
+
+
+extern unsigned char* gBmFont;
+
+
+
+
+extern unsigned int gImage;
+extern unsigned int gColor;
+extern unsigned int gPattern;
+extern unsigned int gSprite;
+extern unsigned int gSpritePat;
+
+
+extern int nTextRow,nTextEnd;
+extern int nTextPos,nTextFlags;
+# 472 "/home/xahmol/libti99/vdp.h"
+extern unsigned char gSaveIntCnt;
+
+
+extern const unsigned int byte2hex[256];
+
+
+
+void unlock_f18a();
+
+
+void lock_f18a();
+# 16 "/home/xahmol/libti99/conio.h" 2
+# 1 "/home/xahmol/tms9900gcc/lib/gcc/tms9900/4.4.0/include/stdarg.h" 1 3 4
+# 40 "/home/xahmol/tms9900gcc/lib/gcc/tms9900/4.4.0/include/stdarg.h" 3 4
+typedef __builtin_va_list __gnuc_va_list;
+# 102 "/home/xahmol/tms9900gcc/lib/gcc/tms9900/4.4.0/include/stdarg.h" 3 4
+typedef __gnuc_va_list va_list;
+# 17 "/home/xahmol/libti99/conio.h" 2
+
+
+extern int conio_x,conio_y;
+unsigned int conio_getvram();
+
+
+extern unsigned int conio_scrnCol;
+unsigned int bgcolor(unsigned int color);
+
+
+unsigned int bordercolor(unsigned int x);
+
+
+void cclear(unsigned int length);
+
+
+void cclearxy(int col, int row, int v);
+
+
+extern int conio_cursorFlag;
+extern int conio_cursorChar;
+unsigned char cgetc();
+
+
+void chline(int v);
+
+
+void chlinexy(int xx, int yy, int v);
+
+
+void clrscr();
+
+
+int cprintf(const char *fmt, ...);
+
+
+void cputc(int ch);
+
+
+void cputcxy(int xx, int yy, int ch);
+
+
+void cputs(const char *s);
+
+
+void cputsxy(int xx, int yy, const char *s);
+
+
+
+
+
+void cvline(int len);
+
+
+void cvlinexy(int x, int y, int len);
+# 83 "/home/xahmol/libti99/conio.h"
+unsigned char kbhit();
+
+
+unsigned char reverse(unsigned char x);
+
+
+void screensize(unsigned char *x, unsigned char *y);
+
+
+
+unsigned int textcolor(unsigned int color);
+
+
+int vcprintf(const char *fmt, va_list argp);
+
+
+inline int wherex() { return conio_x; }
+
+
+inline int wherey() { return conio_y; }
+# 63 "main.c" 2
+# 1 "/home/xahmol/libti99/kscan.h" 1
+# 54 "/home/xahmol/libti99/kscan.h"
+unsigned char kscan(unsigned char mode);
+
+
+
+
+
+void kscanfast(int mode);
+
+
+
+void joystfast(int unit);
+# 64 "main.c" 2
+# 1 "/home/xahmol/libti99/string.h" 1
+
+
+
+
+
+
+
+int strlen(const char *s);
+
+
+
+int atoi(char *s);
+
+
+char *strcpy(char *d, const char *s);
+
+
+
+int strcmp(const char *s1, const char *s2);
+
+
+
+int memcmp(const void *s1, const void *s2, int n);
+
+
+void *memcpy(void *dest, const void *src, int cnt);
+
+
+void *memset(void *dest, int src, int cnt);
+
+
+
+char *uint2str(unsigned int x);
+
+
+
+char *int2str(int x);
+
+
+
+char* uint2hex(unsigned int x);
+
+
+
+
+void gets(char *buf, int maxlen);
+# 65 "main.c" 2
+# 1 "/home/xahmol/libti99/vdp.h" 1
+# 66 "main.c" 2
+# 1 "/home/xahmol/vgmcomp2/Players/libtivgm2/TISNPlay.h" 1
+# 13 "/home/xahmol/vgmcomp2/Players/libtivgm2/TISNPlay.h"
+typedef int int16;
+typedef unsigned int uint16;
+typedef unsigned char uint8;
+typedef unsigned char uWordSize;
+
+
+
+typedef struct STRTYPE STREAM;
+struct STRTYPE {
+    uint8 *curPtr;
+    uint8 *mainPtr;
+    uint8 (*curType)(STREAM*, uint8*);
+    uWordSize curBytes;
+
+    uWordSize framesLeft;
+};
+
+
+
+
+void StartSong(const unsigned char *pSbf, uWordSize songNum);
+
+
+void StopSong();
+
+
+void SongLoop();
+
+
+void SongLoop30();
+# 54 "/home/xahmol/vgmcomp2/Players/libtivgm2/TISNPlay.h"
+extern uint8 songVol[4];
+# 64 "/home/xahmol/vgmcomp2/Players/libtivgm2/TISNPlay.h"
+extern uint16 songNote[4];
+# 67 "main.c" 2
+# 1 "/home/xahmol/libti99/sound.h" 1
+# 40 "/home/xahmol/libti99/sound.h"
+inline void SET_SOUND_PTR(unsigned int x) { *((volatile unsigned int*)0x83cc) = x; }
+
+
+inline void SET_SOUND_VDP() { *((volatile unsigned char*)0x83fd) |= 0x01; }
+
+
+inline void SET_SOUND_GROM() { *((volatile unsigned char*)0x83fd) &= ~0x01; }
+
+
+inline void START_SOUND() { *((volatile unsigned char*)0x83ce) = 1; }
+
+
+inline void MUTE_SOUND() { *((volatile unsigned char*)0x8400)=0x90|0x0f; *((volatile unsigned char*)0x8400)=0xB0|0x0f; *((volatile unsigned char*)0x8400)=0xD0|0x0f; *((volatile unsigned char*)0x8400)=0xF0|0x0f; }
+# 68 "main.c" 2
+# 1 "graphics.h" 1
+static const unsigned char colorset[] = {
+0x81,
+0x1f,
+0x1f,
+0x1f,
+0xb1,
+0xb1,
+0xb1,
+0xb1,
+0xb1,
+0xb1,
+0xb1,
+0xb1,
+0xb1,
+0xb1,
+0xb1,
+0xb1,
+0x21,
+0x81,
+0x41,
+0xa1,
+0xf1,
+0x21,
+0x81,
+0x41,
+0xa1,
+};
+static const unsigned char patterns[] = {
+0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff,
+0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
+0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
+0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x80,
+0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x03,
+0x00,0x00,0x00,0x00,0x00,0x00,0x80,0xc0,
+0x03,0x01,0x00,0x00,0x00,0x00,0x00,0x00,
+0xc0,0x80,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x0c,0x1e,0x1e,0x0c,0x00,0x00,0x00,
+0x00,0x00,0x00,0x30,0x78,0x78,0x30,0x00,
+0x00,0x0c,0x1e,0x1e,0x0c,0x00,0x80,0xc0,
+0x03,0x01,0x00,0x30,0x78,0x78,0x30,0x00,
+0x00,0x30,0x78,0x78,0x30,0x00,0x00,0x00,
+0x00,0x00,0x00,0x0c,0x1e,0x1e,0x0c,0x00,
+0x00,0x30,0x78,0x78,0x30,0x00,0x01,0x03,
+0xc0,0x80,0x00,0x0c,0x1e,0x1e,0x0c,0x00,
+0x00,0x30,0x78,0x78,0x30,0x00,0x30,0x78,
+0x00,0x0c,0x1e,0x1e,0x0c,0x00,0x0c,0x1e,
+0x78,0x30,0x00,0x30,0x78,0x78,0x30,0x00,
+0x1e,0x0c,0x00,0x0c,0x1e,0x1e,0x0c,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x18,0x3c,0x3c,0x18,0x18,0x00,0x18,0x00,
+0x6c,0x6c,0x00,0x00,0x00,0x00,0x00,0x00,
+0x6c,0x6c,0xfe,0x6c,0xfe,0x6c,0x6c,0x00,
+0x18,0x3e,0x60,0x3c,0x06,0x7c,0x18,0x00,
+0x00,0xc6,0xcc,0x18,0x30,0x66,0xc6,0x00,
+0x38,0x6c,0x68,0x76,0xdc,0xcc,0x76,0x00,
+0x0c,0x0c,0x10,0x00,0x00,0x00,0x00,0x00,
+0x0c,0x18,0x30,0x30,0x30,0x18,0x0c,0x00,
+0x30,0x18,0x0c,0x0c,0x0c,0x18,0x30,0x00,
+0x00,0x66,0x3c,0xff,0x3c,0x66,0x00,0x00,
+0x00,0x18,0x18,0x7e,0x18,0x18,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x30,
+0x00,0x00,0x00,0x7e,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x00,
+0x03,0x06,0x0c,0x18,0x30,0x60,0xc0,0x00,
+0x3c,0x66,0x6e,0x7e,0x76,0x66,0x3c,0x00,
+0x18,0x18,0x38,0x18,0x18,0x18,0x7e,0x00,
+0x3c,0x66,0x06,0x0c,0x30,0x66,0x7e,0x00,
+0x3c,0x66,0x06,0x1c,0x06,0x66,0x3c,0x00,
+0x1c,0x3c,0x6c,0xcc,0xfe,0x0c,0x1e,0x00,
+0x7e,0x60,0x7c,0x06,0x06,0x66,0x3c,0x00,
+0x1c,0x30,0x60,0x7c,0x66,0x66,0x3c,0x00,
+0x7e,0x66,0x06,0x0c,0x18,0x18,0x18,0x00,
+0x3c,0x66,0x66,0x3c,0x66,0x66,0x3c,0x00,
+0x3c,0x66,0x66,0x3e,0x06,0x0c,0x38,0x00,
+0x00,0x18,0x18,0x00,0x18,0x18,0x00,0x00,
+0x00,0x18,0x18,0x00,0x00,0x18,0x18,0x30,
+0x0c,0x18,0x30,0x60,0x30,0x18,0x0c,0x00,
+0x00,0x00,0x7e,0x00,0x7e,0x00,0x00,0x00,
+0x30,0x18,0x0c,0x06,0x0c,0x18,0x30,0x00,
+0x3c,0x66,0x06,0x0c,0x18,0x00,0x18,0x00,
+0x3c,0x42,0x99,0xa1,0xa1,0x99,0x42,0x3c,
+0x18,0x3c,0x3c,0x66,0x7e,0xc3,0xc3,0x00,
+0xfc,0x66,0x66,0x7c,0x66,0x66,0xfc,0x00,
+0x3c,0x66,0xc0,0xc0,0xc0,0x66,0x3c,0x00,
+0xf8,0x6c,0x66,0x66,0x66,0x6c,0xf8,0x00,
+0xfe,0x66,0x60,0x78,0x60,0x66,0xfe,0x00,
+0xfe,0x66,0x60,0x78,0x60,0x60,0xf0,0x00,
+0x3c,0x66,0xc0,0xce,0xc6,0x66,0x3c,0x00,
+0x66,0x66,0x66,0x7e,0x66,0x66,0x66,0x00,
+0x7e,0x18,0x18,0x18,0x18,0x18,0x7e,0x00,
+0x3c,0x0c,0x0c,0x0c,0xcc,0xcc,0x78,0x00,
+0xe6,0x66,0x6c,0x70,0x6c,0x66,0xe6,0x00,
+0xf0,0x60,0x60,0x60,0x62,0x66,0xfe,0x00,
+0x82,0xc6,0xee,0xfe,0xd6,0xc6,0xc6,0x00,
+0xc6,0xe6,0xf6,0xde,0xce,0xc6,0xc6,0x00,
+0x38,0x6c,0xc6,0xc6,0xc6,0x6c,0x38,0x00,
+0xfc,0x66,0x66,0x7c,0x60,0x60,0xf0,0x00,
+0x38,0x6c,0xc6,0xc6,0xc6,0x6c,0x3c,0x06,
+0xfc,0x66,0x66,0x7c,0x6c,0x66,0xe3,0x00,
+0x3c,0x66,0x70,0x38,0x0e,0x66,0x3c,0x00,
+0x7e,0x5a,0x18,0x18,0x18,0x18,0x3c,0x00,
+0x66,0x66,0x66,0x66,0x66,0x66,0x3e,0x00,
+0xc3,0xc3,0x66,0x66,0x3c,0x3c,0x18,0x00,
+0xc6,0xc6,0xc6,0xd6,0xfe,0xee,0xc6,0x00,
+0xc3,0x66,0x3c,0x18,0x3c,0x66,0xc3,0x00,
+0xc3,0xc3,0x66,0x3c,0x18,0x18,0x3c,0x00,
+0xfe,0xc6,0x8c,0x18,0x32,0x66,0xfe,0x00,
+0x3c,0x30,0x30,0x30,0x30,0x30,0x3c,0x00,
+0xc0,0x60,0x30,0x18,0x0c,0x06,0x03,0x00,
+0x3c,0x0c,0x0c,0x0c,0x0c,0x0c,0x3c,0x00,
+0x10,0x38,0x6c,0xc6,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff,
+0x00,0x00,0x20,0x10,0x08,0x00,0x00,0x00,
+0x00,0x00,0x78,0x0c,0x7c,0xcc,0x76,0x00,
+0xe0,0x60,0x6c,0x76,0x66,0x66,0x3c,0x00,
+0x00,0x00,0x3c,0x66,0x60,0x66,0x3c,0x00,
+0x1c,0x0c,0x6c,0xdc,0xcc,0xcc,0x76,0x00,
+0x00,0x00,0x3c,0x66,0x7e,0x60,0x3c,0x00,
+0x1c,0x36,0x30,0x78,0x30,0x30,0x78,0x00,
+0x00,0x00,0x3b,0x66,0x66,0x3c,0xc6,0x7c,
+0xe0,0x60,0x6c,0x76,0x66,0x66,0xe6,0x00,
+0x18,0x00,0x38,0x18,0x18,0x18,0x3c,0x00,
+0x0c,0x00,0x0c,0x0c,0x0c,0x0c,0xcc,0x78,
+0xe0,0x60,0x66,0x6c,0x78,0x6c,0xe6,0x00,
+0x38,0x18,0x18,0x18,0x18,0x18,0x3c,0x00,
+0x00,0x00,0xcc,0xee,0xd6,0xc6,0xc6,0x00,
+0x00,0x00,0x7c,0x66,0x66,0x66,0x66,0x00,
+0x00,0x00,0x3c,0x66,0x66,0x66,0x3c,0x00,
+0x00,0x00,0xbc,0x66,0x66,0x7c,0x60,0xf0,
+0x00,0x00,0x7a,0xcc,0xcc,0x7c,0x0c,0x0e,
+0x00,0x00,0xac,0x76,0x66,0x60,0xf0,0x00,
+0x00,0x00,0x3e,0x60,0x3c,0x06,0x7c,0x00,
+0x10,0x30,0x7c,0x30,0x30,0x34,0x18,0x00,
+0x00,0x00,0xcc,0xcc,0xcc,0xcc,0x72,0x00,
+0x00,0x00,0x66,0x66,0x66,0x3c,0x18,0x00,
+0x00,0x00,0xc6,0xd6,0xd6,0x6c,0x6c,0x00,
+0x00,0x00,0xc6,0x6c,0x38,0x6c,0xc6,0x00,
+0x00,0x00,0x66,0x66,0x66,0x3c,0x18,0x70,
+0x00,0x00,0x7e,0x4c,0x18,0x32,0x7e,0x00,
+0x18,0x20,0x20,0x40,0x20,0x20,0x18,0x00,
+0x10,0x10,0x10,0x00,0x10,0x10,0x10,0x00,
+0x30,0x08,0x08,0x04,0x08,0x08,0x30,0x00,
+0x00,0x20,0x54,0x08,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x03,0x0f,0x1f,0x3f,0x1f,0x0f,0x07,0x0f,
+0xc0,0xf0,0xf8,0xfc,0xf8,0xf0,0xe0,0xf0,
+0x07,0x0f,0x1f,0x1f,0x3f,0x3f,0x3f,0x00,
+0xe0,0xf0,0xf8,0xf8,0xfc,0xfc,0xfc,0x00,
+0x00,0x00,0x01,0x07,0x0f,0x1f,0x1f,0x3f,
+0x00,0x00,0x80,0xe0,0xf0,0xf8,0xf8,0xfc,
+0x3f,0x1f,0x1f,0x0f,0x07,0x01,0x00,0x00,
+0xfc,0xf8,0xf8,0xf0,0xe0,0x80,0x00,0x00,
+0x03,0x0f,0x1f,0x3f,0x1f,0x0f,0x07,0x0f,
+0xc0,0xf0,0xf8,0xfc,0xf8,0xf0,0xe0,0xf0,
+0x07,0x0f,0x1f,0x1f,0x3f,0x3f,0x3f,0x00,
+0xe0,0xf0,0xf8,0xf8,0xfc,0xfc,0xfc,0x00,
+0x00,0x00,0x01,0x07,0x0f,0x1f,0x1f,0x3f,
+0x00,0x00,0x80,0xe0,0xf0,0xf8,0xf8,0xfc,
+0x3f,0x1f,0x1f,0x0f,0x07,0x01,0x00,0x00,
+0xfc,0xf8,0xf8,0xf0,0xe0,0x80,0x00,0x00,
+0x03,0x0f,0x1f,0x3f,0x1f,0x0f,0x07,0x0f,
+0xc0,0xf0,0xf8,0xfc,0xf8,0xf0,0xe0,0xf0,
+0x07,0x0f,0x1f,0x1f,0x3f,0x3f,0x3f,0x00,
+0xe0,0xf0,0xf8,0xf8,0xfc,0xfc,0xfc,0x00,
+0x00,0x00,0x01,0x07,0x0f,0x1f,0x1f,0x3f,
+0x00,0x00,0x80,0xe0,0xf0,0xf8,0xf8,0xfc,
+0x3f,0x1f,0x1f,0x0f,0x07,0x01,0x00,0x00,
+0xfc,0xf8,0xf8,0xf0,0xe0,0x80,0x00,0x00,
+0x03,0x0f,0x1f,0x3f,0x1f,0x0f,0x07,0x0f,
+0xc0,0xf0,0xf8,0xfc,0xf8,0xf0,0xe0,0xf0,
+0x07,0x0f,0x1f,0x1f,0x3f,0x3f,0x3f,0x00,
+0xe0,0xf0,0xf8,0xf8,0xfc,0xfc,0xfc,0x00,
+0x00,0x00,0x01,0x07,0x0f,0x1f,0x1f,0x3f,
+0x00,0x00,0x80,0xe0,0xf0,0xf8,0xf8,0xfc,
+0x3f,0x1f,0x1f,0x0f,0x07,0x01,0x00,0x00,
+0xfc,0xf8,0xf8,0xf0,0xe0,0x80,0x00,0x00,
+0x03,0x0f,0x1f,0x3f,0x1f,0x0f,0x07,0x0f,
+0xc0,0xf0,0xf8,0xfc,0xf8,0xf0,0xe0,0xf0,
+0x07,0x0f,0x1f,0x1f,0x3f,0x3f,0x3f,0x00,
+0xe0,0xf0,0xf8,0xf8,0xfc,0xfc,0xfc,0x00,
+0x00,0x00,0x01,0x06,0x08,0x10,0x10,0x20,
+0x00,0x00,0x80,0x60,0x10,0x08,0x08,0x04,
+0x20,0x10,0x10,0x08,0x06,0x01,0x00,0x00,
+0x04,0x08,0x08,0x10,0x60,0x80,0x00,0x00,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x01,0x07,0x0f,0x1f,0x1f,0x38,
+0x00,0x00,0x80,0xe0,0xf0,0x78,0x38,0x1c,
+0x38,0x1f,0x1f,0x0f,0x07,0x01,0x00,0x00,
+0x1c,0x38,0x78,0xf0,0xe0,0x80,0x00,0x00,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0x00,0x08,0x0c,0x7e,0x7e,0x0c,0x08,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x01,0x07,0x0f,0x1e,0x1e,0x3e,
+0x00,0x00,0x80,0xe0,0xf0,0x78,0x78,0x7c,
+0x38,0x1c,0x1e,0x0f,0x07,0x01,0x00,0x00,
+0x1c,0x38,0x78,0xf0,0xe0,0x80,0x00,0x00,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x01,0x07,0x0f,0x1e,0x1c,0x38,
+0x00,0x00,0x80,0xe0,0xf0,0xf8,0xf8,0x1c,
+0x38,0x1c,0x1e,0x0f,0x07,0x01,0x00,0x00,
+0x1c,0xf8,0xf8,0xf0,0xe0,0x80,0x00,0x00,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x01,0x07,0x0f,0x1e,0x1c,0x38,
+0x00,0x00,0x80,0xe0,0xf0,0x78,0x38,0x1c,
+0x3e,0x1e,0x1e,0x0f,0x07,0x01,0x00,0x00,
+0x7c,0x78,0x78,0xf0,0xe0,0x80,0x00,0x00,
+};
+static const unsigned char mainscreen[] = {
+0x4c,0x55,0x44,0x4f,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x80,0x81,0x80,0x81,0x20,0x20,0x20,0x20,0xa4,0xa5,0xa4,0xa5,0xb4,0xb5,0x20,0x20,0x20,0x20,0x88,0x89,0x88,0x89,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x82,0x83,0x82,0x83,0x20,0x20,0x20,0x20,0xa6,0xa7,0xa6,0xa7,0xb6,0xb7,0x20,0x20,0x20,0x20,0x8a,0x8b,0x8a,0x8b,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x80,0x81,0x80,0x81,0x20,0x20,0x20,0x20,0xa4,0xa5,0x8c,0x8d,0xa4,0xa5,0x20,0x20,0x20,0x20,0x88,0x89,0x88,0x89,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x82,0x83,0x82,0x83,0x20,0x20,0x20,0x20,0xa6,0xa7,0x8e,0x8f,0xa6,0xa7,0x20,0x20,0x20,0x20,0x8a,0x8b,0x8a,0x8b,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0xa4,0xa5,0x8c,0x8d,0xa4,0xa5,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0xa6,0xa7,0x8e,0x8f,0xa6,0xa7,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0xa4,0xa5,0x8c,0x8d,0xa4,0xa5,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0xa6,0xa7,0x8e,0x8f,0xa6,0xa7,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0xac,0xad,0xa4,0xa5,0xa4,0xa5,0xa4,0xa5,0xa4,0xa5,0x8c,0x8d,0xa4,0xa5,0xa4,0xa5,0xa4,0xa5,0xa4,0xa5,0xa4,0xa5,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0xae,0xaf,0xa6,0xa7,0xa6,0xa7,0xa6,0xa7,0xa6,0xa7,0x8e,0x8f,0xa6,0xa7,0xa6,0xa7,0xa6,0xa7,0xa6,0xa7,0xa6,0xa7,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0xa4,0xa5,0x84,0x85,0x84,0x85,0x84,0x85,0x84,0x85,0x20,0x20,0x94,0x95,0x94,0x95,0x94,0x95,0x94,0x95,0xa4,0xa5,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0xa6,0xa7,0x86,0x87,0x86,0x87,0x86,0x87,0x86,0x87,0x20,0x20,0x96,0x97,0x96,0x97,0x96,0x97,0x96,0x97,0xa6,0xa7,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0xa4,0xa5,0xa4,0xa5,0xa4,0xa5,0xa4,0xa5,0xa4,0xa5,0x9c,0x9d,0xa4,0xa5,0xa4,0xa5,0xa4,0xa5,0xa4,0xa5,0xbc,0xbd,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0xa6,0xa7,0xa6,0xa7,0xa6,0xa7,0xa6,0xa7,0xa6,0xa7,0x9e,0x9f,0xa6,0xa7,0xa6,0xa7,0xa6,0xa7,0xa6,0xa7,0xbe,0xbf,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0xa4,0xa5,0x9c,0x9d,0xa4,0xa5,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0xa6,0xa7,0x9e,0x9f,0xa6,0xa7,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0xa4,0xa5,0x9c,0x9d,0xa4,0xa5,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0xa6,0xa7,0x9e,0x9f,0xa6,0xa7,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x98,0x99,0x98,0x99,0x20,0x20,0x20,0x20,0xa4,0xa5,0x9c,0x9d,0xa4,0xa5,0x20,0x20,0x20,0x20,0x90,0x91,0x90,0x91,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x9a,0x9b,0x9a,0x9b,0x20,0x20,0x20,0x20,0xa6,0xa7,0x9e,0x9f,0xa6,0xa7,0x20,0x20,0x20,0x20,0x92,0x93,0x92,0x93,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x98,0x99,0x98,0x99,0x20,0x20,0x20,0x20,0xc4,0xc5,0xa4,0xa5,0xa4,0xa5,0x20,0x20,0x20,0x20,0x90,0x91,0x90,0x91,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x9a,0x9b,0x9a,0x9b,0x20,0x20,0x20,0x20,0xc6,0xc7,0xa6,0xa7,0xa6,0xa7,0x20,0x20,0x20,0x20,0x92,0x93,0x92,0x93,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+};
+static const unsigned char titlescreen[] = {
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x49,0x44,0x72,0x65,0x61,0x6d,0x74,0x49,0x6e,0x38,0x42,0x69,0x74,0x73,0x2e,0x63,0x6f,0x6d,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x70,0x72,0x65,0x73,0x65,0x6e,0x74,0x73,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x80,0x81,0x20,0x20,0x9c,0x9d,0x20,0x20,0x20,0x9c,0x9d,0x20,0x9c,0x9d,0x20,0x9c,0xc0,0xc0,0xc0,0x9d,0x20,0x20,0x9c,0xc0,0xc0,0xc0,0x9d,0x20,0x88,0x89,0x20,
+0x20,0x82,0x83,0x20,0x20,0xc0,0xc0,0x20,0x20,0x20,0xc0,0xc0,0x20,0xc0,0xc0,0x20,0xc0,0xc0,0x20,0x20,0x9e,0x9d,0x20,0xc0,0xc0,0x20,0xc0,0xc0,0x20,0x8a,0x8b,0x20,
+0x20,0x20,0x20,0x20,0x20,0xa8,0xa8,0x20,0x20,0x20,0xa8,0xa8,0x20,0xa8,0xa8,0x20,0xa8,0xa8,0x20,0x20,0x20,0xa8,0x20,0xa8,0xa8,0x20,0xa8,0xa8,0x20,0x20,0x20,0x20,
+0x20,0x98,0x99,0x20,0x20,0xa8,0xa8,0x20,0x20,0x20,0xa8,0xa8,0x20,0xa8,0xa8,0x20,0xa8,0xa8,0x20,0x20,0x84,0x87,0x20,0xa8,0xa8,0x20,0xa8,0xa8,0x20,0x90,0x91,0x20,
+0x20,0x9a,0x9b,0x20,0x20,0x96,0xb8,0xb8,0xb8,0x20,0x96,0xb8,0xb8,0xb8,0x97,0x20,0x96,0xb8,0xb8,0xb8,0x97,0x20,0x20,0x96,0xb8,0xb8,0xb8,0x97,0x20,0x92,0x93,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x57,0x72,0x69,0x74,0x74,0x65,0x6e,0x20,0x62,0x79,0x20,0x58,0x61,0x6e,0x64,0x65,0x72,0x20,0x4d,0x6f,0x6c,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x08,0x09,0x20,0x15,0x16,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x0a,0x0b,0x20,0x17,0x18,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
+};
+# 69 "main.c" 2
+# 1 "defines.h" 1
+# 70 "main.c" 2
+
+
+
+
 struct WindowStruct
 {
     unsigned int address;
@@ -83,7 +848,7 @@ unsigned int windowaddress;
 unsigned char windowmemory[768];
 unsigned char windownumber = 0;
 
-//Menu data
+
 unsigned char menubaroptions = 4;
 unsigned char pulldownmenunumber = 8;
 unsigned char menubartitles[4][12] = {"Game","Disc","Music","Info"};
@@ -114,13 +879,13 @@ unsigned char pulldownmenutitles[8][5][16] = {
      "Slot 4: Empty  "}
 };
 
-//Input validation strings
+
 unsigned char numbers[11]="0123456789";
 unsigned char letters[53]="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-unsigned char updownenter[4] = {C_DOWN,C_UP,C_ENTER,0};
-unsigned char leftright[3] = {C_LEFT,C_RIGHT,0};
+unsigned char updownenter[4] = {10,11,13,0};
+unsigned char leftright[3] = {8,9,0};
 
-//Pawn position co-ords main field
+
 unsigned char fieldcoords[40][2] = {
      { 0,10}, { 2,10}, { 4,10}, { 6,10}, { 8,10},
      { 8, 8}, { 8, 6}, { 8, 4}, { 8, 2}, {10, 2},
@@ -131,53 +896,53 @@ unsigned char fieldcoords[40][2] = {
      { 8,22}, { 8,20}, { 8,18}, { 8,16}, { 8,14},
      { 6,14}, { 4,14}, { 2,14}, { 0,14}, { 0,12}
 };
-//Pawn posiiion co-ords start and destination
+
 unsigned char homedestcoords[4][8][2] = {
     {{ 0, 2}, { 2, 2}, { 0, 4}, { 2, 4}, { 2,12}, { 4,12}, { 6,12}, { 8,12}},
     {{18, 2}, {20, 2}, {18, 4}, {20, 4}, {10, 4}, {10, 6}, {10, 8}, {10,10}},
     {{18,20}, {20,20}, {18,22}, {20,22}, {18,12}, {16,12}, {14,12}, {12,12}},
     {{ 0,20}, { 2,20}, { 0,22}, { 2,22}, {10,20}, {10,18}, {10,16}, {10,14}}
 };
-/* Player data:
-    [players 0-3]
-    [position 0: human = 0 or computer = 1
-     position 1: number of pawns not at destination
-     position 2: player color
-     position 3: number of pawns at home              */
+
+
+
+
+
+
 unsigned char playerdata[4][4] = {
-    {0,4,C_GINVSPACE,4},
-    {0,4,C_RINVSPACE,4},
-    {0,4,C_BINVSPACE,4},
-    {0,4,C_YINVSPACE,4}
+    {0,4,168,4},
+    {0,4,176,4},
+    {0,4,184,4},
+    {0,4,192,4}
 };
-/* Player field positions:
-    [players 0-3]
-    [pawnnumber 0-3]
-    [0 position: main field = 0, else 1
-     1 position: fieldnumber]               */
+
+
+
+
+
 unsigned char playerpos[4][4][2] = {
     {{1,0}, {1,1}, {1,2}, {1,3}},
     {{1,0}, {1,1}, {1,2}, {1,3}},
     {{1,0}, {1,1}, {1,2}, {1,3}},
     {{1,0}, {1,1}, {1,2}, {1,3}}
 };
-/* Player names */
+
 unsigned char playername[4][9] = { "","","","" };
 
 signed char np[4] = { -1, -1, -1, -1};
 unsigned char dp[4] = { 8, 8, 8, 8 };
 
-//Dice graphics string data
+
 unsigned char dicegraphics[6][4] = {
-    {C_DICE01,C_DICE02,C_DICE03,C_DICE04},
-    {C_DICE05,C_DICE06,C_DICE07,C_DICE05},
-    {C_DICE01,C_DICE08,C_DICE09,C_DICE04},
-    {C_DICE10,C_DICE06,C_DICE07,C_DICE11},
-    {C_DICE12,C_DICE08,C_DICE09,C_DICE13},
-    {C_DICE14,C_DICE15,C_DICE16,C_DICE17}
+    {8,9,10,11},
+    {12,13,14,12},
+    {8,15,16,11},
+    {17,13,14,18},
+    {19,15,16,20},
+    {21,22,23,24}
 };
 
-//Game variables
+
 unsigned char endofgameflag = 0;
 unsigned char turnofplayernr = 0;
 unsigned char zv = 0;
@@ -187,18 +952,18 @@ unsigned char musicnumber = 1;
 unsigned char joyinterface = 1;
 unsigned char autosavetoggle = 1;
 
-//Save game memory allocation
+
 unsigned char saveslots[85];
 unsigned char savegamemem[136];
 
-//Music memory allocation
+
 unsigned char musicmem[3200];
 
-/* Functions not present in LIBTI99 */
+
 unsigned char* strcat(unsigned char *dest, unsigned const char *src)
 {
-    /*  Append SRC on the end of DEST.
-        Source: https://code.woboq.org/userspace/glibc/string/strcat.c.html */
+
+
 
     strcpy (dest + strlen (dest), src);
     return dest;
@@ -206,10 +971,10 @@ unsigned char* strcat(unsigned char *dest, unsigned const char *src)
 
 unsigned char* strchr(unsigned register const char *s, unsigned int c)
 {
-    /*  eturns a pointer to the first occurrence of the character @var{c} in
-        the string @var{s}, or @code{NULL} if not found.  If @var{c} is itself the
-        null character, the results are undefined.
-        Source: https://code.woboq.org/gcc/libiberty/strchr.c.html */
+
+
+
+
 
     do {
       if (*s == c)
@@ -222,123 +987,123 @@ unsigned char* strchr(unsigned register const char *s, unsigned int c)
 
 static unsigned int random(void)
 {
-    /*  Retun random number
-        Source from: https://github.com/peberlein/turmoil */
 
-	static unsigned int seed = 0xaaaa;
-	static const unsigned int random_mask = 0xb400;
 
-	__asm__(
-		"srl %0,1  \n\t"
-		"jnc 1f    \n\t"
-		"xor %2,%0 \n\t"
-		"1:        \n\t"
-		: "=r"(seed)
-		: "0"(seed),"m"(random_mask)
-	);
-	return seed;
+
+ static unsigned int seed = 0xaaaa;
+ static const unsigned int random_mask = 0xb400;
+
+ __asm__(
+  "srl %0,1  \n\t"
+  "jnc 1f    \n\t"
+  "xor %2,%0 \n\t"
+  "1:        \n\t"
+  : "=r"(seed)
+  : "0"(seed),"m"(random_mask)
+ );
+ return seed;
 }
 
 void wait(unsigned int jiffies)
 {
-    /* Function to wait for the specified number of cycles
-       Input: wait_cycles = numnber of cycles to wait       
-       Source: https://github.com/jedimatt42/tipi/tree/master/clients/tipicfg */
+
+
+
 
     for(int i=0; i < jiffies; i++) {
-        VDP_WAIT_VBLANK_CRU;
+        __asm__( "clr r12\n\ttb 2\n\tjeq -4\n\tmovb @>8802,r12" : : : "r12" );;
         if(musicnumber)
         {
-            CALL_PLAYER_SN;
-            if (!isSNPlaying) { StartSong(musicmem,0); }
+            __asm__( "bl @SongLoop" : : : "r0","r1","r2","r3","r4","r5","r6","r7","r8","r9","r11","r12","r13","r14","r15","cc" );
+            if (!((songNote[3]&0x01) != 0)) { StartSong(musicmem,0); }
         }
     }
 }
 
-/*  File management functions */
+
 
 unsigned char dsr_load(unsigned char* filename, unsigned char* dest, unsigned int numbytes)
 {
-    /*  Load file.
-        Inspired by Jedimatt42 and Tursi
-        Source: https://atariage.com/forums/topic/164295-gcc-for-the-ti/page/25/?tab=comments#comment-4786953 */
+
+
+
 
     struct PAB pab;
     unsigned char ferr;
 
-    // not relavent, but lets initialize all the bits
-    pab.ScreenOffset = 0; 
+
+    pab.ScreenOffset = 0;
     pab.Status = 0;
     pab.RecordLength = 0;
     pab.CharCount = 0;
-    // the stuff that matters...
-    pab.OpCode = DSR_LOAD; // DSR_LOAD for LOAD
-    pab.VDPBuffer = FBUF; // where in VDP you want to load (or save from)
-    pab.RecordNumber = numbytes; // size to load since we aren't using records
+
+    pab.OpCode = 0x05;
+    pab.VDPBuffer = 0x1A00;
+    pab.RecordNumber = numbytes;
     pab.NameLength = strlen(filename);
     pab.pName = filename;
- 
-    ferr = dsrlnk(&pab, VPAB);
-    if(!ferr) { vdpmemread(FBUF, dest, numbytes); }
+
+    ferr = dsrlnk(&pab, 0x1800);
+    if(!ferr) { vdpmemread(0x1A00, dest, numbytes); }
     return ferr;
 }
 
 unsigned char dsr_save(unsigned char* filename, unsigned char* source, unsigned int numbytes)
 {
-    /*  Save file.
-        Inspired by Jedimatt42 and Tursi
-        Source: https://atariage.com/forums/topic/164295-gcc-for-the-ti/page/25/?tab=comments#comment-4786953 */
+
+
+
 
     struct PAB pab;
 
-    // not relavent, but lets initialize all the bits
-    pab.ScreenOffset = 0; 
+
+    pab.ScreenOffset = 0;
     pab.Status = 0;
     pab.RecordLength = 0;
     pab.CharCount = 0;
-    // the stuff that matters...
-    pab.OpCode = DSR_SAVE; // DSR_SAVE for SAVE
-    pab.VDPBuffer = FBUF; // where in VDP you want to load (or save from)
-    pab.RecordNumber = numbytes; // size to save since we aren't using records
+
+    pab.OpCode = 0x06;
+    pab.VDPBuffer = 0x1A00;
+    pab.RecordNumber = numbytes;
     pab.NameLength = strlen(filename);
     pab.pName = filename;
-    
-    vdpmemcpy(FBUF, source, numbytes);
-    return dsrlnk(&pab, VPAB);
+
+    vdpmemcpy(0x1A00, source, numbytes);
+    return dsrlnk(&pab, 0x1800);
 }
 
-/* General screen functions */
+
 void cspaces(unsigned char number)
 {
-    /* Function to print specified number of spaces */
+
 
     unsigned char x;
 
-    for(x=0;x<number;x++) { cputc(C_SPACE); }
+    for(x=0;x<number;x++) { cputc(32); }
 }
 
 void cleararea(unsigned char xpos, unsigned char ypos, unsigned char height, unsigned char width)
 {
-    /* Function to clear area */
+
 
     unsigned char x;
 
     for(x=0;x<height;x++)
     {
-        gotoxy(xpos,ypos+x);
+        conio_x = (xpos); conio_y = (ypos+x);
         cspaces(width);
     }
 }
 
 void printcentered(unsigned char* text, unsigned char xpos, unsigned char ypos, unsigned char width)
 {
-    /* Function to print a text centered
-       Input:
-       - Text:  Text to be printed
-       - Color: Color for text to be printed
-       - Width: Width of window to align to    */
 
-    gotoxy(xpos,ypos);
+
+
+
+
+
+    conio_x = (xpos); conio_y = (ypos);
 
     if(strlen(text)<width)
     {
@@ -347,13 +1112,13 @@ void printcentered(unsigned char* text, unsigned char xpos, unsigned char ypos, 
     cputs(text);
 }
 
-/* Generic input routines */
+
 unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
 {
-    /* Function to wait on valid key or joystick press/move
-       Input: allowedkeys = String with valid key press options
-                            Empty string means any key allowed
-       Output: key value (or joystick converted to key value)    */
+
+
+
+
 
     unsigned char key, joy1x, joy1y, joy1b, joy2x, joy2y, joy2b, debounce;
 
@@ -362,48 +1127,48 @@ unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
         random();
         if(musicnumber)
         {
-            vdpwaitvint();      // wait for an interrupt with ints enabled - console clears it
-            CALL_PLAYER_SN;
-            if (!isSNPlaying) { StartSong(musicmem,0); }
+            vdpwaitvint();
+            __asm__( "bl @SongLoop" : : : "r0","r1","r2","r3","r4","r5","r6","r7","r8","r9","r11","r12","r13","r14","r15","cc" );
+            if (!((songNote[3]&0x01) != 0)) { StartSong(musicmem,0); }
         }
-        
+
         key = 0;
         if(joyinterface && joyallowed)
         {
             joystfast(1);
             kscanfast(1);
-            joy1x = KSCAN_JOYX;
-            joy1y = KSCAN_JOYY;
-            joy1b = KSCAN_KEY;
+            joy1x = *((volatile unsigned char*)0x8377);
+            joy1y = *((volatile unsigned char*)0x8376);
+            joy1b = *((volatile unsigned char*)0x8375);
             joystfast(2);
             kscanfast(2);
-            joy2x = KSCAN_JOYX;
-            joy2y = KSCAN_JOYY;
-            joy2b = KSCAN_KEY;
-            if(joy1b != 0xff || joy2b != 0xff ) { key = C_ENTER; }
-            if(joy1x == JOY_RIGHT || joy2x == JOY_RIGHT ) { key = C_RIGHT; }
-            if(joy1x == JOY_LEFT || joy2x == JOY_LEFT ) { key = C_LEFT; }
-            if(joy1y == JOY_DOWN || joy2y == JOY_DOWN ) { key = C_DOWN; }
-            if(joy1y == JOY_UP || joy2y == JOY_UP ) { key = C_UP; }
+            joy2x = *((volatile unsigned char*)0x8377);
+            joy2y = *((volatile unsigned char*)0x8376);
+            joy2b = *((volatile unsigned char*)0x8375);
+            if(joy1b != 0xff || joy2b != 0xff ) { key = 13; }
+            if(joy1x == 0x04 || joy2x == 0x04 ) { key = 9; }
+            if(joy1x == 0xfc || joy2x == 0xfc ) { key = 8; }
+            if(joy1y == 0xfc || joy2y == 0xfc ) { key = 10; }
+            if(joy1y == 0x04 || joy2y == 0x04 ) { key = 11; }
             if(key){
                 do
                 {
                     debounce = 0;
                     joystfast(1);
                     kscanfast(1);
-                    joy1x = KSCAN_JOYX;
-                    joy1y = KSCAN_JOYY;
-                    joy1b = KSCAN_KEY;
+                    joy1x = *((volatile unsigned char*)0x8377);
+                    joy1y = *((volatile unsigned char*)0x8376);
+                    joy1b = *((volatile unsigned char*)0x8375);
                     joystfast(2);
                     kscanfast(2);
-                    joy2x = KSCAN_JOYX;
-                    joy2y = KSCAN_JOYY;
-                    joy2b = KSCAN_KEY;
+                    joy2x = *((volatile unsigned char*)0x8377);
+                    joy2y = *((volatile unsigned char*)0x8376);
+                    joy2b = *((volatile unsigned char*)0x8375);
                     if(joy1b != 0xff || joy2b != 0xff ) { debounce=1; }
-                    if(joy1x == JOY_RIGHT || joy2x == JOY_RIGHT ) { debounce=1; }
-                    if(joy1x == JOY_LEFT || joy2x == JOY_LEFT ) { debounce=1; }
-                    if(joy1y == JOY_DOWN || joy2y == JOY_DOWN ) { debounce=1; }
-                    if(joy1y == JOY_UP || joy2y == JOY_UP ) { debounce=1; }
+                    if(joy1x == 0x04 || joy2x == 0x04 ) { debounce=1; }
+                    if(joy1x == 0xfc || joy2x == 0xfc ) { debounce=1; }
+                    if(joy1y == 0xfc || joy2y == 0xfc ) { debounce=1; }
+                    if(joy1y == 0x04 || joy2y == 0x04 ) { debounce=1; }
                 } while (debounce == 1);
             }
         }
@@ -412,73 +1177,62 @@ unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
             if(kbhit())
             {
                 key = cgetc();
-                if(strlen(allowedkeys)==0) { key = C_ENTER; }
+                if(strlen(allowedkeys)==0) { key = 13; }
             }
         }
-    } while ( (strchr(allowedkeys, key)==0 && key != C_ENTER) || key == 0);
+    } while ( (strchr(allowedkeys, key)==0 && key != 13) || key == 0);
     return key;
 }
 
 int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned char size)
 {
-    /**
-    * input/modify a string.
-    * based on version DraCopy 1.0e, then modified.
-    * Created 2009 by Sascha Bader.
-    * @param[in] xpos screen x where input starts.
-    * @param[in] ypos screen y where input starts.
-    * @param[in,out] str string that is edited, it can have content and must have at   least @p size + 1 bytes. Maximum size if 255 bytes.
-    * @param[in] size maximum length of @p str in bytes.
-    * @return -1 if input was aborted.
-    * @return >= 0 length of edited string @p str.
-    */
-
+# 436 "main.c"
     unsigned char idx = strlen(str);
     unsigned char c, x, b, flag;
-    unsigned char validkeys[70] = {C_SPACE ,C_DELETE,0};
+    unsigned char validkeys[70] = {32 ,3,0};
 
     strcat(validkeys,numbers);
     strcat(validkeys,letters);
     strcat(validkeys,updownenter);
     strcat(validkeys,leftright);
-  
-    for(x=0;x<size+1;x++) { vdpchar(gImage+xpos+x+(ypos*32),C_WUNDERL); }
+
+    for(x=0;x<size+1;x++) { vdpchar(gImage+xpos+x+(ypos*32),26); }
 
     cputsxy(xpos, ypos, str);
-    vdpchar(gImage+xpos+strlen(str)+(ypos*32),C_INVSPACE);
-  
+    vdpchar(gImage+xpos+strlen(str)+(ypos*32),25);
+
     while(1)
     {
         c = getkey(validkeys,0);
         switch (c)
         {
-            case C_ENTER:
+            case 13:
                 idx = strlen(str);
                 str[idx] = 0;
-                gotoxy(xpos,ypos);
+                conio_x = (xpos); conio_y = (ypos);
                 cspaces(size+1);
                 cputsxy(xpos, ypos, str);
                 return idx;
-  
-            case C_DELETE:
+
+            case 3:
                 if (idx)
                 {
                     --idx;
-                    cputcxy(xpos+idx, ypos, C_SPACE);
+                    cputcxy(xpos+idx, ypos, 32);
                     for(x = idx; 1; ++x)
                     {
                         b = str[x+1];
                         str[x] = b;
-                        vdpchar(gImage+xpos+x+(ypos*32), b ? b : C_WUNDERL);
+                        vdpchar(gImage+xpos+x+(ypos*32), b ? b : 26);
                         if (b == 0) { break; }
                     }
-                    vdpchar(gImage+xpos+idx+(ypos*32),C_INVSPACE);
-                    vdpchar(gImage+xpos+idx+1+(ypos*32),str[idx+1] ? str[idx+1] : C_WUNDERL);
-                    gotoxy(xpos+idx, ypos);
+                    vdpchar(gImage+xpos+idx+(ypos*32),25);
+                    vdpchar(gImage+xpos+idx+1+(ypos*32),str[idx+1] ? str[idx+1] : 26);
+                    conio_x = (xpos+idx); conio_y = (ypos);
                 }
                 break;
 
-            case C_INSERT:
+            case 4:
                 c = strlen(str);
                 if (c < size && c > 0 && idx < c)
                 {
@@ -491,39 +1245,39 @@ int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned c
                     }
                     str[idx] = ' ';
                     cputsxy(xpos, ypos, str);
-                    gotoxy(xpos + idx, ypos);
-                }
-                break;
-  
-            case C_LEFT:
-                if (idx)
-                {
-                    --idx;
-                    vdpchar(gImage+xpos+idx+(ypos*32),C_INVSPACE);
-                    vdpchar(gImage+xpos+idx+1+(ypos*32),str[idx+1] ? str[idx+1] : C_WUNDERL);
-                    gotoxy(xpos+idx, ypos);
+                    conio_x = (xpos + idx); conio_y = (ypos);
                 }
                 break;
 
-            case C_RIGHT:
+            case 8:
+                if (idx)
+                {
+                    --idx;
+                    vdpchar(gImage+xpos+idx+(ypos*32),25);
+                    vdpchar(gImage+xpos+idx+1+(ypos*32),str[idx+1] ? str[idx+1] : 26);
+                    conio_x = (xpos+idx); conio_y = (ypos);
+                }
+                break;
+
+            case 9:
                 if (idx < strlen(str) && idx < size)
                 {
                     ++idx;
-                    gotoxy(xpos+idx-1, ypos);
+                    conio_x = (xpos+idx-1); conio_y = (ypos);
                     cputc(str[idx-1]);
-                    vdpchar(gImage+xpos+idx+(ypos*32),C_INVSPACE);
-                    gotoxy(xpos + idx, ypos);
+                    vdpchar(gImage+xpos+idx+(ypos*32),25);
+                    conio_x = (xpos + idx); conio_y = (ypos);
                 }
                 break;
-  
+
             default:
                 if (idx < size)
                 {
                     flag = (str[idx] == 0);
                     str[idx] = c;
-                    gotoxy(xpos+idx, ypos);
+                    conio_x = (xpos+idx); conio_y = (ypos);
                     cputc(c);
-                    vdpchar(gImage+xpos+idx+1+(ypos*32),C_INVSPACE);
+                    vdpchar(gImage+xpos+idx+1+(ypos*32),25);
                     ++idx;
                     if (flag) { str[idx+1] = 0; }
                 }
@@ -531,28 +1285,28 @@ int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned c
         }
     }
     return 0;
-}  
+}
 
-/* Functions for windowing and menu system */
+
 
 void windowsave(unsigned char ypos, unsigned char height)
 {
-    /* Function to save a window
-       Input:
-       - ypos: startline of window
-       - height: height of window    */
-    
+
+
+
+
+
     Window[windownumber].address = windowaddress;
     Window[windownumber].ypos = ypos;
     Window[windownumber].height = height;
     vdpmemread(gImage+Window[windownumber].ypos*32, windowmemory, Window[windownumber].height*32);
-    vdpmemcpy(windowaddress, windowmemory,  Window[windownumber].height*32);
+    vdpmemcpy(windowaddress, windowmemory, Window[windownumber].height*32);
     windowaddress += Window[windownumber++].height*32;
 }
 
 void windowrestore()
 {
-    /* Function to restore a window */
+
     windowaddress = Window[--windownumber].address;
     vdpmemread(windowaddress, windowmemory, Window[windownumber].height*32);
     vdpmemcpy(gImage+Window[windownumber].ypos*32, windowmemory, Window[windownumber].height*32);
@@ -560,39 +1314,39 @@ void windowrestore()
 
 void menumakeborder(unsigned char xpos, unsigned char ypos, unsigned char height, unsigned char width)
 {
-    /* Function to make menu border
-       Input:
-       - xpos: x-coordinate of left upper corner
-       - ypos: y-coordinate of right upper corner
-       - height: number of rows in window
-       - width: window width in characters        */
+
+
+
+
+
+
 
     unsigned char x, y;
-    
+
     windowsave(ypos, height+2);
 
-    vdpchar(gImage+xpos+(ypos*32),C_LOWRIGHT);
-    for(x=0;x<width;x++) {vdpchar(gImage+(xpos+x+1)+(ypos*32),C_LOWLINE); }
-    vdpchar(gImage+(xpos+width)+(ypos*32),C_LOWLEFT);
+    vdpchar(gImage+xpos+(ypos*32),6);
+    for(x=0;x<width;x++) {vdpchar(gImage+(xpos+x+1)+(ypos*32),1); }
+    vdpchar(gImage+(xpos+width)+(ypos*32),7);
     for(y=0;y<height;y++)
     {
-        vdpchar(gImage+xpos+(ypos+y+1)*32,C_RIGHTLINE);
-        gotoxy(xpos+1,ypos+y+1);
+        vdpchar(gImage+xpos+(ypos+y+1)*32,2);
+        conio_x = (xpos+1); conio_y = (ypos+y+1);
         cspaces(width);
-        vdpchar(gImage+(xpos+width)+(ypos+y+1)*32,C_LEFTLINE);
+        vdpchar(gImage+(xpos+width)+(ypos+y+1)*32,3);
     }
-    vdpchar(gImage+xpos+(ypos+height+1)*32,C_UPRIGHT);
-    for(x=0;x<width;x++) { vdpchar(gImage+(xpos+x+1)+(ypos+height+1)*32,C_UPLINE); }
-    vdpchar(gImage+(xpos+width)+(ypos+height+1)*32,C_UPLEFT);
+    vdpchar(gImage+xpos+(ypos+height+1)*32,4);
+    for(x=0;x<width;x++) { vdpchar(gImage+(xpos+x+1)+(ypos+height+1)*32,0); }
+    vdpchar(gImage+(xpos+width)+(ypos+height+1)*32,5);
 }
 
 void menuplacebar()
 {
-    /* Function to print menu bar */
+
 
     unsigned char x;
 
-    gotoxy(6,0);
+    conio_x = (6); conio_y = (0);
     for(x=0;x<menubaroptions;x++)
     {
         cprintf("%s ",menubartitles[x]);
@@ -601,12 +1355,12 @@ void menuplacebar()
 
 unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char menunumber)
 {
-    /* Function for pull down menu
-       Input:
-       - xpos = x-coordinate of upper left corner
-       - ypos = y-coordinate of upper left corner
-       - menunumber = 
-         number of the menu as defined in pulldownmenuoptions array */
+
+
+
+
+
+
 
     unsigned char x;
     unsigned char validkeys[6];
@@ -617,20 +1371,20 @@ unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char
     windowsave(ypos, pulldownmenuoptions[menunumber-1]+4);
     if(menunumber>menubaroptions)
     {
-        vdpchar(gImage+xpos+(ypos*32),C_LOWRIGHT);
-        for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+2;x++) { vdpchar(gImage+xpos+x+1+(ypos*32),C_LOWLINE); }
+        vdpchar(gImage+xpos+(ypos*32),6);
+        for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+2;x++) { vdpchar(gImage+xpos+x+1+(ypos*32),1); }
     }
     for(x=0;x<pulldownmenuoptions[menunumber-1];x++)
     {
-        vdpchar(gImage+xpos+(ypos+x+1)*32,C_RIGHTLINE);
-        gotoxy(xpos+1,ypos+x+1);
+        vdpchar(gImage+xpos+(ypos+x+1)*32,2);
+        conio_x = (xpos+1); conio_y = (ypos+x+1);
         cprintf(" %s ",pulldownmenutitles[menunumber-1][x]);
-        vdpchar(gImage+xpos+strlen(pulldownmenutitles[menunumber-1][x])+2+(ypos+x+1)*32,C_RIGHTLINE);
+        vdpchar(gImage+xpos+strlen(pulldownmenutitles[menunumber-1][x])+2+(ypos+x+1)*32,2);
     }
-    vdpchar(gImage+xpos+(ypos+pulldownmenuoptions[menunumber-1]+1)*32,C_UPRIGHT);
+    vdpchar(gImage+xpos+(ypos+pulldownmenuoptions[menunumber-1]+1)*32,4);
     for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+2;x++)
     {
-        vdpchar(gImage+xpos+x+1+(ypos+pulldownmenuoptions[menunumber-1]+1)*32,C_UPLINE);
+        vdpchar(gImage+xpos+x+1+(ypos+pulldownmenuoptions[menunumber-1]+1)*32,0);
     }
 
     strcpy(validkeys, updownenter);
@@ -638,27 +1392,27 @@ unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char
     {
         strcat(validkeys, leftright);
     }
-    
+
     do
     {
-        vdpchar(gImage+xpos+1+(ypos+menuchoice)*32,C_ARROW);
+        vdpchar(gImage+xpos+1+(ypos+menuchoice)*32,177);
         key = getkey(validkeys,joyinterface);
         switch (key)
         {
-        case C_ENTER:
+        case 13:
             exit = 1;
             break;
-        
-        case C_LEFT:
-        case C_RIGHT:
+
+        case 8:
+        case 9:
             exit = 1;
             menuchoice = 10 + key;
             break;
 
-        case C_DOWN:
-        case C_UP:
-            vdpchar(gImage+xpos+1+(ypos+menuchoice)*32,C_SPACE);
-            if(key==C_UP)
+        case 10:
+        case 11:
+            vdpchar(gImage+xpos+1+(ypos+menuchoice)*32,32);
+            if(key==11)
             {
                 menuchoice--;
                 if(menuchoice<1)
@@ -680,18 +1434,18 @@ unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char
             break;
         }
     } while (exit==0);
-    windowrestore();    
+    windowrestore();
     return menuchoice;
 }
 
 unsigned char menumain()
 {
-    /* Function for main menu selection */
+
 
     unsigned char menubarchoice = 1;
     unsigned char menuoptionchoice = 0;
     unsigned char key, x;
-    unsigned char validkeys[4] = {C_LEFT,C_RIGHT,C_ENTER,0};
+    unsigned char validkeys[4] = {8,9,13,0};
     unsigned char xpos;
 
     do
@@ -700,12 +1454,12 @@ unsigned char menumain()
         {
             for(x=0;x<strlen(menubartitles[menubarchoice-1]);x++)
             {
-                vdpchar(gImage+menubarcoords[menubarchoice-1]+x+32,C_UPLINE);
+                vdpchar(gImage+menubarcoords[menubarchoice-1]+x+32,0);
             }
             key = getkey(validkeys,joyinterface);
-            gotoxy(menubarcoords[menubarchoice-1],1);
+            conio_x = (menubarcoords[menubarchoice-1]); conio_y = (1);
             cspaces(strlen(menubartitles[menubarchoice-1]));
-            if(key==C_LEFT)
+            if(key==8)
             {
                 menubarchoice--;
                 if(menubarchoice<1)
@@ -713,7 +1467,7 @@ unsigned char menumain()
                     menubarchoice = menubaroptions;
                 }
             }
-            else if (key==C_RIGHT)
+            else if (key==9)
             {
                 menubarchoice++;
                 if(menubarchoice>menubaroptions)
@@ -721,7 +1475,7 @@ unsigned char menumain()
                     menubarchoice = 1;
                 }
             }
-        } while (key!=C_ENTER);
+        } while (key!=13);
         xpos=menubarcoords[menubarchoice-1]-1;
         if(xpos+strlen(pulldownmenutitles[menubarchoice-1][0])>38)
         {
@@ -747,12 +1501,12 @@ unsigned char menumain()
             }
         }
     } while (menuoptionchoice==0);
-    return menubarchoice*10+menuoptionchoice;    
+    return menubarchoice*10+menuoptionchoice;
 }
 
 unsigned char areyousure()
 {
-    /* Pull down menu to verify if player is sure */
+
     unsigned char choice;
 
     menumakeborder(10,5,6,20);
@@ -764,34 +1518,34 @@ unsigned char areyousure()
 
 void fileerrormessage(unsigned char ferr)
 {
-    /* Show message for file error encountered */
+
 
     menumakeborder(10,5,6,20);
     cputsxy(12,7,"File error!");
-    gotoxy(12,8);
+    conio_x = (12); conio_y = (8);
     cprintf("Error nr.: %2X",ferr);
     cputsxy(12,10,"Press key.");
     getkey("",1);
-    windowrestore();    
+    windowrestore();
 }
 
 void tipinotenabledmessage()
 {
-    /* Show message when TIPI is not enabled on trying file menu options */
+
 
     menumakeborder(10,5,5,20);
     cputsxy(12,7,"TIPI not enabled!");
-    gotoxy(12,8);
+    conio_x = (12); conio_y = (8);
     cputsxy(12,9,"Press key.");
     getkey("",1);
-    windowrestore();   
+    windowrestore();
 }
 
-/* Config file and save game functions */
+
 
 void saveconfigfile()
 {
-    /* Save configuration file */
+
 
     unsigned char fname[13] = "TIPI.LUDOCFG";
 
@@ -801,7 +1555,7 @@ void saveconfigfile()
 
 void loadconfigfile()
 {
-    /* Load configuration file or create one if not present */
+
 
     unsigned char fname[13] = "TIPI.LUDOCFG";
     unsigned char x,y;
@@ -820,15 +1574,15 @@ void loadconfigfile()
     }
 }
 
-/* Graphics and screen initialisation functions */
+
 
 void graphicsinit()
 {
-    /* Initialize graphics mode and load colors and patterns */
+
 
     set_graphics(0);
-    windowaddress = WINDOWBASE;
-    bgcolor(COLOR_BLACK);
+    windowaddress = 0x1000;
+    bgcolor(0x01);
     vdpmemcpy(gColor, colorset, sizeof(colorset));
     vdpmemcpy(gPattern, patterns, sizeof(patterns));
     clrscr();
@@ -836,17 +1590,17 @@ void graphicsinit()
 
 void loadmainscreen()
 {
-    /* Copy mainscreen to screen memory */
+
 
     vdpmemcpy(gImage, mainscreen, sizeof(mainscreen));
     menuplacebar();
 }
 
-/* Game routines */
+
 
 unsigned char dicethrow()
 {
-    /* Throw the dice. Returns the dice value */
+
 
     unsigned char dicethrow, x;
 
@@ -855,9 +1609,9 @@ unsigned char dicethrow()
     {
         if(musicnumber)
         {
-            vdpwaitvint();      // wait for an interrupt with ints enabled - console clears it
-            CALL_PLAYER_SN;
-            if (!isSNPlaying) { StartSong(musicmem,0); }
+            vdpwaitvint();
+            __asm__( "bl @SongLoop" : : : "r0","r1","r2","r3","r4","r5","r6","r7","r8","r9","r11","r12","r13","r14","r15","cc" );
+            if (!((songNote[3]&0x01) != 0)) { StartSong(musicmem,0); }
         }
         dicethrow = random()%6+1;
         vdpchar(gImage+25+(12*32),dicegraphics[dicethrow-1][0]);
@@ -874,11 +1628,11 @@ unsigned char dicethrow()
 
 unsigned char pawncoord(unsigned char playernumber, unsigned char pawnnumber, unsigned char xy)
 {
-    /* Obtain pawn coordinates
-       Input:
-       - playernumber and pawnnumber
-       - xy: X (0) or Y (1) coordinate returned
-       Output: the corresponding x or y co-ordinate */
+
+
+
+
+
 
     if(playerpos[playernumber][pawnnumber][0]==0)
     {
@@ -892,8 +1646,8 @@ unsigned char pawncoord(unsigned char playernumber, unsigned char pawnnumber, un
 
 void pawnerase(unsigned char playernumber, unsigned char pawnnumber)
 {
-    /* Erase a pawn from the field
-       Input playernumber and pawnnumber */
+
+
 
     unsigned char xpos, ypos, boardpos;
 
@@ -902,37 +1656,37 @@ void pawnerase(unsigned char playernumber, unsigned char pawnnumber)
     boardpos = playerpos[playernumber][pawnnumber][1];
     if(playerpos[playernumber][pawnnumber][0]==0 && (boardpos==0 || boardpos==10 || boardpos==20 || boardpos==30 ))
     {
-        /* Colored start fields */
+
         switch (playerpos[playernumber][pawnnumber][1]/10)
         {
         case 0:
-            cputcxy(xpos,ypos,C_GSTARTUL);
-            cputcxy(xpos+1,ypos,C_GSTARTUR);
-            cputcxy(xpos,ypos+1,C_GSTARTLL);
-            cputcxy(xpos+1,ypos+1,C_GSTARTLR);
+            cputcxy(xpos,ypos,172);
+            cputcxy(xpos+1,ypos,173);
+            cputcxy(xpos,ypos+1,174);
+            cputcxy(xpos+1,ypos+1,175);
             break;
 
         case 1:
-            cputcxy(xpos,ypos,C_RSTARTUL);
-            cputcxy(xpos+1,ypos,C_RSTARTUR);
-            cputcxy(xpos,ypos+1,C_RSTARTLL);
-            cputcxy(xpos+1,ypos+1,C_RSTARTLR);
+            cputcxy(xpos,ypos,180);
+            cputcxy(xpos+1,ypos,181);
+            cputcxy(xpos,ypos+1,182);
+            cputcxy(xpos+1,ypos+1,183);
             break;
 
         case 2:
-            cputcxy(xpos,ypos,C_BSTARTUL);
-            cputcxy(xpos+1,ypos,C_BSTARTUR);
-            cputcxy(xpos,ypos+1,C_BSTARTLL);
-            cputcxy(xpos+1,ypos+1,C_BSTARTLR);
+            cputcxy(xpos,ypos,188);
+            cputcxy(xpos+1,ypos,189);
+            cputcxy(xpos,ypos+1,190);
+            cputcxy(xpos+1,ypos+1,191);
             break;
 
         case 3:
-            cputcxy(xpos,ypos,C_YSTARTUL);
-            cputcxy(xpos+1,ypos,C_YSTARTUR);
-            cputcxy(xpos,ypos+1,C_YSTARTLL);
-            cputcxy(xpos+1,ypos+1,C_YSTARTLR);
+            cputcxy(xpos,ypos,196);
+            cputcxy(xpos+1,ypos,197);
+            cputcxy(xpos,ypos+1,198);
+            cputcxy(xpos+1,ypos+1,199);
             break;
-        
+
         default:
             break;
         }
@@ -941,43 +1695,43 @@ void pawnerase(unsigned char playernumber, unsigned char pawnnumber)
     {
         if(playerpos[playernumber][pawnnumber][0]==0)
         {
-            /* Normal white field main track */
-            cputcxy(xpos,ypos,C_EFIELDUL);
-            cputcxy(xpos+1,ypos,C_EFIELDUR);
-            cputcxy(xpos,ypos+1,C_EFIELDLL);
-            cputcxy(xpos+1,ypos+1,C_EFIELDLR);
+
+            cputcxy(xpos,ypos,164);
+            cputcxy(xpos+1,ypos,165);
+            cputcxy(xpos,ypos+1,166);
+            cputcxy(xpos+1,ypos+1,167);
         }
         else
         {
-            /* Colored home or destination field */
+
             switch (playernumber)
             {
             case 0:
-                cputcxy(xpos,ypos,C_GFIELDUL);
-                cputcxy(xpos+1,ypos,C_GFIELDUR);
-                cputcxy(xpos,ypos+1,C_GFIELDLL);
-                cputcxy(xpos+1,ypos+1,C_GFIELDLR);
+                cputcxy(xpos,ypos,132);
+                cputcxy(xpos+1,ypos,133);
+                cputcxy(xpos,ypos+1,134);
+                cputcxy(xpos+1,ypos+1,135);
                 break;
 
             case 1:
-                cputcxy(xpos,ypos,C_RFIELDUL);
-                cputcxy(xpos+1,ypos,C_RFIELDUR);
-                cputcxy(xpos,ypos+1,C_RFIELDLL);
-                cputcxy(xpos+1,ypos+1,C_RFIELDLR);
+                cputcxy(xpos,ypos,140);
+                cputcxy(xpos+1,ypos,141);
+                cputcxy(xpos,ypos+1,142);
+                cputcxy(xpos+1,ypos+1,143);
                 break;
 
             case 2:
-                cputcxy(xpos,ypos,C_BFIELDUL);
-                cputcxy(xpos+1,ypos,C_BFIELDUR);
-                cputcxy(xpos,ypos+1,C_BFIELDLL);
-                cputcxy(xpos+1,ypos+1,C_BFIELDLR);
+                cputcxy(xpos,ypos,148);
+                cputcxy(xpos+1,ypos,149);
+                cputcxy(xpos,ypos+1,150);
+                cputcxy(xpos+1,ypos+1,151);
                 break;
 
             case 3:
-                cputcxy(xpos,ypos,C_YFIELDUL);
-                cputcxy(xpos+1,ypos,C_YFIELDUR);
-                cputcxy(xpos,ypos+1,C_YFIELDLL);
-                cputcxy(xpos+1,ypos+1,C_YFIELDLR);
+                cputcxy(xpos,ypos,156);
+                cputcxy(xpos+1,ypos,157);
+                cputcxy(xpos,ypos+1,158);
+                cputcxy(xpos+1,ypos+1,159);
                 break;
 
             default:
@@ -989,8 +1743,8 @@ void pawnerase(unsigned char playernumber, unsigned char pawnnumber)
 
 void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned char selected)
 {
-    /* Place a pawn on the field
-       Input playernumber and pawnnumber */
+
+
 
     unsigned char xpos, ypos, color;
 
@@ -999,43 +1753,43 @@ void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned ch
 
     if(selected)
     {
-        cputcxy(xpos,ypos,C_WPAWNUL);
-        cputcxy(xpos+1,ypos,C_WPAWNUR);
-        cputcxy(xpos,ypos+1,C_WPAWNLL);
-        cputcxy(xpos+1,ypos+1,C_WPAWNLR);
+        cputcxy(xpos,ypos,160);
+        cputcxy(xpos+1,ypos,161);
+        cputcxy(xpos,ypos+1,162);
+        cputcxy(xpos+1,ypos+1,163);
     }
     else
     {
         switch (playernumber)
         {
         case 0:
-            cputcxy(xpos,ypos,C_GPAWNUL);
-            cputcxy(xpos+1,ypos,C_GPAWNUR);
-            cputcxy(xpos,ypos+1,C_GPAWNLL);
-            cputcxy(xpos+1,ypos+1,C_GPAWNLR);
+            cputcxy(xpos,ypos,128);
+            cputcxy(xpos+1,ypos,129);
+            cputcxy(xpos,ypos+1,130);
+            cputcxy(xpos+1,ypos+1,131);
             break;
 
         case 1:
-            cputcxy(xpos,ypos,C_RPAWNUL);
-            cputcxy(xpos+1,ypos,C_RPAWNUR);
-            cputcxy(xpos,ypos+1,C_RPAWNLL);
-            cputcxy(xpos+1,ypos+1,C_RPAWNLR);
+            cputcxy(xpos,ypos,136);
+            cputcxy(xpos+1,ypos,137);
+            cputcxy(xpos,ypos+1,138);
+            cputcxy(xpos+1,ypos+1,139);
             break;
 
         case 2:
-            cputcxy(xpos,ypos,C_BPAWNUL);
-            cputcxy(xpos+1,ypos,C_BPAWNUR);
-            cputcxy(xpos,ypos+1,C_BPAWNLL);
-            cputcxy(xpos+1,ypos+1,C_BPAWNLR);
+            cputcxy(xpos,ypos,144);
+            cputcxy(xpos+1,ypos,145);
+            cputcxy(xpos,ypos+1,146);
+            cputcxy(xpos+1,ypos+1,147);
             break;
 
         case 3:
-            cputcxy(xpos,ypos,C_YPAWNUL);
-            cputcxy(xpos+1,ypos,C_YPAWNUR);
-            cputcxy(xpos,ypos+1,C_YPAWNLL);
-            cputcxy(xpos+1,ypos+1,C_YPAWNLR);
+            cputcxy(xpos,ypos,152);
+            cputcxy(xpos+1,ypos,153);
+            cputcxy(xpos,ypos+1,154);
+            cputcxy(xpos+1,ypos+1,155);
             break;
-        
+
         default:
             break;
         }
@@ -1044,8 +1798,8 @@ void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned ch
 
 void savegame(unsigned char autosave)
 {
-    /* Save game to a gameslot
-       Input: autosave is 1 for autosave, else 0 */
+
+
 
     unsigned char fname[14] = "TIPI.LUDOSAV";
     unsigned char slot = 0;
@@ -1080,7 +1834,7 @@ void savegame(unsigned char autosave)
             input(4,10,pulldownmenutitles[7][slot],15);
             for(x=strlen(pulldownmenutitles[7][slot]);x<15;x++)
             {
-                pulldownmenutitles[7][slot][x] = C_SPACE;
+                pulldownmenutitles[7][slot][x] = 32;
             }
             pulldownmenutitles[7][slot][15] = 0;
             fname[len]=48+slot;
@@ -1130,14 +1884,14 @@ void savegame(unsigned char autosave)
 
 void loadgame()
 {
-     /* Load game from a gameslot */
-    
+
+
     unsigned char fname[14] = "TIPI.LUDOSAV";
     unsigned char slot, x, y, ferr, len;
     unsigned char yesno = 1;
-    
+
     len = strlen(fname);
-    
+
     menumakeborder(2,5,12,28);
     cputsxy(4,7,"Load game.");
     cputsxy(4,9,"Choose slot:");
@@ -1191,13 +1945,13 @@ void loadgame()
 
 void inputofnames()
 {
-    /* Enter player nanes */
+
     unsigned char x, choice;
 
     menumakeborder(2,8,6,28);
     for(x=0;x<4;x++)
     {
-        gotoxy(4,10);
+        conio_x = (4); conio_y = (10);
         cprintf("Computer plays player %d?",x+1);
         choice = menupulldown(20,11,5);
         if(choice==1)
@@ -1208,7 +1962,7 @@ void inputofnames()
         {
             playerdata[x][0]=0;
         }
-        gotoxy(4,10);
+        conio_x = (4); conio_y = (10);
         cprintf("Input name player %d:    ",x+1);
         input(4,12,playername[x],8);
     }
@@ -1217,7 +1971,7 @@ void inputofnames()
 
 void musicnext()
 {
-    /* Funtion to load and start next music track */
+
 
     unsigned char fname[14] = "TIPI.LUDOMUS";
     unsigned char len, ferr;
@@ -1236,13 +1990,13 @@ void musicnext()
 
 void informationcredits()
 {
-    /* Print version information and credits */
+
 
     unsigned char version[30] = {
-        'v',VERSION_MAJOR_CH0,VERSION_MINOR_CH0,VERSION_MINOR_CH1,' ','-',' ',
-        BUILD_YEAR_CH0,BUILD_YEAR_CH1,BUILD_YEAR_CH2,BUILD_YEAR_CH3,
-        BUILD_MONTH_CH0,BUILD_MONTH_CH1,BUILD_DAY_CH0,BUILD_DAY_CH1,'-',
-        BUILD_HOUR_CH0,BUILD_HOUR_CH1,BUILD_MIN_CH0,BUILD_MIN_CH1 };
+        'v','1','9','9',' ','-',' ',
+        ("Mar 26 2021"[ 7]),("Mar 26 2021"[ 8]),("Mar 26 2021"[ 9]),("Mar 26 2021"[10]),
+        ((("Mar 26 2021"[0] == 'O') || ("Mar 26 2021"[0] == 'N') || ("Mar 26 2021"[0] == 'D')) ? '1' : '0'),( (("Mar 26 2021"[0] == 'J' && "Mar 26 2021"[1] == 'a' && "Mar 26 2021"[2] == 'n')) ? '1' : (("Mar 26 2021"[0] == 'F')) ? '2' : (("Mar 26 2021"[0] == 'M' && "Mar 26 2021"[1] == 'a' && "Mar 26 2021"[2] == 'r')) ? '3' : (("Mar 26 2021"[0] == 'A' && "Mar 26 2021"[1] == 'p')) ? '4' : (("Mar 26 2021"[0] == 'M' && "Mar 26 2021"[1] == 'a' && "Mar 26 2021"[2] == 'y')) ? '5' : (("Mar 26 2021"[0] == 'J' && "Mar 26 2021"[1] == 'u' && "Mar 26 2021"[2] == 'n')) ? '6' : (("Mar 26 2021"[0] == 'J' && "Mar 26 2021"[1] == 'u' && "Mar 26 2021"[2] == 'l')) ? '7' : (("Mar 26 2021"[0] == 'A' && "Mar 26 2021"[1] == 'u')) ? '8' : (("Mar 26 2021"[0] == 'S')) ? '9' : (("Mar 26 2021"[0] == 'O')) ? '0' : (("Mar 26 2021"[0] == 'N')) ? '1' : (("Mar 26 2021"[0] == 'D')) ? '2' : '?' ),(("Mar 26 2021"[4] >= '0') ? ("Mar 26 2021"[4]) : '0'),("Mar 26 2021"[ 5]),'-',
+        ("16:05:23"[0]),("16:05:23"[1]),("16:05:23"[3]),("16:05:23"[4]) };
     menumakeborder(0,5,14,30);
     printcentered("L U D O",2,7,28);
     printcentered(version,2,8,28);
@@ -1260,7 +2014,7 @@ void informationcredits()
 
 void gamereset()
 {
-    /* Reset all player data */
+
 
     unsigned char n;
 
@@ -1277,7 +2031,7 @@ void gamereset()
 
 void turnhuman()
 {
-    /* Turn for the human players */
+
 
     unsigned char choice;
     unsigned char yesno;
@@ -1289,7 +2043,7 @@ void turnhuman()
         {
             case 12:
                 yesno = areyousure();
-                if(yesno==1) { endofgameflag=3;  gamereset(); }
+                if(yesno==1) { endofgameflag=3; gamereset(); }
                 break;
 
             case 13:
@@ -1331,7 +2085,7 @@ void turnhuman()
 
             case 33:
                 if(musicnumber)
-                { 
+                {
                     StopSong();
                 }
                 else
@@ -1353,16 +2107,16 @@ void turnhuman()
 
 unsigned char humanchoosepawn(unsigned char playernumber, unsigned char possible[4])
 {
-    /* Human has to choose a pawn, returns pawnnumber chosen */
+
 
     signed char pawnnumber = 0;
     signed char direction;
     unsigned char key;
-    unsigned char validkeys[5] = { C_LEFT, C_RIGHT, C_UP, C_DOWN, C_ENTER };
+    unsigned char validkeys[5] = { 8, 9, 11, 10, 13 };
 
     menumakeborder(22,6,2,9);
     cputsxy(24,7,"Pawn?");
-    gotoxy(24,8);
+    conio_x = (24); conio_y = (8);
     cprintf("Dice=%d", throw);
     while (possible[++pawnnumber]!=1 && pawnnumber<4);
     do
@@ -1370,9 +2124,9 @@ unsigned char humanchoosepawn(unsigned char playernumber, unsigned char possible
         pawnplace(playernumber,pawnnumber,1);
         key = getkey(validkeys,1);
         pawnplace(playernumber,pawnnumber,0);
-        if(key==C_LEFT || key==C_DOWN) { pawnnumber--; direction=-1; }
-        if(key==C_RIGHT || key==C_UP) { pawnnumber++; direction=1; }
-        if(key!=C_ENTER)
+        if(key==8 || key==10) { pawnnumber--; direction=-1; }
+        if(key==9 || key==11) { pawnnumber++; direction=1; }
+        if(key!=13)
         {
             if(pawnnumber>3) { pawnnumber = 0; }
             if(pawnnumber<0) { pawnnumber = 3; }
@@ -1386,7 +2140,7 @@ unsigned char humanchoosepawn(unsigned char playernumber, unsigned char possible
                 }
             } while (possible[pawnnumber]!=1);
         }
-    } while (key!=C_ENTER);
+    } while (key!=13);
     windowrestore();
     return pawnnumber;
 }
@@ -1396,7 +2150,7 @@ void playerwins()
     unsigned char choice;
 
     menumakeborder(3,5,10,25);
-    gotoxy(5,7);
+    conio_x = (5); conio_y = (7);
     cprintf("%s has won!", playername[turnofplayernr]);
     cputsxy(5,9,"Your choice?");
     do
@@ -1410,7 +2164,7 @@ void playerwins()
 
 unsigned char computerchoosepawn(unsigned char playernumber, unsigned char possible[4])
 {
-    /* Computer has to choose a pawn, returns pawnnumber chosen */
+
 
     signed int pawnscore[4] = { 0,0,0,0 };
     unsigned char pawnnumber = 0;
@@ -1485,7 +2239,7 @@ unsigned char computerchoosepawn(unsigned char playernumber, unsigned char possi
 
 void turngeneric()
 {
-    /* Generic turn sequence */
+
 
     unsigned char pawnpossible[4] = { 0,0,0,0 };
     unsigned char dicethrows = 1;
@@ -1653,7 +2407,7 @@ void turngeneric()
     pawnplace(turnofplayernr,pawnnumber,0);
     if(playerdata[turnofplayernr][0]==0 && autosavetoggle==1)
     {
-        savegame(1); /* Autosave on end human turn */
+        savegame(1);
     }
     else
     {
@@ -1664,26 +2418,26 @@ void turngeneric()
 
 void loadintro()
 {
-    /* Game intro */
+
 
     int x, y, ferr;
     int len = 0;
-    unsigned char validkeys[4] = {'m', 'M', C_ENTER, 0 };
+    unsigned char validkeys[4] = {'m', 'M', 13, 0 };
     unsigned char key;
 
-    /* Load title screen */
+
     vdpmemcpy(gImage, titlescreen, sizeof(titlescreen));
 
-    /* Load and read game config file */
+
     loadconfigfile();
 
-    /* Load and start first music file */
+
     ferr = dsr_load("TIPI.LUDOMUS1",musicmem,3200);
     if (ferr) { fileerrormessage(ferr); }
     StartSong(musicmem,0);
 
-    /* Wait for ENTER of FIRE while player can toggle joystick and music */
-    
+
+
     cputsxy(1,21,"Press ENTER/FIRE to start game.");
     cputsxy(1,22,"M=toggle music.");
 
@@ -1707,25 +2461,25 @@ void loadintro()
                 StartSong(musicmem,0);
             }
             break;
-        
+
         default:
             break;
         }
-    } while (key != C_ENTER);
+    } while (key != 13);
 }
 
-/* Main routine */
+
 
 int main()
 {
     unsigned char x, choice;
 
-    //Game intro
+
     graphicsinit();
 
     loadintro();
 
-    //Ask for loading save game
+
     menumakeborder(8,5,6,20);
     cputsxy(10,7,"Load old game?");
     choice = menupulldown(17,8,5);
@@ -1734,7 +2488,7 @@ int main()
 
     if(endofgameflag==0) { loadmainscreen(); }
 
-    //Main game loop
+
     do
     {
         if(endofgameflag>0)
@@ -1748,7 +2502,7 @@ int main()
         do
         {
             cleararea(23,2,8,8);
-            gotoxy(23,2);
+            conio_x = (23); conio_y = (2);
             cprintf("Player %d", turnofplayernr+1);
             cputsxy(23,3,"Color");
             cputcxy(30,3,playerdata[turnofplayernr][2]);
@@ -1779,13 +2533,13 @@ int main()
                 }
             } while (zv==0 && playerdata[turnofplayernr][1]==0);
         } while (endofgameflag==0);
-    } while (endofgameflag!=1); 
+    } while (endofgameflag!=1);
 
-    //End of game
+
     clrscr();
-    bgcolor(0);    
+    bgcolor(0);
     cputsxy(0,0,"Thanks for playing, goodbye.");
-    //StopMusic();
+
 
     return 0;
 }

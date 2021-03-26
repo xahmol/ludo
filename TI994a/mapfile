@@ -1,0 +1,365 @@
+Archive member included because of file (symbol)
+
+/home/xahmol/libti99/libti99.a(conio_getvram.o)
+                              main.o (conio_x)
+/home/xahmol/libti99/libti99.a(conio_cprintf.o)
+                              main.o (cprintf)
+/home/xahmol/libti99/libti99.a(conio_cputcxy.o)
+                              main.o (cputcxy)
+/home/xahmol/libti99/libti99.a(vdp_setmode.o)
+                              main.o (gImage)
+/home/xahmol/libti99/libti99.a(vdp_memcpy.o)
+                              main.o (vdpmemcpy)
+/home/xahmol/libti99/libti99.a(vdp_setgraphics.o)
+                              main.o (set_graphics)
+/home/xahmol/libti99/libti99.a(conio_bgcolor.o)
+                              main.o (bgcolor)
+/home/xahmol/libti99/libti99.a(conio_clrscr.o)
+                              main.o (clrscr)
+/home/xahmol/libti99/libti99.a(str_strlen.o)
+                              main.o (strlen)
+/home/xahmol/libti99/libti99.a(str_strcpy.o)
+                              main.o (strcpy)
+/home/xahmol/libti99/libti99.a(vdp_memread.o)
+                              main.o (vdpmemread)
+/home/xahmol/libti99/libti99.a(conio_cputc.o)
+                              main.o (cputc)
+/home/xahmol/libti99/libti99.a(vdp_char.o)
+                              /home/xahmol/libti99/libti99.a(vdp_setgraphics.o) (vdpchar_default)
+/home/xahmol/libti99/libti99.a(conio_cputs.o)
+                              main.o (cputs)
+/home/xahmol/libti99/libti99.a(conio_kbhit.o)
+                              main.o (kbhit)
+/home/xahmol/libti99/libti99.a(vdp_waitvint.o)
+                              main.o (vdpwaitvint)
+/home/xahmol/libti99/libti99.a(joystfast.o)
+                              main.o (joystfast)
+/home/xahmol/libti99/libti99.a(kscanfast.o)
+                              main.o (kscanfast)
+/home/xahmol/libti99/libti99.a(conio_cgetc.o)
+                              main.o (cgetc)
+/home/xahmol/libti99/libti99.a(str_memcpy.o)
+                              main.o (memcpy)
+/home/xahmol/libti99/libti99.a(conio_cputsxy.o)
+                              main.o (cputsxy)
+/home/xahmol/libti99/libti99.a(str_memset.o)
+                              main.o (memset)
+/home/xahmol/libti99/libti99.a(dsr_dsrlnk.o)
+                              main.o (dsrlnk)
+/home/xahmol/libti99/libti99.a(vdp_textdefs.o)
+                              /home/xahmol/libti99/libti99.a(vdp_setgraphics.o) (nTextRow)
+/home/xahmol/libti99/libti99.a(str_uint2str.o)
+                              /home/xahmol/libti99/libti99.a(conio_cprintf.o) (uint2str)
+/home/xahmol/libti99/libti99.a(str_int2str.o)
+                              /home/xahmol/libti99/libti99.a(conio_cprintf.o) (int2str)
+/home/xahmol/libti99/libti99.a(vdp_scrnscroll.o)
+                              /home/xahmol/libti99/libti99.a(vdp_setgraphics.o) (scrn_scroll_default)
+/home/xahmol/libti99/libti99.a(vdp_memset.o)
+                              /home/xahmol/libti99/libti99.a(conio_clrscr.o) (vdpmemset)
+/home/xahmol/libti99/libti99.a(kscan.o)
+                              /home/xahmol/libti99/libti99.a(conio_kbhit.o) (kscan)
+/home/xahmol/libti99/libti99.a(dsr_dsrlnkraw.o)
+                              /home/xahmol/libti99/libti99.a(dsr_dsrlnk.o) (dsrlnkraw)
+/home/xahmol/libti99/libti99.a(vdp_readchar.o)
+                              /home/xahmol/libti99/libti99.a(dsr_dsrlnk.o) (vdpreadchar)
+/home/xahmol/vgmcomp2/Players/libtivgm2/libtivgm2.a(CPlayerTIHandEdit.o)
+                              main.o (SongLoop)
+/home/xahmol/vgmcomp2/Players/libtivgm2/libtivgm2.a(CPlayerTIHandlers.o)
+                              main.o (songNote)
+/home/xahmol/vgmcomp2/Players/libtivgm2/libtivgm2.a(CPlayerCommonHandEdit.o)
+                              /home/xahmol/vgmcomp2/Players/libtivgm2/libtivgm2.a(CPlayerTIHandEdit.o) (getCompressedByte)
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+lower_exp        0x0000000000002000 0x0000000000002000 xw
+upper_exp        0x000000000000a000 0x0000000000006000 xw
+scratchpad       0x0000000000008320 0x00000000000000e0 xw
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD crt0.o
+LOAD main.o
+
+.text           0x000000000000a000     0x5b98
+ *(.text)
+ .text          0x000000000000a000       0x46 crt0.o
+                0x000000000000a012                _start2
+                0x000000000000a000                _start
+ .text          0x000000000000a046     0x461f main.o
+                0x000000000000ad3a                cspaces
+                0x000000000000b742                dicethrow
+                0x000000000000d19c                musicnext
+                0x000000000000d118                dsr_load
+                0x000000000000a616                pawnplace
+                0x000000000000a060                pawncoord
+                0x000000000000c038                input
+                0x000000000000c680                saveconfigfile
+                0x000000000000be12                menumain
+                0x000000000000aafc                gamereset
+                0x000000000000ac14                strcat
+                0x000000000000a800                pawnerase
+                0x000000000000ab38                wait
+                0x000000000000d260                loadgame
+                0x000000000000a0a2                computerchoosepawn
+                0x000000000000aae2                loadmainscreen
+                0x000000000000d49c                turnhuman
+                0x000000000000ac3a                windowrestore
+                0x000000000000c602                dsr_save
+                0x000000000000d8a6                main
+                0x000000000000bdc6                areyousure
+                0x000000000000b310                humanchoosepawn
+                0x000000000000abcc                graphicsinit
+                0x000000000000b8a4                tipinotenabledmessage
+                0x000000000000afc2                getkey
+                0x000000000000af64                cleararea
+                0x000000000000ad6a                menumakeborder
+                0x000000000000c534                inputofnames
+                0x000000000000af00                printcentered
+                0x000000000000bcc0                playerwins
+                0x000000000000b920                fileerrormessage
+                0x000000000000d652                loadconfigfile
+                0x000000000000b5b2                informationcredits
+                0x000000000000a046                strchr
+                0x000000000000c716                savegame
+                0x000000000000aca8                windowsave
+                0x000000000000a5b8                menuplacebar
+                0x000000000000ca0e                turngeneric
+                0x000000000000b9a8                menupulldown
+                0x000000000000d716                loadintro
+ *fill*         0x000000000000e665        0x1 00
+ .text          0x000000000000e666       0x78 /home/xahmol/libti99/libti99.a(conio_getvram.o)
+                0x000000000000e666                conio_getvram
+ .text          0x000000000000e6de      0x6c4 /home/xahmol/libti99/libti99.a(conio_cprintf.o)
+                0x000000000000e906                cprintf
+                0x000000000000e6de                fmt_print
+ .text          0x000000000000eda2        0xe /home/xahmol/libti99/libti99.a(conio_cputcxy.o)
+                0x000000000000eda2                cputcxy
+ .text          0x000000000000edb0        0x0 /home/xahmol/libti99/libti99.a(vdp_setmode.o)
+ .text          0x000000000000edb0       0x2c /home/xahmol/libti99/libti99.a(vdp_memcpy.o)
+                0x000000000000edb0                vdpmemcpy
+ .text          0x000000000000eddc       0xde /home/xahmol/libti99/libti99.a(vdp_setgraphics.o)
+                0x000000000000eddc                set_graphics_raw
+                0x000000000000ee9c                set_graphics
+ .text          0x000000000000eeba       0x88 /home/xahmol/libti99/libti99.a(conio_bgcolor.o)
+                0x000000000000ef3e                reverse
+                0x000000000000ef1e                bordercolor
+                0x000000000000eeba                bgcolor
+                0x000000000000eeea                textcolor
+ .text          0x000000000000ef42       0x6e /home/xahmol/libti99/libti99.a(conio_clrscr.o)
+                0x000000000000ef42                clrscr
+ .text          0x000000000000efb0       0x22 /home/xahmol/libti99/libti99.a(str_strlen.o)
+                0x000000000000efb0                strlen
+ .text          0x000000000000efd2       0x1e /home/xahmol/libti99/libti99.a(str_strcpy.o)
+                0x000000000000efd2                strcpy
+ .text          0x000000000000eff0       0x26 /home/xahmol/libti99/libti99.a(vdp_memread.o)
+                0x000000000000eff0                vdpmemread
+ .text          0x000000000000f016      0x15c /home/xahmol/libti99/libti99.a(conio_cputc.o)
+                0x000000000000f062                cputc
+                0x000000000000f016                inc_row
+ .text          0x000000000000f172       0x1c /home/xahmol/libti99/libti99.a(vdp_char.o)
+                0x000000000000f172                vdpchar_default
+ .text          0x000000000000f18e       0x28 /home/xahmol/libti99/libti99.a(conio_cputs.o)
+                0x000000000000f18e                cputs
+ .text          0x000000000000f1b6       0x4c /home/xahmol/libti99/libti99.a(conio_kbhit.o)
+                0x000000000000f1b6                kbhit
+ .text          0x000000000000f202       0x1c /home/xahmol/libti99/libti99.a(vdp_waitvint.o)
+                0x000000000000f202                vdpwaitvint
+ .text          0x000000000000f21e       0x64 /home/xahmol/libti99/libti99.a(joystfast.o)
+                0x000000000000f21e                joystfast
+ .text          0x000000000000f282       0xdc /home/xahmol/libti99/libti99.a(kscanfast.o)
+                0x000000000000f282                kscanfast
+                0x000000000000f32e                keymap
+ .text          0x000000000000f35e       0xd6 /home/xahmol/libti99/libti99.a(conio_cgetc.o)
+                0x000000000000f35e                cgetc
+ .text          0x000000000000f434       0x1c /home/xahmol/libti99/libti99.a(str_memcpy.o)
+                0x000000000000f434                memcpy
+ .text          0x000000000000f450        0xe /home/xahmol/libti99/libti99.a(conio_cputsxy.o)
+                0x000000000000f450                cputsxy
+ .text          0x000000000000f45e       0x16 /home/xahmol/libti99/libti99.a(str_memset.o)
+                0x000000000000f45e                memset
+ .text          0x000000000000f474       0x9c /home/xahmol/libti99/libti99.a(dsr_dsrlnk.o)
+                0x000000000000f474                dsrlnk
+ .text          0x000000000000f510        0x0 /home/xahmol/libti99/libti99.a(vdp_textdefs.o)
+ .text          0x000000000000f510       0x6a /home/xahmol/libti99/libti99.a(str_uint2str.o)
+                0x000000000000f510                uint2str
+ .text          0x000000000000f57a       0xbe /home/xahmol/libti99/libti99.a(str_int2str.o)
+                0x000000000000f57a                int2str
+ .text          0x000000000000f638      0x108 /home/xahmol/libti99/libti99.a(vdp_scrnscroll.o)
+                0x000000000000f638                scrn_scroll_default
+ .text          0x000000000000f740       0x2a /home/xahmol/libti99/libti99.a(vdp_memset.o)
+                0x000000000000f740                vdpmemset
+ .text          0x000000000000f76a       0x16 /home/xahmol/libti99/libti99.a(kscan.o)
+                0x000000000000f76a                kscan
+ .text          0x000000000000f780      0x128 /home/xahmol/libti99/libti99.a(dsr_dsrlnkraw.o)
+                0x000000000000f780                dsrlnkraw
+ .text          0x000000000000f8a8       0x14 /home/xahmol/libti99/libti99.a(vdp_readchar.o)
+                0x000000000000f8a8                vdpreadchar
+ .text          0x000000000000f8bc      0x116 /home/xahmol/vgmcomp2/Players/libtivgm2/libtivgm2.a(CPlayerTIHandEdit.o)
+                0x000000000000f8bc                SongLoop
+ .text          0x000000000000f9d2       0x6a /home/xahmol/vgmcomp2/Players/libtivgm2/libtivgm2.a(CPlayerTIHandlers.o)
+                0x000000000000f9d2                StartSong
+                0x000000000000fa34                StopSong
+ .text          0x000000000000fa3c      0x15c /home/xahmol/vgmcomp2/Players/libtivgm2/libtivgm2.a(CPlayerCommonHandEdit.o)
+                0x000000000000fa5e                getDatRLE
+                0x000000000000fa98                getCompressedByte
+                0x000000000000fa56                getDatInline
+                0x000000000000fa86                getDatRLE24
+                0x000000000000fa76                getDatRLE16
+                0x000000000000fa64                getDatRLE32
+                0x000000000000fb94                getDatZero
+
+.ctors          0x000000000000fb98        0x0
+                0x000000000000fb98                __CTOR_START = .
+ *(.ctors)
+                0x000000000000fb98                __CTOR_END = .
+                0x000000000000fb98                __VAL_START = .
+
+.data           0x0000000000002000      0x424
+                0x0000000000002000                __DATA_START = .
+ *(.data)
+ .data          0x0000000000002000        0x0 crt0.o
+ .data          0x0000000000002000      0x410 main.o
+                0x00000000000023e9                np
+                0x00000000000023f1                dicegraphics
+                0x0000000000002000                menubaroptions
+                0x000000000000203e                pulldownmenutitles
+                0x000000000000240b                joyinterface
+                0x0000000000002355                homedestcoords
+                0x0000000000002302                leftright
+                0x00000000000022c9                letters
+                0x000000000000240a                musicnumber
+                0x00000000000023c5                playername
+                0x0000000000002395                playerdata
+                0x0000000000002305                fieldcoords
+                0x0000000000002001                pulldownmenunumber
+                0x0000000000002036                pulldownmenuoptions
+                0x00000000000023a5                playerpos
+                0x00000000000023ed                dp
+                0x00000000000022be                numbers
+                0x00000000000022fe                updownenter
+                0x0000000000002002                menubartitles
+                0x000000000000240c                autosavetoggle
+                0x0000000000002032                menubarcoords
+ .data          0x0000000000002410        0x0 /home/xahmol/libti99/libti99.a(conio_getvram.o)
+ .data          0x0000000000002410        0x0 /home/xahmol/libti99/libti99.a(conio_cprintf.o)
+ .data          0x0000000000002410        0x0 /home/xahmol/libti99/libti99.a(conio_cputcxy.o)
+ .data          0x0000000000002410        0x6 /home/xahmol/libti99/libti99.a(vdp_setmode.o)
+                0x0000000000002410                gColor
+                0x0000000000002414                gSprite
+                0x0000000000002412                gPattern
+ .data          0x0000000000002416        0x0 /home/xahmol/libti99/libti99.a(vdp_memcpy.o)
+ .data          0x0000000000002416        0x0 /home/xahmol/libti99/libti99.a(vdp_setgraphics.o)
+ .data          0x0000000000002416        0x2 /home/xahmol/libti99/libti99.a(conio_bgcolor.o)
+                0x0000000000002416                conio_scrnCol
+ .data          0x0000000000002418        0x0 /home/xahmol/libti99/libti99.a(conio_clrscr.o)
+ .data          0x0000000000002418        0x0 /home/xahmol/libti99/libti99.a(str_strlen.o)
+ .data          0x0000000000002418        0x0 /home/xahmol/libti99/libti99.a(str_strcpy.o)
+ .data          0x0000000000002418        0x0 /home/xahmol/libti99/libti99.a(vdp_memread.o)
+ .data          0x0000000000002418        0x0 /home/xahmol/libti99/libti99.a(conio_cputc.o)
+ .data          0x0000000000002418        0x2 /home/xahmol/libti99/libti99.a(vdp_char.o)
+                0x0000000000002418                vdpchar
+ .data          0x000000000000241a        0x0 /home/xahmol/libti99/libti99.a(conio_cputs.o)
+ .data          0x000000000000241a        0x1 /home/xahmol/libti99/libti99.a(conio_kbhit.o)
+                0x000000000000241a                last_conio_key
+ .data          0x000000000000241b        0x0 /home/xahmol/libti99/libti99.a(vdp_waitvint.o)
+ .data          0x000000000000241b        0x0 /home/xahmol/libti99/libti99.a(joystfast.o)
+ .data          0x000000000000241b        0x0 /home/xahmol/libti99/libti99.a(kscanfast.o)
+ *fill*         0x000000000000241b        0x1 00
+ .data          0x000000000000241c        0x6 /home/xahmol/libti99/libti99.a(conio_cgetc.o)
+                0x000000000000241c                conio_cursorFlag
+                0x0000000000002420                conio_allowInts
+                0x000000000000241e                conio_cursorChar
+ .data          0x0000000000002422        0x0 /home/xahmol/libti99/libti99.a(str_memcpy.o)
+ .data          0x0000000000002422        0x0 /home/xahmol/libti99/libti99.a(conio_cputsxy.o)
+ .data          0x0000000000002422        0x0 /home/xahmol/libti99/libti99.a(str_memset.o)
+ .data          0x0000000000002422        0x0 /home/xahmol/libti99/libti99.a(dsr_dsrlnk.o)
+ .data          0x0000000000002422        0x0 /home/xahmol/libti99/libti99.a(vdp_textdefs.o)
+ .data          0x0000000000002422        0x0 /home/xahmol/libti99/libti99.a(str_uint2str.o)
+ .data          0x0000000000002422        0x0 /home/xahmol/libti99/libti99.a(str_int2str.o)
+ .data          0x0000000000002422        0x2 /home/xahmol/libti99/libti99.a(vdp_scrnscroll.o)
+                0x0000000000002422                scrn_scroll
+ .data          0x0000000000002424        0x0 /home/xahmol/libti99/libti99.a(vdp_memset.o)
+ .data          0x0000000000002424        0x0 /home/xahmol/libti99/libti99.a(kscan.o)
+ .data          0x0000000000002424        0x0 /home/xahmol/libti99/libti99.a(dsr_dsrlnkraw.o)
+ .data          0x0000000000002424        0x0 /home/xahmol/libti99/libti99.a(vdp_readchar.o)
+ .data          0x0000000000002424        0x0 /home/xahmol/vgmcomp2/Players/libtivgm2/libtivgm2.a(CPlayerTIHandEdit.o)
+ .data          0x0000000000002424        0x0 /home/xahmol/vgmcomp2/Players/libtivgm2/libtivgm2.a(CPlayerTIHandlers.o)
+ .data          0x0000000000002424        0x0 /home/xahmol/vgmcomp2/Players/libtivgm2/libtivgm2.a(CPlayerCommonHandEdit.o)
+                0x0000000000002424                __DATA_END = .
+
+.bss            0x0000000000002424     0x11b0
+                0x0000000000002424                __BSS_START = .
+ *(.bss)
+ .bss           0x0000000000002424        0x0 crt0.o
+ .bss           0x0000000000002424     0x108e main.o
+                0x0000000000002428                zv
+                0x000000000000242a                ns
+                0x0000000000002450                windowaddress
+                0x00000000000027aa                savegamemem
+                0x0000000000002426                turnofplayernr
+                0x0000000000002424                windownumber
+                0x0000000000002754                saveslots
+                0x0000000000002452                windowmemory
+                0x0000000000002752                throw
+                0x000000000000242c                Window
+                0x0000000000002832                musicmem
+                0x0000000000002425                endofgameflag
+ .bss           0x00000000000034b2        0x4 /home/xahmol/libti99/libti99.a(conio_getvram.o)
+                0x00000000000034b2                conio_x
+                0x00000000000034b4                conio_y
+ .bss           0x00000000000034b6      0x100 /home/xahmol/libti99/libti99.a(conio_cprintf.o)
+                0x00000000000034b6                conio_sprintfbuf
+ .bss           0x00000000000035b6        0x0 /home/xahmol/libti99/libti99.a(conio_cputcxy.o)
+ .bss           0x00000000000035b6        0x4 /home/xahmol/libti99/libti99.a(vdp_setmode.o)
+                0x00000000000035b6                gImage
+                0x00000000000035b8                gSpritePat
+ .bss           0x00000000000035ba        0x0 /home/xahmol/libti99/libti99.a(vdp_memcpy.o)
+ .bss           0x00000000000035ba        0x0 /home/xahmol/libti99/libti99.a(vdp_setgraphics.o)
+ .bss           0x00000000000035ba        0x0 /home/xahmol/libti99/libti99.a(conio_bgcolor.o)
+ .bss           0x00000000000035ba        0x0 /home/xahmol/libti99/libti99.a(conio_clrscr.o)
+ .bss           0x00000000000035ba        0x0 /home/xahmol/libti99/libti99.a(str_strlen.o)
+ .bss           0x00000000000035ba        0x0 /home/xahmol/libti99/libti99.a(str_strcpy.o)
+ .bss           0x00000000000035ba        0x0 /home/xahmol/libti99/libti99.a(vdp_memread.o)
+ .bss           0x00000000000035ba        0x0 /home/xahmol/libti99/libti99.a(conio_cputc.o)
+ .bss           0x00000000000035ba        0x0 /home/xahmol/libti99/libti99.a(vdp_char.o)
+ .bss           0x00000000000035ba        0x0 /home/xahmol/libti99/libti99.a(conio_cputs.o)
+ .bss           0x00000000000035ba        0x0 /home/xahmol/libti99/libti99.a(conio_kbhit.o)
+ .bss           0x00000000000035ba        0x1 /home/xahmol/libti99/libti99.a(vdp_waitvint.o)
+                0x00000000000035ba                gSaveIntCnt
+ .bss           0x00000000000035bb        0x0 /home/xahmol/libti99/libti99.a(joystfast.o)
+ .bss           0x00000000000035bb        0x0 /home/xahmol/libti99/libti99.a(kscanfast.o)
+ .bss           0x00000000000035bb        0x0 /home/xahmol/libti99/libti99.a(conio_cgetc.o)
+ .bss           0x00000000000035bb        0x0 /home/xahmol/libti99/libti99.a(str_memcpy.o)
+ .bss           0x00000000000035bb        0x0 /home/xahmol/libti99/libti99.a(conio_cputsxy.o)
+ .bss           0x00000000000035bb        0x0 /home/xahmol/libti99/libti99.a(str_memset.o)
+ .bss           0x00000000000035bb        0x0 /home/xahmol/libti99/libti99.a(dsr_dsrlnk.o)
+ *fill*         0x00000000000035bb        0x1 00
+ .bss           0x00000000000035bc        0x8 /home/xahmol/libti99/libti99.a(vdp_textdefs.o)
+                0x00000000000035bc                nTextRow
+                0x00000000000035be                nTextEnd
+                0x00000000000035c2                nTextFlags
+                0x00000000000035c0                nTextPos
+ .bss           0x00000000000035c4        0x8 /home/xahmol/libti99/libti99.a(str_uint2str.o)
+ .bss           0x00000000000035cc        0x8 /home/xahmol/libti99/libti99.a(str_int2str.o)
+ .bss           0x00000000000035d4        0x0 /home/xahmol/libti99/libti99.a(vdp_scrnscroll.o)
+ .bss           0x00000000000035d4        0x0 /home/xahmol/libti99/libti99.a(vdp_memset.o)
+ .bss           0x00000000000035d4        0x0 /home/xahmol/libti99/libti99.a(kscan.o)
+ .bss           0x00000000000035d4        0x0 /home/xahmol/libti99/libti99.a(dsr_dsrlnkraw.o)
+ .bss           0x00000000000035d4        0x0 /home/xahmol/libti99/libti99.a(vdp_readchar.o)
+ .bss           0x00000000000035d4        0x0 /home/xahmol/vgmcomp2/Players/libtivgm2/libtivgm2.a(CPlayerTIHandEdit.o)
+ .bss           0x00000000000035d4        0x0 /home/xahmol/vgmcomp2/Players/libtivgm2/libtivgm2.a(CPlayerTIHandlers.o)
+ .bss           0x00000000000035d4        0x0 /home/xahmol/vgmcomp2/Players/libtivgm2/libtivgm2.a(CPlayerCommonHandEdit.o)
+                0x00000000000035d4                __BSS_END = .
+LOAD /home/xahmol/libti99/libti99.a
+LOAD /home/xahmol/vgmcomp2/Players/libtivgm2/libtivgm2.a
+OUTPUT(ludo.elf elf32-tms9900)
+
+songDatVars     0x00000000000035d4       0x58
+ songDatVars    0x00000000000035d4       0x58 /home/xahmol/vgmcomp2/Players/libtivgm2/libtivgm2.a(CPlayerTIHandlers.o)
+                0x0000000000003620                songNote
+                0x000000000000362a                retSave
+                0x000000000000361c                songVol
+                0x00000000000035d4                strDat
+                0x0000000000003628                workBuf
