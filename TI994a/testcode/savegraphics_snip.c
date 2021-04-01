@@ -1,0 +1,11 @@
+    ferr=dsr_save("DSK1.LUDOCOL",colorset,sizeof(colorset));
+    cprintf("%d ",sizeof(colorset));
+    ferr=dsr_save("DSK1.LUDOCHR",patterns,sizeof(patterns));
+    cprintf("%d ",sizeof(patterns));
+    ferr=dsr_save("DSK1.LUDOTIT",titlescreen,sizeof(titlescreen));
+    cprintf("%d ",sizeof(titlescreen));
+    ferr=dsr_save("DSK1.LUDOMSC",mainscreen,sizeof(mainscreen));
+    cprintf("%d ",sizeof(mainscreen));
+    getkey("",1);
+    ferr=dsr_save("DSK1.LUDOSPH",CUSTOM_PHRASE,sizeof(CUSTOM_PHRASE));
+    cprintf("%d ",sizeof(CUSTOM_PHRASE));
