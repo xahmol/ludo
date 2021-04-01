@@ -11,6 +11,9 @@
 #define VPAB        0x1800      // PAB memory base
 #define FBUF        0x1A00      // Filebuffer memory base
 
+#define SPEECH_TURN 0x7092
+#define SPEECH_WIN  0x7ddb
+
 /* References to redefined chars */
 /* Dice graphics */
 #define C_DICE01    8
