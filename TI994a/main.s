@@ -568,9 +568,9 @@ L116
 JMP_11
 L78
 	mov  @>20(r10), r5
+	li   r4, >B1E0
 	clr  r1
 	movb r1, r3
-	li   r4, >B1E0
 	li   r7, >100
 	li   r6, >400
 	mov  @>26(r10), r8
@@ -674,8 +674,8 @@ JMP_19
 	mov  r2, *r14
 	b    @L105
 L62
-	movb @>1D(r10), @>1C(r10)
 	movb @>1F(r10), r13
+	movb @>1D(r10), @>1C(r10)
 L71
 	li   r2, >100
 	cb   r13, r2
@@ -1416,6 +1416,19 @@ L157
 	.size	pawnerase, .-pawnerase
 	even
 
+	def	startmusic
+startmusic
+	jeq  0
+	cb  @musicnumber, @$-1
+	jne  L161
+	b    *r11
+L161
+	li   r1, musicmem
+	clr  r2
+	b    @StartSong
+	.size	startmusic, .-startmusic
+	even
+
 	def	wait
 wait
 	ai   r10, >FFF2
@@ -1427,23 +1440,23 @@ wait
 	mov  r15, *r0
 	mov  r1, @>C(r10)
 	jne  JMP_41
-	b    @L162
+	b    @L166
 JMP_41
 	clr  r1
 	mov  r1, @>A(r10)
-	jmp  L161
-L160
+	jmp  L165
+L164
 	mov  @>A(r10), r1
 	inc  r1
 	mov  r1, @>A(r10)
 	mov  @>C(r10), r2
 	c    r2, r1
 	jh  JMP_42
-	b    @L162
+	b    @L166
 JMP_42
-L161
+L165
 * Begin inline assembler code
-* 264 "main.c" 1
+* 269 "main.c" 1
 	clr r12
 	tb 2
 	jeq -4
@@ -1453,17 +1466,17 @@ L161
 	jeq  0
 	cb  @musicnumber, @$-1
 	jne  JMP_43
-	b    @L160
+	b    @L164
 JMP_43
 * Begin inline assembler code
-* 267 "main.c" 1
+* 272 "main.c" 1
 	bl @SongLoop
 * 0 "" 2
 * End of inline assembler code
 	mov  @songNote+6, r1
 	andi r1, >1
 	jeq  JMP_44
-	b    @L160
+	b    @L164
 JMP_44
 	li   r1, musicmem
 	clr  r2
@@ -1475,9 +1488,9 @@ JMP_44
 	mov  @>C(r10), r2
 	c    r2, r1
 	jle  JMP_45
-	b    @L161
+	b    @L165
 JMP_45
-L162
+L166
 	mov  *r10+, r11
 	mov  *r10+, r9
 	mov  *r10+, r13
@@ -1486,6 +1499,32 @@ L162
 	ai   r10, >6
 	b    *r11
 	.size	wait, .-wait
+	even
+
+	def	pausemusic
+pausemusic
+	dect r10
+	mov  r11, *r10
+	jeq  0
+	cb  @musicnumber, @$-1
+	jne  L171
+	mov  *r10+, r11
+	b    *r11
+	jmp  L172
+L171
+	bl   @StopSong
+	li   r2, >9FBF
+	movb r2, @>8400
+	swpb r2
+	movb r2, @>8400
+	li   r1, >DFFF
+	movb r1, @>8400
+	swpb r1
+	movb r1, @>8400
+	mov  *r10+, r11
+	b    *r11
+L172
+	.size	pausemusic, .-pausemusic
 	even
 
 	def	loadmainscreen
@@ -1510,7 +1549,7 @@ gamereset
 	movb r1, @turnofplayernr
 	li   r2, playerdata+1
 	clr  r1
-L167
+L176
 	li   r3, >400
 	movb r3, *r2
 	movb r3, @>2(r2)
@@ -1521,7 +1560,7 @@ L167
 	inc  r1
 	ai   r2, >4
 	ci   r1, >4
-	jne  L167
+	jne  L176
 	mov  *r10+, r11
 	b    *r11
 	.size	gamereset, .-gamereset
@@ -1657,16 +1696,16 @@ cspaces
 	mov  r13, *r0+
 	mov  r14, *r0+
 	movb r1, r13
-	jeq  L179
+	jeq  L188
 	clr  r9
 	li   r14, cputc
-L178
+L187
 	li   r1, >20
 	bl   *r14
 	ai   r9, >100
 	cb   r13, r9
-	jh  L178
-L179
+	jh  L187
+L188
 	mov  *r10+, r11
 	mov  *r10+, r9
 	mov  *r10+, r13
@@ -1707,10 +1746,10 @@ menumakeborder
 	bl   *r3
 	jeq  0
 	cb  r13, @$-1
-	jeq  L183
+	jeq  L192
 	mov  @>A(r10), r15
 	clr  r9
-L184
+L193
 	mov  @gImage, r5
 	inc  r5
 	a    r14, r5
@@ -1722,8 +1761,8 @@ L184
 	ai   r9, >100
 	inc  r15
 	cb   r13, r9
-	jh  L184
-L183
+	jh  L193
+L192
 	movb r13, r2
 	srl  r2, 8
 	mov  @>A(r10), r1
@@ -1738,7 +1777,7 @@ L183
 	bl   *r3
 	movb @>E(r10), r1
 	jne  JMP_46
-	b    @L194
+	b    @L203
 JMP_46
 	mov  @>14(r10), r1
 	inc  r1
@@ -1751,7 +1790,7 @@ JMP_46
 	inc  r2
 	mov  r2, @>10(r10)
 	mov  r1, @>12(r10)
-L187
+L196
 	mov  @>A(r10), r1
 	a    @gImage, r1
 	a    r9, r1
@@ -1776,8 +1815,8 @@ L187
 	ai   r9, >20
 	movb @>E(r10), r1
 	cb   r1, r15
-	jh  L187
-L186
+	jh  L196
+L195
 	movb @>E(r10), r15
 	srl  r15, 8
 	mov  @>14(r10), r2
@@ -1791,10 +1830,10 @@ L186
 	bl   *r3
 	jeq  0
 	cb  r13, @$-1
-	jeq  L188
+	jeq  L197
 	mov  @>A(r10), r14
 	clr  r9
-L189
+L198
 	mov  @gImage, r2
 	inc  r2
 	a    r15, r2
@@ -1806,8 +1845,8 @@ L189
 	ai   r9, >100
 	inc  r14
 	cb   r13, r9
-	jh  L189
-L188
+	jh  L198
+L197
 	mov  @>C(r10), r1
 	a    @gImage, r1
 	a    r15, r1
@@ -1820,11 +1859,11 @@ L188
 	mov  *r10, r15
 	ai   r10, >E
 	b    *r3
-L194
+L203
 	mov  @>14(r10), r2
 	inc  r2
 	mov  r2, @>14(r10)
-	jmp  L186
+	jmp  L195
 	.size	menumakeborder, .-menumakeborder
 	even
 
@@ -1846,35 +1885,35 @@ printcentered
 	movb r13, r4
 	srl  r4, 8
 	c    r1, r4
-	jlt  L199
+	jlt  L208
 	mov  r9, r1
 	mov  *r10+, r11
 	mov  *r10+, r9
 	mov  *r10+, r13
 	b    @cputs
-L199
+L208
 	s    r4, r2
 	neg  r2
-	jlt  L200
+	jlt  L209
 	sra  r2, >1
 	dec  r2
 	mov  r2, r1
 	swpb r1
 	bl   @cspaces
-L201
+L210
 	mov  r9, r1
 	mov  *r10+, r11
 	mov  *r10+, r9
 	mov  *r10+, r13
 	b    @cputs
-L200
+L209
 	inc  r2
 	sra  r2, >1
 	dec  r2
 	mov  r2, r1
 	swpb r1
 	bl   @cspaces
-	jmp  L201
+	jmp  L210
 	.size	printcentered, .-printcentered
 	even
 
@@ -1891,14 +1930,14 @@ cleararea
 	movb r4, r15
 	jeq  0
 	cb  r3, @$-1
-	jeq  L205
+	jeq  L214
 	srl  r1, 8
 	mov  r1, @>A(r10)
 	clr  r13
 	clr  r9
 	srl  r2, 8
 	mov  r2, @>C(r10)
-L204
+L213
 	mov  @>A(r10), @conio_x
 	mov  @>C(r10), r2
 	a    r13, r2
@@ -1909,8 +1948,8 @@ L204
 	ai   r9, >100
 	inc  r13
 	cb   r14, r9
-	jh  L204
-L205
+	jh  L213
+L214
 	mov  *r10+, r11
 	mov  *r10+, r9
 	mov  *r10+, r13
@@ -1932,59 +1971,59 @@ getkey
 	mov  r15, *r0
 	mov  r1, @>A(r10)
 	movb r2, @>C(r10)
-L249
-	mov  @seed.1613, r1
+L258
+	mov  @seed.1614, r1
 * Begin inline assembler code
-* 246 "main.c" 1
+* 251 "main.c" 1
 	srl r1,1  
 	jnc 1f    
-	xor @random_mask.1614,r1 
+	xor @random_mask.1615,r1 
 	1:        
 	
 * 0 "" 2
 * End of inline assembler code
-	mov  r1, @seed.1613
+	mov  r1, @seed.1614
 	jeq  0
 	cb  @musicnumber, @$-1
-	jne  L254
-L208
+	jne  L263
+L217
 	jeq  0
 	cb  @joyinterface, @$-1
-	jeq  L209
+	jeq  L218
 	movb @>C(r10), r4
 	jeq  JMP_47
-	b    @L255
+	b    @L264
 JMP_47
-L209
+L218
 	bl   @kbhit
 	jeq  0
 	cb  r1, @$-1
 	jeq  JMP_48
-	b    @L234
+	b    @L243
 JMP_48
 	clr  r5
 	movb r1, r8
-L233
+L242
 	mov  @>A(r10), r2
-	jmp  L238
-L256
+	jmp  L247
+L265
 	inc  r2
-L238
+L247
 	movb *r2, r1
 	movb r1, r3
 	srl  r3, 8
 	c    r3, r5
 	jne  JMP_49
-	b    @L236
+	b    @L245
 JMP_49
 	jeq  0
 	cb  r1, @$-1
-	jne  L256
-L237
+	jne  L265
+L246
 	li   r2, >D00
 	cb   r8, r2
 	jeq  JMP_50
-	b    @L249
+	b    @L258
 JMP_50
 	movb r8, r1
 	mov  *r10+, r11
@@ -1994,33 +2033,33 @@ JMP_50
 	mov  *r10, r15
 	ai   r10, >6
 	b    *r11
-	b    @L257
-L254
+	b    @L266
+L263
 	li   r1, vdpwaitvint
 	bl   *r1
 * Begin inline assembler code
-* 381 "main.c" 1
+* 404 "main.c" 1
 	bl @SongLoop
 * 0 "" 2
 * End of inline assembler code
 	mov  @songNote+6, r1
 	andi r1, >1
 	jeq  JMP_51
-	b    @L208
+	b    @L217
 JMP_51
 	li   r1, musicmem
 	clr  r2
 	bl   @StartSong
-	b    @L208
-L236
+	b    @L217
+L245
 	ci   r2, 0
 	jne  JMP_52
-	b    @L237
+	b    @L246
 JMP_52
 	jeq  0
 	cb  r8, @$-1
 	jne  JMP_53
-	b    @L249
+	b    @L258
 JMP_53
 	movb r8, r1
 	mov  *r10+, r11
@@ -2030,8 +2069,8 @@ JMP_53
 	mov  *r10, r15
 	ai   r10, >6
 	b    *r11
-	b    @L257
-L255
+	b    @L266
+L264
 	li   r1, >1
 	li   r5, joystfast
 	bl   *r5
@@ -2053,64 +2092,64 @@ L255
 	seto r4
 	cb   r13, r4
 	jne  JMP_54
-	b    @L258
+	b    @L267
 JMP_54
-L210
+L219
 	li   r8, >D00
 	li   r5, >400
 	cb   r15, r5
 	jne  JMP_55
-	b    @L259
+	b    @L268
 JMP_55
-L212
+L221
 	li   r1, >400
 	cb   r3, r1
 	jne  JMP_56
-	b    @L260
+	b    @L269
 JMP_56
-L214
+L223
 	li   r4, >FC00
 	cb   r15, r4
 	jne  JMP_57
-	b    @L215
+	b    @L224
 JMP_57
 	li   r5, >FC00
 	cb   r3, r5
 	jne  JMP_58
-	b    @L215
+	b    @L224
 JMP_58
-L216
+L225
 	li   r1, >FC00
 	cb   r14, r1
 	jne  JMP_59
-	b    @L261
+	b    @L270
 JMP_59
-L217
+L226
 	li   r4, >FC00
 	cb   r2, r4
 	jne  JMP_60
-	b    @L262
+	b    @L271
 JMP_60
-L219
+L228
 	li   r5, >400
 	cb   r14, r5
 	jne  JMP_61
-	b    @L220
+	b    @L229
 JMP_61
 	li   r1, >400
 	cb   r2, r1
 	jne  JMP_62
-	b    @L220
+	b    @L229
 JMP_62
-L267
+L276
 	jeq  0
 	cb  r8, @$-1
 	jne  JMP_63
-	b    @L209
+	b    @L218
 JMP_63
-L251
+L260
 	movb r8, @>D(r10)
-L248
+L257
 	li   r1, >1
 	li   r2, joystfast
 	bl   *r2
@@ -2132,154 +2171,154 @@ L248
 	seto r5
 	cb   r13, r5
 	jne  JMP_64
-	b    @L222
+	b    @L231
 JMP_64
-L252
+L261
 	li   r1, >100
 	li   r2, >400
 	cb   r14, r2
 	jne  JMP_65
-	b    @L263
+	b    @L272
 JMP_65
-L225
+L234
 	li   r5, >400
 	cb   r4, r5
 	jne  JMP_66
-	b    @L264
+	b    @L273
 JMP_66
-L227
+L236
 	li   r2, >FC00
 	cb   r14, r2
 	jne  JMP_67
-	b    @L228
+	b    @L237
 JMP_67
 	li   r5, >FC00
 	cb   r4, r5
 	jne  JMP_68
-	b    @L228
+	b    @L237
 JMP_68
-L229
+L238
 	li   r2, >FC00
 	cb   r15, r2
 	jne  JMP_69
-	b    @L265
+	b    @L274
 JMP_69
-L230
+L239
 	li   r4, >FC00
 	cb   r3, r4
 	jne  JMP_70
-	b    @L266
+	b    @L275
 JMP_70
-L232
+L241
 	li   r5, >400
 	cb   r15, r5
-	jeq  L248
-L231
+	jeq  L257
+L240
 	li   r2, >400
 	cb   r3, r2
 	jne  JMP_71
-	b    @L248
+	b    @L257
 JMP_71
 	li   r4, >100
 	cb   r1, r4
 	jne  JMP_72
-	b    @L248
+	b    @L257
 JMP_72
 	movb @>D(r10), r8
 	movb r8, r5
 	srl  r5, 8
-	b    @L233
-L258
+	b    @L242
+L267
 	cb   r1, r4
 	jeq  JMP_73
-	b    @L210
+	b    @L219
 JMP_73
 	clr  r8
 	li   r5, >400
 	cb   r15, r5
 	jeq  JMP_74
-	b    @L212
+	b    @L221
 JMP_74
-L259
+L268
 	li   r8, >900
 	li   r5, >FC00
 	cb   r3, r5
 	jeq  JMP_75
-	b    @L216
+	b    @L225
 JMP_75
-L215
+L224
 	li   r8, >800
 	li   r1, >FC00
 	cb   r14, r1
 	jeq  JMP_76
-	b    @L217
+	b    @L226
 JMP_76
-L261
+L270
 	li   r8, >A00
 	li   r1, >400
 	cb   r2, r1
 	jeq  JMP_77
-	b    @L267
+	b    @L276
 JMP_77
-L220
+L229
 	li   r8, >B00
-	b    @L251
-L222
+	b    @L260
+L231
 	clr  r1
 	seto r5
 	cb   r2, r5
 	jeq  JMP_78
-	b    @L252
+	b    @L261
 JMP_78
 	li   r2, >400
 	cb   r14, r2
 	jeq  JMP_79
-	b    @L225
+	b    @L234
 JMP_79
-L263
+L272
 	li   r1, >100
 	li   r5, >FC00
 	cb   r4, r5
 	jeq  JMP_80
-	b    @L229
+	b    @L238
 JMP_80
-L228
+L237
 	li   r1, >100
 	li   r2, >FC00
 	cb   r15, r2
 	jeq  JMP_81
-	b    @L230
+	b    @L239
 JMP_81
-L265
+L274
 	li   r1, >100
-	b    @L231
-L264
+	b    @L240
+L273
 	li   r1, >100
-	b    @L227
-L266
+	b    @L236
+L275
 	li   r1, >100
-	b    @L232
-L234
+	b    @L241
+L243
 	bl   @cgetc
 	movb r1, r8
 	mov  @>A(r10), r5
 	jeq  0
 	cb  *r5, @$-1
-	jne  L235
+	jne  L244
 	li   r5, >D
 	li   r8, >D00
-	b    @L233
-L262
+	b    @L242
+L271
 	li   r8, >A00
-	b    @L219
-L260
+	b    @L228
+L269
 	li   r8, >900
-	b    @L214
-L235
+	b    @L223
+L244
 	movb r1, r5
 	srl  r5, 8
-	b    @L233
-L257
+	b    @L242
+L266
 	.size	getkey, .-getkey
 LC1
 	text 'Pawn?'
@@ -2302,7 +2341,7 @@ humanchoosepawn
 	mov  r2, r14
 	mov  r10, r1
 	ai   r1, >A
-	li   r2, C.124.2742
+	li   r2, C.126.2753
 	li   r3, >5
 	bl   @memcpy
 	li   r1, >1600
@@ -2328,28 +2367,28 @@ humanchoosepawn
 	ai   r10, >4
 	li   r9, >100
 	cb   @>1(r14), r9
-	jeq  L293
+	jeq  L302
 	cb   @>2(r14), r9
 	jne  JMP_82
-	b    @L295
+	b    @L304
 JMP_82
 	cb   @>3(r14), r9
 	jne  JMP_83
-	b    @L296
+	b    @L305
 JMP_83
 	cb   @>4(r14), r9
 	jne  JMP_84
-	b    @L273
+	b    @L282
 JMP_84
 	li   r9, >400
-L293
+L302
 	li   r1, pawnplace
 	mov  r1, @>12(r10)
 	li   r3, getkey
 	mov  r3, @>14(r10)
-L292
+L301
 	li   r4, >300
-L291
+L300
 	movb @>10(r10), r1
 	movb r9, r2
 	li   r3, >100
@@ -2371,65 +2410,65 @@ L291
 	li   r1, >800
 	cb   r13, r1
 	jne  JMP_85
-	b    @L274
+	b    @L283
 JMP_85
 	li   r3, >A00
 	cb   r13, r3
-	jeq  L274
-L275
+	jeq  L283
+L284
 	li   r5, >900
 	cb   r13, r5
-	jeq  L276
+	jeq  L285
 	li   r1, >B00
 	cb   r13, r1
-	jeq  L276
+	jeq  L285
 	li   r2, >D00
 	cb   r13, r2
-	jeq  L278
-L298
+	jeq  L287
+L307
 	cb   r9, r4
-	jlt  L279
-	jeq  L279
+	jlt  L288
+	jeq  L288
 	clr  r9
-L280
+L289
 	movb r9, r2
 	sra  r2, 8
-L281
+L290
 	a    r14, r2
 	li   r3, >100
 	cb   *r2, r3
-	jeq  L291
+	jeq  L300
 	ab   r15, r9
 	cb   r9, r4
-	jlt  L282
-	jeq  L282
-L297
+	jlt  L291
+	jeq  L291
+L306
 	clr  r9
-L283
+L292
 	movb r9, r1
 	sra  r1, 8
-L284
+L293
 	a    r14, r1
 	cb   *r1, r3
-	jeq  L291
+	jeq  L300
 	ab   r15, r9
 	cb   r9, r4
-	jgt  L297
-L282
+	jgt  L306
+L291
 	jeq  0
 	cb  r9, @$-1
-	jgt  L283
-	jeq  L283
+	jgt  L292
+	jeq  L292
 	li   r1, >3
 	li   r9, >300
-	jmp  L284
-L276
+	jmp  L293
+L285
 	ai   r9, >100
 	li   r15, >100
 	li   r2, >D00
 	cb   r13, r2
-	jne  L298
-L278
+	jne  L307
+L287
 	bl   @windowrestore
 	movb r9, r1
 	mov  *r10+, r11
@@ -2439,39 +2478,39 @@ L278
 	mov  *r10, r15
 	ai   r10, >10
 	b    *r11
-L274
+L283
 	ai   r9, >FF00
 	seto r15
-	jmp  L275
-L279
+	jmp  L284
+L288
 	jeq  0
 	cb  r9, @$-1
-	jgt  L280
-	jeq  L280
+	jgt  L289
+	jeq  L289
 	li   r2, >3
 	li   r9, >300
-	jmp  L281
-L295
+	jmp  L290
+L304
 	li   r9, >200
 	li   r5, pawnplace
 	mov  r5, @>12(r10)
 	li   r1, getkey
 	mov  r1, @>14(r10)
-	b    @L292
-L273
+	b    @L301
+L282
 	li   r9, >400
 	li   r5, pawnplace
 	mov  r5, @>12(r10)
 	li   r1, getkey
 	mov  r1, @>14(r10)
-	b    @L292
-L296
+	b    @L301
+L305
 	li   r9, >300
 	li   r3, pawnplace
 	mov  r3, @>12(r10)
 	li   r5, getkey
 	mov  r5, @>14(r10)
-	b    @L292
+	b    @L301
 	.size	humanchoosepawn, .-humanchoosepawn
 LC3
 	text 'L U D O'
@@ -2545,11 +2584,11 @@ informationcredits
 	movb r6, @>12(r10)
 	swpb r6
 	movb r6, @>13(r10)
-	li   r5, >3039
+	li   r5, >3233
 	movb r5, @>14(r10)
 	swpb r5
 	movb r5, @>15(r10)
-	li   r4, >3238
+	li   r4, >3139
 	movb r4, @>16(r10)
 	swpb r4
 	movb r4, @>17(r10)
@@ -2640,19 +2679,19 @@ dicethrow
 	bl   @menumakeborder
 	clr  r1
 	movb r1, @>A(r10)
-	b    @L303
-L302
-	mov  @seed.1613, r1
+	b    @L312
+L311
+	mov  @seed.1614, r1
 * Begin inline assembler code
-* 246 "main.c" 1
+* 251 "main.c" 1
 	srl r1,1  
 	jnc 1f    
-	xor @random_mask.1614,r1 
+	xor @random_mask.1615,r1 
 	1:        
 	
 * 0 "" 2
 * End of inline assembler code
-	mov  r1, @seed.1613
+	mov  r1, @seed.1614
 	mov  r1, r2
 	clr  r1
 	li   r3, >6
@@ -2705,32 +2744,32 @@ L302
 	li   r1, >A00
 	cb   r3, r1
 	jne  JMP_86
-	b    @L306
+	b    @L315
 JMP_86
-L303
+L312
 	jeq  0
 	cb  @musicnumber, @$-1
 	jne  JMP_87
-	b    @L302
+	b    @L311
 JMP_87
 	li   r2, vdpwaitvint
 	bl   *r2
 * Begin inline assembler code
-* 881 "main.c" 1
+* 906 "main.c" 1
 	bl @SongLoop
 * 0 "" 2
 * End of inline assembler code
 	mov  @songNote+6, r1
 	andi r1, >1
 	jeq  JMP_88
-	b    @L302
+	b    @L311
 JMP_88
 	li   r1, musicmem
 	clr  r2
 	li   r3, StartSong
 	bl   *r3
-	b    @L302
-L306
+	b    @L311
+L315
 	li   r1, >18
 	li   r2, >F
 	li   r3, LC13
@@ -2833,7 +2872,7 @@ menupulldown
 	movb @>20(r10), r1
 	cb   r1, @menubaroptions
 	jle  JMP_89
-	b    @L310
+	b    @L319
 JMP_89
 	srl  r14, 8
 	mov  r14, @>10(r10)
@@ -2848,11 +2887,11 @@ JMP_89
 	mov  r2, @>1E(r10)
 	li   r3, strlen
 	mov  r3, @>18(r10)
-L315
+L324
 	mov  @>14(r10), r1
 	movb *r1, r4
 	jne  JMP_90
-	b    @L337
+	b    @L346
 JMP_90
 	mov  @>1C(r10), r2
 	inc  r2
@@ -2865,7 +2904,7 @@ JMP_90
 	a    r9, r1
 	mov  r1, @>16(r10)
 	clr  r15
-L316
+L325
 	movb r15, r9
 	srl  r9, 8
 	mov  @>12(r10), r14
@@ -2908,8 +2947,8 @@ L316
 	mov  @>14(r10), r1
 	movb *r1, r4
 	cb   r4, r15
-	jh  L316
-L312
+	jh  L325
+L321
 	mov  @>10(r10), r1
 	a    @gImage, r1
 	srl  r4, 8
@@ -2924,8 +2963,8 @@ L312
 	mov  @>1E(r10), r14
 	mov  @>18(r10), r15
 	mov  @>14(r10), r13
-	jmp  L317
-L318
+	jmp  L326
+L327
 	mov  @gImage, r2
 	inc  r2
 	mov  @>10(r10), r3
@@ -2942,15 +2981,15 @@ L318
 	mov  @vdpchar, r3
 	bl   *r3
 	ai   r9, >100
-L317
+L326
 	mov  r14, r1
 	bl   *r15
 	inc  r1
 	movb r9, r4
 	srl  r4, 8
 	c    r1, r4
-	jgt  L318
-	jeq  L318
+	jgt  L327
+	jeq  L327
 	mov  r10, r1
 	ai   r1, >A
 	li   r2, updownenter
@@ -2958,12 +2997,12 @@ L317
 	movb @>20(r10), r2
 	cb   r2, @menubaroptions
 	jh  JMP_91
-	b    @L338
+	b    @L347
 JMP_91
-L319
+L328
 	li   r13, >100
 	li   r15, >1
-L332
+L341
 	mov  @>1C(r10), r9
 	a    r15, r9
 	sla  r9, >5
@@ -2984,23 +3023,23 @@ L332
 	movb r1, r2
 	ai   r2, >F800
 	ci   r2, >5FF
-	jh  L332
+	jh  L341
 	srl  r2, 8
 	a    r2, r2
-	mov  @L324(r2), r3
+	mov  @L333(r2), r3
 	b    *r3
 	even
-L324
-		data		L321
-		data		L321
-		data		L322
-		data		L322
+L333
+		data		L330
+		data		L330
+		data		L331
+		data		L331
+		data		L341
 		data		L332
-		data		L323
-L321
+L330
 	movb r1, r13
 	ai   r13, >A00
-L323
+L332
 	bl   @windowrestore
 	movb r13, r1
 	mov  *r10+, r11
@@ -3010,7 +3049,7 @@ L323
 	mov  *r10, r15
 	ai   r10, >1A
 	b    *r11
-L322
+L331
 	mov  @gImage, r1
 	inc  r1
 	mov  @>10(r10), r2
@@ -3021,30 +3060,30 @@ L322
 	bl   *r3
 	li   r3, >B00
 	cb   r14, r3
-	jeq  L339
+	jeq  L348
 	ai   r13, >100
 	mov  @>14(r10), r2
 	cb   r13, *r2
-	jh  L319
-L336
+	jh  L328
+L345
 	movb r13, r15
 	srl  r15, 8
-	jmp  L332
-L339
+	jmp  L341
+L348
 	ai   r13, >FF00
-	jne  L336
+	jne  L345
 	mov  @>14(r10), r1
 	movb *r1, r13
 	movb r13, r15
 	srl  r15, 8
-	jmp  L332
-L338
+	jmp  L341
+L347
 	mov  r10, r1
 	ai   r1, >A
 	li   r2, leftright
 	bl   @strcat
-	b    @L319
-L310
+	b    @L328
+L319
 	srl  r14, 8
 	mov  r14, @>10(r10)
 	srl  r13, 8
@@ -3071,8 +3110,8 @@ L310
 	mov  r9, @>12(r10)
 	mov  r14, r9
 	mov  r1, r14
-	jmp  L313
-L314
+	jmp  L322
+L323
 	mov  @gImage, r2
 	inc  r2
 	mov  @>10(r10), r1
@@ -3084,22 +3123,22 @@ L314
 	mov  @vdpchar, r3
 	bl   *r3
 	ai   r13, >100
-L313
+L322
 	mov  r15, r1
 	bl   *r14
 	inc  r1
 	movb r13, r3
 	srl  r3, 8
 	c    r1, r3
-	jgt  L314
-	jeq  L314
+	jgt  L323
+	jeq  L323
 	mov  @>12(r10), r9
-	b    @L315
-L337
+	b    @L324
+L346
 	mov  @>1C(r10), r2
 	inc  r2
 	mov  r2, @>12(r10)
-	b    @L312
+	b    @L321
 	.size	menupulldown, .-menupulldown
 LC18
 	text '%s has won!'
@@ -3139,6 +3178,10 @@ playerwins
 	mov  r1, @>2(r10)
 	bl   @cprintf
 	ai   r10, >4
+	bl   @detect_speech
+	ci   r1, 0
+	jne  L357
+L350
 	li   r1, >5
 	li   r2, >9
 	li   r3, LC19
@@ -3147,37 +3190,37 @@ playerwins
 	li   r9, >200
 	li   r14, >300
 	li   r15, >100
-L344
+L354
 	li   r1, >A00
 	movb r1, r2
 	li   r3, >700
 	bl   *r13
 	cb   r1, r9
-	jeq  L347
+	jeq  L358
 	cb   r1, r14
-	jeq  L348
+	jeq  L359
 	cb   r1, r15
-	jne  L342
+	jne  L352
 	jeq  0
 	cb  @playerdata+1, @$-1
-	jne  L342
+	jne  L352
 	jeq  0
 	cb  @playerdata+5, @$-1
-	jne  L342
+	jne  L352
 	jeq  0
 	cb  @playerdata+9, @$-1
-	jne  L342
+	jne  L352
 	jeq  0
 	cb  @playerdata+13, @$-1
-	jeq  L344
-L342
+	jeq  L354
+L352
 	mov  *r10+, r11
 	mov  *r10+, r9
 	mov  *r10+, r13
 	mov  *r10+, r14
 	mov  *r10+, r15
 	b    @windowrestore
-L348
+L359
 	li   r1, >100
 	movb r1, @endofgameflag
 	movb r1, @zv
@@ -3187,13 +3230,29 @@ L348
 	mov  *r10+, r14
 	mov  *r10+, r15
 	b    @windowrestore
-L347
+L358
 	li   r1, >300
 	movb r1, @endofgameflag
 	bl   @gamereset
 	li   r1, >100
 	movb r1, @zv
-	jmp  L342
+	jmp  L352
+L357
+	bl   @pausemusic
+	movb @turnofplayernr, r1
+	srl  r1, 8
+	a    r1, r1
+	li   r13, say_vocab
+	mov  @speech_playercolor(r1), r1
+	bl   *r13
+	li   r9, speech_wait
+	bl   *r9
+	bl   @speech_reset
+	li   r1, >7DDB
+	bl   *r13
+	bl   *r9
+	bl   @startmusic
+	b    @L350
 	.size	playerwins, .-playerwins
 LC20
 	text 'Are you sure?'
@@ -3238,14 +3297,14 @@ menumain
 	mov  r15, *r0
 	mov  r10, r1
 	ai   r1, >A
-	li   r2, C.59.2134
+	li   r2, C.61.2145
 	li   r3, >4
 	bl   @memcpy
 	li   r1, >100
 	movb r1, @>E(r10)
 	li   r2, >1
 	mov  r2, @>12(r10)
-L367
+L378
 	mov  @>12(r10), r15
 	dec  r15
 	mov  r15, r3
@@ -3258,8 +3317,8 @@ L367
 	clr  r9
 	mov  r15, r13
 	ai   r13, menubarcoords
-	jmp  L352
-L353
+	jmp  L363
+L364
 	mov  @gImage, r3
 	ai   r3, >20
 	movb *r13, r2
@@ -3271,14 +3330,14 @@ L353
 	mov  @vdpchar, r3
 	bl   *r3
 	ai   r9, >100
-L352
+L363
 	mov  r14, r1
 	li   r4, strlen
 	bl   *r4
 	movb r9, r4
 	srl  r4, 8
 	c    r4, r1
-	jlt  L353
+	jlt  L364
 	mov  r10, r1
 	ai   r1, >A
 	movb @joyinterface, r2
@@ -3299,16 +3358,16 @@ L352
 	li   r4, >800
 	cb   r9, r4
 	jne  JMP_92
-	b    @L371
+	b    @L382
 JMP_92
 	li   r1, >900
 	cb   r9, r1
 	jne  JMP_93
-	b    @L372
+	b    @L383
 JMP_93
 	li   r4, >D00
 	cb   r9, r4
-	jne  L367
+	jne  L378
 	movb *r13, r14
 	movb r14, r9
 	ai   r9, >FF00
@@ -3326,8 +3385,8 @@ JMP_93
 	srl  r4, 8
 	a    r1, r4
 	ci   r4, >26
-	jlt  L358
-	jeq  L358
+	jlt  L369
+	jeq  L369
 	mov  @>10(r10), r4
 	a    r15, r4
 	sla  r4, >2
@@ -3341,7 +3400,7 @@ JMP_93
 	a    r1, r2
 	mov  r2, r9
 	swpb r9
-L358
+L369
 	movb r9, r1
 	clr  r2
 	movb @>E(r10), r3
@@ -3350,15 +3409,15 @@ L358
 	li   r2, >1200
 	cb   r1, r2
 	jne  JMP_94
-	b    @L373
+	b    @L384
 JMP_94
 	li   r3, >1300
 	cb   r1, r3
-	jeq  L374
+	jeq  L385
 	jeq  0
 	cb  r1, @$-1
 	jne  JMP_95
-	b    @L367
+	b    @L378
 JMP_95
 	movb @>E(r10), r2
 	movb r2, r3
@@ -3374,66 +3433,66 @@ JMP_95
 	mov  *r10, r15
 	ai   r10, >C
 	b    *r11
-L371
+L382
 	movb @>E(r10), r1
 	ai   r1, >FF00
 	movb r1, @>E(r10)
-	jne  L370
+	jne  L381
 	movb @menubaroptions, r3
 	movb r3, @>E(r10)
 	movb r3, r4
 	srl  r4, 8
 	mov  r4, @>12(r10)
-	b    @L367
-L372
+	b    @L378
+L383
 	movb @>E(r10), r2
 	ai   r2, >100
 	movb r2, @>E(r10)
 	cb   r2, @menubaroptions
-	jh  L357
+	jh  L368
 	movb r2, r3
 	srl  r3, 8
 	mov  r3, @>12(r10)
-	b    @L367
-L369
+	b    @L378
+L380
 	movb @menubaroptions, r1
 	movb r1, @>E(r10)
-L370
+L381
 	movb r1, r2
 	srl  r2, 8
 	mov  r2, @>12(r10)
-	b    @L367
-L357
+	b    @L378
+L368
 	li   r2, >100
 	movb r2, @>E(r10)
 	li   r3, >1
 	mov  r3, @>12(r10)
-	b    @L367
-L374
+	b    @L378
+L385
 	movb @>E(r10), r4
 	ai   r4, >100
 	movb r4, @>E(r10)
 	cb   r4, @menubaroptions
-	jh  L361
+	jh  L372
 	movb r4, r1
 	srl  r1, 8
 	mov  r1, @>12(r10)
-	b    @L367
-L373
+	b    @L378
+L384
 	movb @>E(r10), r3
 	ai   r3, >FF00
 	movb r3, @>E(r10)
-	jeq  L369
+	jeq  L380
 	movb r3, r4
 	srl  r4, 8
 	mov  r4, @>12(r10)
-	b    @L367
-L361
+	b    @L378
+L372
 	li   r4, >100
 	movb r4, @>E(r10)
 	li   r1, >1
 	mov  r1, @>12(r10)
-	b    @L367
+	b    @L378
 	.size	menumain, .-menumain
 	even
 
@@ -3496,7 +3555,7 @@ input
 	mov  r1, r15
 	mov  r14, @>5A(r10)
 	mov  @>52(r10), r14
-L376
+L387
 	mov  r14, r1
 	a    @gImage, r1
 	a    r15, r1
@@ -3508,8 +3567,8 @@ L376
 	movb r9, r6
 	srl  r6, 8
 	c    r6, r13
-	jlt  L376
-	jeq  L376
+	jlt  L387
+	jeq  L387
 	mov  @>5A(r10), r14
 	swpb r14
 	mov  @>52(r10), r1
@@ -3539,18 +3598,18 @@ L376
 	movb r1, r4
 	ai   r4, >FD00
 	ci   r4, >AFF
-	jle  L403
-L378
+	jle  L414
+L389
 	movb @>58(r10), r3
 	cb   r9, r3
 	jhe  JMP_96
-	b    @L404
+	b    @L415
 JMP_96
-L385
+L396
 	movb r9, r13
-L388
+L399
 	movb r13, r9
-L405
+L416
 	mov  r10, r1
 	ai   r1, >A
 	clr  r2
@@ -3559,26 +3618,26 @@ L405
 	movb r1, r4
 	ai   r4, >FD00
 	ci   r4, >AFF
-	jh  L378
-L403
+	jh  L389
+L414
 	srl  r4, 8
 	a    r4, r4
-	mov  @L384(r4), r3
+	mov  @L395(r4), r3
 	b    *r3
 	even
-L384
-		data		L379
-		data		L380
-		data		L378
-		data		L378
-		data		L378
-		data		L381
-		data		L382
-		data		L378
-		data		L378
-		data		L378
-		data		L383
-L383
+L395
+		data		L390
+		data		L391
+		data		L389
+		data		L389
+		data		L389
+		data		L392
+		data		L393
+		data		L389
+		data		L389
+		data		L389
+		data		L394
+L394
 	mov  @>50(r10), r1
 	li   r4, strlen
 	bl   *r4
@@ -3606,18 +3665,18 @@ L383
 	mov  *r10, r15
 	ai   r10, >5C
 	b    *r11
-L382
+L393
 	mov  r14, r1
 	li   r3, strlen
 	bl   *r3
 	movb r9, r4
 	srl  r4, 8
 	c    r4, r1
-	jgt  L385
-	jeq  L385
+	jgt  L396
+	jeq  L396
 	movb @>58(r10), r4
 	cb   r9, r4
-	jhe  L385
+	jhe  L396
 	movb r9, r13
 	ai   r13, >100
 	movb r13, r9
@@ -3648,12 +3707,12 @@ L382
 	mov  @>62(r10), @conio_x
 	mov  @>54(r10), @conio_y
 	movb r13, r9
-	b    @L405
-L381
+	b    @L416
+L392
 	jeq  0
 	cb  r9, @$-1
 	jne  JMP_97
-	b    @L385
+	b    @L396
 JMP_97
 	movb r9, r13
 	ai   r13, >FF00
@@ -3674,10 +3733,10 @@ JMP_97
 	a    r9, r4
 	movb @>1(r4), r5
 	jeq  JMP_98
-	b    @L392
+	b    @L403
 JMP_98
 	li   r2, >1A
-L393
+L404
 	mov  r1, r4
 	inc  r4
 	a    r15, r4
@@ -3690,8 +3749,8 @@ L393
 	mov  r9, @conio_x
 	mov  @>54(r10), @conio_y
 	movb r13, r9
-	b    @L405
-L380
+	b    @L416
+L391
 	mov  r14, r1
 	li   r4, strlen
 	bl   *r4
@@ -3700,41 +3759,41 @@ L380
 	movb @>58(r10), r1
 	cb   r1, r4
 	jh  JMP_99
-	b    @L385
+	b    @L396
 JMP_99
 	jeq  0
 	cb  r4, @$-1
 	jne  JMP_100
-	b    @L385
+	b    @L396
 JMP_100
 	cb   r9, r4
 	jl  JMP_101
-	b    @L385
+	b    @L396
 JMP_101
 	ai   r4, >100
 	cb   r9, r4
-	jh  L389
+	jh  L400
 	movb r4, r5
 	srl  r5, 8
 	a    r14, r5
 	movb *r5, @>1(r5)
 	jeq  0
 	cb  r4, @$-1
-	jne  L400
-	jmp  L389
-L391
+	jne  L411
+	jmp  L400
+L402
 	movb r4, r1
 	srl  r1, 8
 	a    r14, r1
 	movb *r1, @>1(r1)
 	jeq  0
 	cb  r4, @$-1
-	jeq  L389
-L400
+	jeq  L400
+L411
 	ai   r4, >FF00
 	cb   r9, r4
-	jle  L391
-L389
+	jle  L402
+L400
 	movb r9, r13
 	srl  r13, 8
 	mov  r14, r4
@@ -3751,12 +3810,12 @@ L389
 	mov  @>54(r10), @conio_y
 	movb r9, r13
 	movb r13, r9
-	b    @L405
-L379
+	b    @L416
+L390
 	jeq  0
 	cb  r9, @$-1
 	jne  JMP_102
-	b    @L385
+	b    @L396
 JMP_102
 	movb r9, r13
 	ai   r13, >FF00
@@ -3786,10 +3845,10 @@ JMP_102
 	a    r4, r1
 	jeq  0
 	cb  r2, @$-1
-	jeq  L386
+	jeq  L397
 	movb r13, @>5E(r10)
 	mov  r3, r13
-L397
+L408
 	srl  r2, 8
 	bl   *r5
 	movb r9, r3
@@ -3806,9 +3865,9 @@ L397
 	ai   r9, >100
 	jeq  0
 	cb  r2, @$-1
-	jne  L397
+	jne  L408
 	movb @>5E(r10), r13
-L386
+L397
 	li   r2, >1A
 	bl   *r5
 	mov  r15, r4
@@ -3824,7 +3883,7 @@ L386
 	mov  @gImage, r5
 	mov  @>5C(r10), r1
 	movb *r1, r4
-	jeq  L406
+	jeq  L417
 	movb r4, r2
 	srl  r2, 8
 	inc  r5
@@ -3836,10 +3895,10 @@ L386
 	bl   *r3
 	mov  @>60(r10), @conio_x
 	mov  @>54(r10), @conio_y
-L407
+L418
 	movb r13, r9
-	b    @L405
-L404
+	b    @L416
+L415
 	movb r9, r13
 	srl  r13, 8
 	mov  r14, r4
@@ -3870,15 +3929,15 @@ L404
 	jeq  0
 	cb  r3, @$-1
 	jeq  JMP_103
-	b    @L388
+	b    @L399
 JMP_103
 	movb r13, r4
 	srl  r4, 8
 	a    r14, r4
 	movb r3, @>1(r4)
 	movb r13, r9
-	b    @L405
-L406
+	b    @L416
+L417
 	li   r2, >1A
 	inc  r5
 	a    r15, r5
@@ -3889,11 +3948,11 @@ L406
 	bl   *r3
 	mov  @>60(r10), @conio_x
 	mov  @>54(r10), @conio_y
-	jmp  L407
-L392
+	jmp  L418
+L403
 	movb r5, r2
 	srl  r2, 8
-	b    @L393
+	b    @L404
 	.size	input, .-input
 LC21
 	text 'Computer plays player %d?'
@@ -3921,7 +3980,7 @@ inputofnames
 	li   r13, playerdata
 	clr  r9
 	li   r15, cprintf
-L411
+L422
 	li   r1, >4
 	mov  r1, @conio_x
 	li   r2, >A
@@ -3940,10 +3999,10 @@ L411
 	bl   *r5
 	li   r2, >100
 	cb   r1, r2
-	jeq  L414
+	jeq  L425
 	clr  r4
 	movb r4, *r13
-L410
+L421
 	li   r5, >4
 	mov  r5, @conio_x
 	li   r1, >A
@@ -3963,16 +4022,16 @@ L410
 	ai   r14, >9
 	ai   r13, >4
 	ci   r9, >4
-	jne  L411
+	jne  L422
 	mov  *r10+, r11
 	mov  *r10+, r9
 	mov  *r10+, r13
 	mov  *r10+, r14
 	mov  *r10+, r15
 	b    @windowrestore
-L414
+L425
 	movb r2, *r13
-	jmp  L410
+	jmp  L421
 	.size	inputofnames, .-inputofnames
 	even
 
@@ -4030,6 +4089,7 @@ saveconfigfile
 	li   r2, LC23
 	li   r3, >D
 	bl   @memcpy
+	bl   @pausemusic
 	mov  r10, r1
 	inct r1
 	li   r2, saveslots
@@ -4037,17 +4097,19 @@ saveconfigfile
 	bl   @dsr_save
 	jeq  0
 	cb  r1, @$-1
-	jne  L420
+	jne  L431
+	bl   @startmusic
 	mov  *r10, r11
 	ai   r10, >10
 	b    *r11
-	jmp  L421
-L420
+	jmp  L432
+L431
 	bl   @fileerrormessage
+	bl   @startmusic
 	mov  *r10, r11
 	ai   r10, >10
 	b    *r11
-L421
+L432
 	.size	saveconfigfile, .-saveconfigfile
 LC25
 	text 'Save game.'
@@ -4093,7 +4155,7 @@ savegame
 	li   r2, >100
 	cb   r9, r2
 	jne  JMP_104
-	b    @L452
+	b    @L464
 JMP_104
 	li   r1, >200
 	li   r2, >500
@@ -4110,14 +4172,14 @@ JMP_104
 	li   r3, LC26
 	bl   *r14
 	li   r13, menupulldown
-L425
+L436
 	li   r1, >A00
 	movb r1, r2
 	li   r3, >800
 	bl   *r13
 	movb r1, r9
 	ai   r9, >FF00
-	jeq  L425
+	jeq  L436
 	movb r9, r5
 	srl  r5, 8
 	mov  r5, r13
@@ -4125,9 +4187,9 @@ L425
 	li   r4, >100
 	cb   *r13, r4
 	jne  JMP_105
-	b    @L453
+	b    @L465
 JMP_105
-L426
+L437
 	li   r1, >4
 	li   r2, >9
 	li   r3, LC28
@@ -4137,13 +4199,13 @@ L426
 	jeq  0
 	cb  *r13, @$-1
 	jne  JMP_106
-	b    @L428
+	b    @L439
 JMP_106
 	mov  r5, r14
 	ai   r14, >23
 	sla  r14, >4
 	ai   r14, pulldownmenutitles
-L429
+L440
 	li   r1, >400
 	li   r2, >A00
 	mov  r14, r3
@@ -4158,14 +4220,14 @@ L429
 	mov  @>1C(r10), r5
 	cb   r2, r1
 	jle  JMP_107
-	b    @L454
+	b    @L466
 JMP_107
 	mov  r5, r4
 	sla  r4, >4
 	mov  r4, r6
 	ai   r6, pulldownmenutitles
 	li   r1, >F00
-L431
+L442
 	movb r2, r3
 	srl  r3, 8
 	a    r6, r3
@@ -4173,8 +4235,8 @@ L431
 	movb r7, @>230(r3)
 	ai   r2, >100
 	cb   r2, r1
-	jne  L431
-L430
+	jne  L442
+L441
 	clr  r1
 	movb r1, @pulldownmenutitles+575(r4)
 	movb @>18(r10), r1
@@ -4187,10 +4249,10 @@ L430
 	ai   r2, >5
 	ai   r2, saveslots
 	ai   r4, saveslots+21
-L432
+L443
 	movb *r3+, *r2+
 	c    r2, r4
-	jne  L432
+	jne  L443
 	li   r2, >A
 	a    r10, r2
 	a    r1, r2
@@ -4202,8 +4264,8 @@ L432
 	clr  r3
 	movb r3, @>1(r1)
 	bl   @windowrestore
-	jmp  L424
-L452
+	jmp  L435
+L464
 	srl  r1, 8
 	li   r2, >A
 	a    r10, r2
@@ -4214,7 +4276,8 @@ L452
 	clr  r2
 	movb r2, @>1(r1)
 	li   r13, saveslots
-L424
+L435
+	bl   @pausemusic
 	li   r7, >100
 	movb r7, *r13
 	bl   @saveconfigfile
@@ -4225,7 +4288,7 @@ L424
 	movb @np+3, @savegamemem+4
 	li   r4, >5
 	clr  r3
-L433
+L444
 	mov  r3, r2
 	sla  r2, >2
 	ai   r2, playerdata
@@ -4233,39 +4296,39 @@ L433
 	ai   r1, savegamemem
 	mov  r4, r5
 	ai   r5, savegamemem+4
-L434
+L445
 	movb *r2+, *r1+
 	c    r5, r1
-	jne  L434
+	jne  L445
 	inc  r3
 	ai   r4, >4
 	ci   r3, >4
-	jne  L433
+	jne  L444
 	li   r5, >15
 	clr  r4
 	li   r6, >400
-L435
+L446
 	mov  r4, r1
 	sla  r1, >3
 	ai   r1, playerpos
 	mov  r5, r2
 	ai   r2, savegamemem
 	clr  r3
-L436
+L447
 	movb *r1, *r2
 	movb @>1(r1), @>1(r2)
 	ai   r3, >100
 	inct r1
 	inct r2
 	cb   r3, r6
-	jne  L436
+	jne  L447
 	inc  r4
 	ai   r5, >8
 	ci   r4, >4
-	jne  L435
+	jne  L446
 	li   r5, >35
 	clr  r4
-L437
+L448
 	mov  r4, r2
 	sla  r2, >3
 	a    r4, r2
@@ -4274,14 +4337,14 @@ L437
 	ai   r1, savegamemem
 	mov  r5, r3
 	ai   r3, savegamemem+21
-L438
+L449
 	movb *r2+, *r1+
 	c    r1, r3
-	jne  L438
+	jne  L449
 	inc  r4
 	ai   r5, >15
 	ci   r4, >4
-	jne  L437
+	jne  L448
 	mov  r10, r1
 	ai   r1, >A
 	li   r2, savegamemem
@@ -4289,8 +4352,10 @@ L438
 	bl   @dsr_save
 	jeq  0
 	cb  r1, @$-1
-	jne  L455
-L441
+	jne  L467
+L451
+	bl   @startmusic
+L453
 	mov  *r10+, r11
 	mov  *r10+, r9
 	mov  *r10+, r13
@@ -4298,10 +4363,7 @@ L441
 	mov  *r10, r15
 	ai   r10, >16
 	b    *r11
-L455
-	bl   @fileerrormessage
-	jmp  L441
-L453
+L465
 	li   r1, >4
 	li   r2, >9
 	li   r3, LC27
@@ -4316,11 +4378,14 @@ L453
 	mov  @>1C(r10), r5
 	cb   r1, r4
 	jne  JMP_108
-	b    @L426
+	b    @L437
 JMP_108
 	bl   @windowrestore
-	jmp  L441
-L428
+	jmp  L453
+L467
+	bl   @fileerrormessage
+	jmp  L451
+L439
 	mov  r5, r14
 	ai   r14, >23
 	sla  r14, >4
@@ -4331,11 +4396,11 @@ L428
 	mov  r5, @>1C(r10)
 	bl   @memset
 	mov  @>1C(r10), r5
-	b    @L429
-L454
+	b    @L440
+L466
 	mov  r5, r4
 	sla  r4, >4
-	b    @L430
+	b    @L441
 	.size	savegame, .-savegame
 LC29
 	text 'Throw 3x'
@@ -4362,6 +4427,12 @@ turngeneric
 	movb r1, @>B(r10)
 	movb r1, @>C(r10)
 	movb r1, @>D(r10)
+	bl   @detect_speech
+	ci   r1, 0
+	jeq  JMP_109
+	b    @L548
+JMP_109
+L469
 	movb @turnofplayernr, r1
 	srl  r1, 8
 	mov  r1, r3
@@ -4369,26 +4440,26 @@ turngeneric
 	mov  r3, r2
 	ai   r2, playerdata
 	cb   @>3(r2), @>1(r2)
-	jne  JMP_109
-	b    @L535
-JMP_109
-L457
+	jne  JMP_110
+	b    @L549
+JMP_110
+L470
 	li   r13, >100
 	li   r1, cputsxy
 	mov  r1, @>E(r10)
-L462
+L475
 	clr  r9
 	li   r15, dicethrow
 	li   r14, >600
-L464
+L477
 	bl   *r15
 	movb r1, @throw
 	cb   r1, r14
-	jeq  L463
+	jeq  L476
 	ai   r9, >100
 	cb   r13, r9
-	jh  L464
-L463
+	jh  L477
+L476
 	li   r1, >17
 	li   r2, >7
 	li   r3, LC30
@@ -4403,57 +4474,57 @@ L463
 	ai   r2, playerdata
 	movb @>3(r2), r4
 	cb   r4, @>1(r2)
-	jne  JMP_110
-	b    @L536
-JMP_110
-L465
+	jne  JMP_111
+	b    @L550
+JMP_111
+L478
 	clr  r14
-L467
+L480
 	mov  r3, r12
 	ai   r12, np
 	movb *r12, r15
-	jgt  JMP_111
-	jeq  JMP_111
-	b    @L537
-JMP_111
+	jgt  JMP_112
+	jeq  JMP_112
+	b    @L551
+JMP_112
 	jeq  0
 	cb  r4, @$-1
-	jne  JMP_112
-	b    @L538
-JMP_112
-L470
+	jne  JMP_113
+	b    @L552
+JMP_113
+L483
 	seto r2
 	movb r2, *r12
-L469
+L482
 	jeq  0
 	cb  r14, @$-1
-	jeq  JMP_113
-	b    @L471
-JMP_113
+	jeq  JMP_114
+	b    @L484
+JMP_114
 	seto r4
 	cb   r15, r4
-	jne  JMP_114
-	b    @L539
-JMP_114
-L472
+	jne  JMP_115
+	b    @L553
+JMP_115
+L485
 	li   r9, >100
-L496
+L509
 	li   r3, >600
 	cb   @throw, r3
-	jne  JMP_115
-	b    @L540
-JMP_115
-L498
+	jne  JMP_116
+	b    @L554
+JMP_116
+L511
 	jeq  0
 	cb  r9, @$-1
-	jne  JMP_116
-	b    @L499
-JMP_116
+	jne  JMP_117
+	b    @L512
+JMP_117
 	li   r13, >100
 	cb   r14, r13
-	jne  JMP_117
-	b    @L499
-JMP_117
+	jne  JMP_118
+	b    @L512
+JMP_118
 	li   r14, pawnerase
 	movb @turnofplayernr, r1
 	movb r15, r2
@@ -4474,44 +4545,44 @@ JMP_117
 	movb *r4, r5
 	movb *r3, r7
 	cb   r7, r13
-	jne  JMP_118
-	b    @L541
-JMP_118
-L502
+	jne  JMP_119
+	b    @L555
+JMP_119
+L515
 	movb r5, r3
 	ab   @throw, r3
 	mov  r8, r4
 	a    r6, r4
 	a    r4, r4
 	movb r3, @playerpos+1(r4)
-L503
+L516
 	jeq  0
 	cb  r9, @$-1
-	jeq  JMP_119
-	b    @L504
-JMP_119
+	jeq  JMP_120
+	b    @L517
+JMP_120
 	li   r4, >2700
 	cb   r3, r4
-	jle  JMP_120
-	b    @L542
-JMP_120
-L509
+	jle  JMP_121
+	b    @L556
+JMP_121
+L522
 	mov  r8, r3
 	a    r6, r3
 	a    r3, r3
 	ai   r3, playerpos
 	movb @>1(r3), r3
-L511
+L524
 	mov  r8, r4
 	a    r6, r4
 	a    r4, r4
 	movb @playerpos(r4), r7
 	li   r4, >100
 	cb   r7, r4
-	jne  JMP_121
-	b    @L543
-JMP_121
-L512
+	jne  JMP_122
+	b    @L557
+JMP_122
+L525
 	mov  r8, r4
 	ai   r4, playerdata
 	inc  r4
@@ -4522,18 +4593,18 @@ L512
 	srl  r5, 8
 	ai   r5, >3
 	c    r0, r5
-	jne  JMP_122
-	b    @L544
-JMP_122
-L513
+	jne  JMP_123
+	b    @L558
+JMP_123
+L526
 	ci   r3, >27FF
-	jle  L514
+	jle  L527
 	mov  r8, r4
 	a    r6, r4
 	a    r4, r4
 	ai   r3, >D800
 	movb r3, @playerpos+1(r4)
-L514
+L527
 	clr  r0
 	a    r6, r8
 	a    r8, r8
@@ -4541,54 +4612,54 @@ L514
 	mov  r8, r13
 	inc  r13
 	li   r12, >400
-L515
+L528
 	clr  r2
 	clr  r5
 	movb r0, r3
 	srl  r3, >6
 	andi r3, >FFFC
-	jmp  L519
-L516
+	jmp  L532
+L529
 	mov  r3, r1
 	a    r2, r1
 	a    r1, r1
 	ai   r1, playerpos
 	jeq  0
 	cb  *r1, @$-1
-	jne  L517
+	jne  L530
 	jeq  0
 	cb  *r8, @$-1
-	jne  L517
+	jne  L530
 	cb   @>1(r1), *r13
-	jeq  L518
-L517
+	jeq  L531
+L530
 	ai   r5, >100
 	inc  r2
 	cb   r5, r12
-	jeq  L545
-L519
-	c    r6, r2
-	jne  L516
+	jeq  L559
+L532
+	c    r2, r6
+	jne  L529
 	cb   r0, r9
-	jne  L516
+	jne  L529
 	ai   r5, >100
 	inc  r2
 	cb   r5, r12
-	jne  L519
-L545
+	jne  L532
+L559
 	ai   r0, >100
 	ci   r0, >3FF
-	jle  L515
+	jle  L528
 	seto r0
 	clr  r5
-L518
+L531
 	seto r3
 	cb   r0, r3
-	jeq  JMP_123
-	b    @L531
-JMP_123
+	jeq  JMP_124
+	b    @L544
+JMP_124
 	li   r13, pawnplace
-L521
+L534
 	movb r9, r1
 	movb r15, r2
 	clr  r3
@@ -4598,17 +4669,17 @@ L521
 	andi r1, >FFFC
 	jeq  0
 	cb  @playerdata(r1), @$-1
-	jne  L522
+	jne  L535
 	li   r1, >100
 	cb   @autosavetoggle, r1
-	jne  JMP_124
-	b    @L546
-JMP_124
-L522
+	jne  JMP_125
+	b    @L560
+JMP_125
+L535
 	li   r1, >17
 	li   r2, >7
-	jmp  L532
-L499
+	jmp  L545
+L512
 	li   r1, >17
 	li   r2, >7
 	li   r3, LC31
@@ -4616,14 +4687,14 @@ L499
 	bl   *r4
 	li   r1, >17
 	li   r2, >8
-L532
+L545
 	li   r3, LC13
 	mov  @>E(r10), r4
 	bl   *r4
 	li   r1, LC12
 	li   r2, >100
 	bl   @getkey
-L523
+L536
 	mov  *r10+, r11
 	mov  *r10+, r9
 	mov  *r10+, r13
@@ -4631,7 +4702,7 @@ L523
 	mov  *r10, r15
 	ai   r10, >10
 	b    *r11
-L539
+L553
 	movb @throw, r13
 	movb r14, r2
 	li   r0, >100
@@ -4641,7 +4712,7 @@ L539
 	li   r9, >400
 	movb r14, @>12(r10)
 	mov  r12, r14
-L490
+L503
 	movb r2, r12
 	srl  r12, 8
 	mov  r8, r3
@@ -4651,163 +4722,179 @@ L490
 	movb *r3+, r4
 	movb *r3, r5
 	cb   r4, r0
-	jne  JMP_125
-	b    @L547
-JMP_125
+	jne  JMP_126
+	b    @L561
+JMP_126
 	movb r5, r7
 	ab   r13, r7
 	jeq  0
 	cb  r4, @$-1
-	jne  L477
+	jne  L490
 	jeq  0
 	cb  r1, @$-1
-	jeq  JMP_126
-	b    @L478
-JMP_126
+	jeq  JMP_127
+	b    @L491
+JMP_127
 	li   r4, >2700
 	cb   r7, r4
-	jle  L484
+	jle  L497
 	cb   r5, r4
-	jh  JMP_127
-	b    @L548
-JMP_127
-L484
-	clr  r4
-L480
-	cb   r4, r0
-	jne  JMP_128
-	b    @L485
+	jh  JMP_128
+	b    @L562
 JMP_128
-L477
+L497
+	clr  r4
+L493
+	cb   r4, r0
+	jne  JMP_129
+	b    @L498
+JMP_129
+L490
 	li   r3, >A
 	a    r10, r3
 	a    r12, r3
 	li   r4, >100
 	movb r4, *r3
 	ab   r4, r2
-L476
+L489
 	cb   r2, r9
-	jne  L490
+	jne  L503
 	movb @>12(r10), r14
-L471
+L484
 	seto r3
 	cb   r15, r3
-	jeq  JMP_129
-	b    @L472
-JMP_129
+	jeq  JMP_130
+	b    @L485
+JMP_130
 	li   r9, >100
 	cb   @>A(r10), r9
-	jne  JMP_130
-	b    @L491
-JMP_130
+	jne  JMP_131
+	b    @L504
+JMP_131
 	clr  r9
-L492
+L505
 	li   r3, >100
 	cb   @>B(r10), r3
-	jne  JMP_131
-	b    @L549
-JMP_131
-L493
+	jne  JMP_132
+	b    @L563
+JMP_132
+L506
 	li   r3, >100
 	cb   @>C(r10), r3
-	jne  JMP_132
-	b    @L550
-JMP_132
-L494
+	jne  JMP_133
+	b    @L564
+JMP_133
+L507
 	li   r3, >100
 	cb   @>D(r10), r3
-	jne  JMP_133
-	b    @L551
-JMP_133
-L495
-	ci   r9, >1FF
-	jh  JMP_134
-	b    @L496
+	jne  JMP_134
+	b    @L565
 JMP_134
+L508
+	ci   r9, >1FF
+	jh  JMP_135
+	b    @L509
+JMP_135
 	jeq  0
 	cb  @playerdata(r8), @$-1
-	jeq  JMP_135
-	b    @L497
-JMP_135
+	jeq  JMP_136
+	b    @L510
+JMP_136
 	mov  r10, r2
 	ai   r2, >A
 	bl   @humanchoosepawn
 	movb r1, r15
 	li   r3, >600
 	cb   @throw, r3
-	jeq  JMP_136
-	b    @L498
-JMP_136
-L540
+	jeq  JMP_137
+	b    @L511
+JMP_137
+L554
 	li   r1, >100
 	movb r1, @zv
-	b    @L498
-L538
+	b    @L511
+L552
 	seto r15
-	b    @L470
-L536
+	b    @L483
+L550
 	li   r2, >300
 	cb   r13, r2
-	jeq  JMP_137
-	b    @L465
-JMP_137
+	jeq  JMP_138
+	b    @L478
+JMP_138
 	clr  r14
 	li   r2, >600
 	cb   @throw, r2
-	jne  JMP_138
-	b    @L467
-JMP_138
+	jne  JMP_139
+	b    @L480
+JMP_139
 	li   r14, >100
-	b    @L467
-L535
+	b    @L480
+L549
 	mov  r1, r2
 	sla  r2, >3
 	jeq  0
 	cb  @playerpos(r2), @$-1
-	jne  JMP_139
-	b    @L552
-JMP_139
+	jne  JMP_140
+	b    @L566
+JMP_140
 	li   r13, >300
-L459
+L472
 	inc  r3
 	a    r3, r3
 	jeq  0
 	cb  @playerpos(r3), @$-1
-	jne  L460
+	jne  L473
 	li   r13, >100
-L460
+L473
 	a    r1, r1
 	inc  r1
 	sla  r1, >2
 	jeq  0
 	cb  @playerpos(r1), @$-1
-	jne  L461
+	jne  L474
 	li   r13, >100
-L461
+L474
 	ai   r2, playerpos
 	jeq  0
 	cb  @>6(r2), @$-1
-	jne  JMP_140
-	b    @L457
-JMP_140
+	jne  JMP_141
+	b    @L470
+JMP_141
 	li   r1, >300
 	cb   r13, r1
-	jne  JMP_141
-	b    @L530
-JMP_141
+	jne  JMP_142
+	b    @L543
+JMP_142
 	li   r2, cputsxy
 	mov  r2, @>E(r10)
-	b    @L462
-L497
+	b    @L475
+L510
 	mov  r10, r2
 	ai   r2, >A
 	bl   @computerchoosepawn
 	movb r1, r15
-	b    @L496
-L537
-	seto r15
+	b    @L509
+L548
+	bl   @pausemusic
+	movb @turnofplayernr, r1
+	srl  r1, 8
+	a    r1, r1
+	li   r13, say_vocab
+	mov  @speech_playercolor(r1), r1
+	bl   *r13
+	li   r9, speech_wait
+	bl   *r9
+	bl   @speech_reset
+	li   r1, >7092
+	bl   *r13
+	bl   *r9
+	bl   @startmusic
 	b    @L469
-L531
+L551
+	seto r15
+	b    @L482
+L544
 	movb r0, r1
 	movb r5, r2
 	mov  r0, @>16(r10)
@@ -4834,25 +4921,25 @@ L531
 	clr  r3
 	bl   *r13
 	movb @turnofplayernr, r9
-	b    @L521
-L504
+	b    @L534
+L517
 	li   r0, >100
 	cb   r9, r0
-	jne  L506
+	jne  L519
 	li   r4, >900
 	cb   r3, r4
-	jh  JMP_142
-	b    @L509
-JMP_142
-	cb   r5, r4
-	jle  JMP_143
-	b    @L509
+	jh  JMP_143
+	b    @L522
 JMP_143
+	cb   r5, r4
+	jle  JMP_144
+	b    @L522
+JMP_144
 	jeq  0
 	cb  r7, @$-1
-	jeq  JMP_144
-	b    @L509
-JMP_144
+	jeq  JMP_145
+	b    @L522
+JMP_145
 	mov  r8, r3
 	a    r6, r3
 	a    r3, r3
@@ -4860,20 +4947,20 @@ JMP_144
 	movb r9, *r3+
 	li   r2, >FA00
 	ab   r2, *r3
-	b    @L509
-L552
+	b    @L522
+L566
 	li   r13, >100
-	b    @L459
-L542
+	b    @L472
+L556
 	cb   r5, r4
-	jle  JMP_145
-	b    @L509
-JMP_145
+	jle  JMP_146
+	b    @L522
+JMP_146
 	jeq  0
 	cb  r7, @$-1
-	jeq  JMP_146
-	b    @L509
-JMP_146
+	jeq  JMP_147
+	b    @L522
+JMP_147
 	mov  r8, r3
 	a    r6, r3
 	a    r3, r3
@@ -4882,27 +4969,27 @@ JMP_146
 	movb r4, *r3+
 	li   r1, >DC00
 	ab   r1, *r3
-	b    @L509
-L506
+	b    @L522
+L519
 	li   r4, >200
 	cb   r9, r4
-	jeq  JMP_147
-	b    @L508
-JMP_147
+	jeq  JMP_148
+	b    @L521
+JMP_148
 	li   r4, >1300
 	cb   r3, r4
-	jh  JMP_148
-	b    @L509
-JMP_148
-	cb   r5, r4
-	jle  JMP_149
-	b    @L509
+	jh  JMP_149
+	b    @L522
 JMP_149
+	cb   r5, r4
+	jle  JMP_150
+	b    @L522
+JMP_150
 	jeq  0
 	cb  r7, @$-1
-	jeq  JMP_150
-	b    @L509
-JMP_150
+	jeq  JMP_151
+	b    @L522
+JMP_151
 	mov  r8, r3
 	a    r6, r3
 	a    r3, r3
@@ -4910,85 +4997,85 @@ JMP_150
 	movb r0, *r3+
 	li   r4, >F000
 	ab   r4, *r3
-	b    @L509
-L547
+	b    @L522
+L561
 	ci   r5, >3FF
-	jh  L474
+	jh  L487
 	li   r3, >600
 	cb   r13, r3
-	jeq  L553
-L488
+	jeq  L567
+L501
 	ai   r2, >100
-	b    @L476
-L553
+	b    @L489
+L567
 	movb r2, r15
 	movb r2, *r14
 	li   r2, >400
-	b    @L476
-L474
+	b    @L489
+L487
 	movb r5, r7
 	ab   r13, r7
-L485
+L498
 	ci   r7, >7FF
-	jh  L488
+	jh  L501
 	mov  @>10(r10), r6
 	clr  r5
-	jmp  L489
-L487
+	jmp  L502
+L500
 	ai   r5, >100
 	inct r6
 	cb   r5, r9
-	jne  JMP_151
-	b    @L477
-JMP_151
-L489
+	jne  JMP_152
+	b    @L490
+JMP_152
+L502
 	cb   r5, r2
-	jeq  L487
+	jeq  L500
 	cb   *r6, r0
-	jne  L487
+	jne  L500
 	movb @>1(r6), r3
 	cb   r3, r7
-	jh  L487
+	jh  L500
 	ci   r3, >3FF
-	jle  L487
+	jle  L500
 	ai   r2, >100
-	b    @L476
-L478
+	b    @L489
+L491
 	cb   r1, r0
-	jne  L481
+	jne  L494
 	li   r4, >900
 	cb   r7, r4
-	jh  JMP_152
-	b    @L484
-JMP_152
-	cb   r5, r4
-	jle  JMP_153
-	b    @L484
+	jh  JMP_153
+	b    @L497
 JMP_153
+	cb   r5, r4
+	jle  JMP_154
+	b    @L497
+JMP_154
 	ai   r7, >FA00
 	movb r1, r4
-	b    @L480
-L543
+	b    @L493
+L557
 	ci   r3, >3FF
-	jh  JMP_154
-	b    @L512
-JMP_154
+	jh  JMP_155
+	b    @L525
+JMP_155
 	movb r3, @dp(r12)
-	b    @L512
-L544
+	b    @L525
+L558
 	li   r5, >100
 	cb   r7, r5
-	jeq  JMP_155
-	b    @L513
-JMP_155
+	jeq  JMP_156
+	b    @L526
+JMP_156
 	ai   r12, >FF00
 	movb r12, *r4
-	b    @L513
-L541
+	b    @L526
+L555
 	ci   r5, >3FF
-	jle  JMP_156
-	b    @L502
-JMP_156
+	jle  JMP_157
+	b    @L515
+JMP_157
 	clr  r1
 	movb r1, *r3
 	movb r9, r3
@@ -5002,48 +5089,48 @@ JMP_156
 	ai   r4, playerdata
 	seto r2
 	ab   r2, @>3(r4)
-	b    @L503
-L481
+	b    @L516
+L494
 	li   r4, >200
 	cb   r1, r4
-	jeq  JMP_157
-	b    @L483
-JMP_157
+	jeq  JMP_158
+	b    @L496
+JMP_158
 	li   r4, >1300
 	cb   r7, r4
-	jh  JMP_158
-	b    @L484
-JMP_158
-	cb   r5, r4
-	jle  JMP_159
-	b    @L484
+	jh  JMP_159
+	b    @L497
 JMP_159
+	cb   r5, r4
+	jle  JMP_160
+	b    @L497
+JMP_160
 	ai   r7, >F000
 	li   r4, >100
-	b    @L480
-L551
+	b    @L493
+L565
 	ab   r3, r9
 	li   r15, >300
-	b    @L495
-L550
+	b    @L508
+L564
 	ab   r3, r9
 	li   r15, >200
-	b    @L494
-L549
+	b    @L507
+L563
 	ab   r3, r9
 	movb r3, r15
-	b    @L493
-L491
+	b    @L506
+L504
 	clr  r15
-	b    @L492
-L548
+	b    @L505
+L562
 	ai   r7, >DC00
 	li   r4, >100
-	b    @L480
-L546
+	b    @L493
+L560
 	bl   @savegame
-	b    @L523
-L530
+	b    @L536
+L543
 	li   r3, cputsxy
 	mov  r3, @>E(r10)
 	li   r1, >17
@@ -5051,27 +5138,27 @@ L530
 	li   r3, LC29
 	li   r4, cputsxy
 	bl   *r4
-	b    @L462
-L508
+	b    @L475
+L521
 	li   r4, >300
 	cb   r9, r4
-	jeq  JMP_160
-	b    @L509
-JMP_160
+	jeq  JMP_161
+	b    @L522
+JMP_161
 	li   r4, >1D00
 	cb   r3, r4
-	jh  JMP_161
-	b    @L511
-JMP_161
-	cb   r5, r4
-	jle  JMP_162
-	b    @L511
+	jh  JMP_162
+	b    @L524
 JMP_162
+	cb   r5, r4
+	jle  JMP_163
+	b    @L524
+JMP_163
 	jeq  0
 	cb  r7, @$-1
-	jeq  JMP_163
-	b    @L511
-JMP_163
+	jeq  JMP_164
+	b    @L524
+JMP_164
 	mov  r8, r4
 	a    r6, r4
 	a    r4, r4
@@ -5080,24 +5167,24 @@ JMP_163
 	movb *r4, r3
 	ai   r3, >E600
 	movb r3, *r4
-	b    @L511
-L483
+	b    @L524
+L496
 	li   r4, >300
 	cb   r1, r4
-	jeq  JMP_164
-	b    @L477
-JMP_164
+	jeq  JMP_165
+	b    @L490
+JMP_165
 	li   r4, >1D00
 	cb   r7, r4
-	jh  JMP_165
-	b    @L477
-JMP_165
-	cb   r5, r4
-	jle  JMP_166
-	b    @L477
+	jh  JMP_166
+	b    @L490
 JMP_166
+	cb   r5, r4
+	jle  JMP_167
+	b    @L490
+JMP_167
 	ai   r7, >E600
-	b    @L485
+	b    @L498
 	.size	turngeneric, .-turngeneric
 	even
 
@@ -5131,12 +5218,12 @@ dsr_load
 	li   r2, >1800
 	bl   @dsrlnk
 	movb r1, r9
-	jne  L555
+	jne  L569
 	li   r1, >1A00
 	mov  r14, r2
 	mov  r13, r3
 	bl   @vdpmemread
-L555
+L569
 	movb r9, r1
 	mov  *r10+, r11
 	mov  *r10+, r9
@@ -5172,9 +5259,9 @@ musicnext
 	ai   r2, >100
 	movb r2, @musicnumber
 	ci   r2, >3FF
-	jh  L558
+	jh  L572
 	ai   r2, >3000
-L559
+L573
 	mov  r9, r1
 	andi r1, >FF
 	li   r3, >4
@@ -5194,9 +5281,9 @@ L559
 	bl   @dsr_load
 	jeq  0
 	cb  r1, @$-1
-	jeq  L560
+	jeq  L574
 	bl   @fileerrormessage
-L560
+L574
 	li   r1, musicmem
 	clr  r2
 	bl   @StartSong
@@ -5204,11 +5291,11 @@ L560
 	mov  *r10, r9
 	ai   r10, >10
 	b    *r11
-L558
+L572
 	li   r2, >100
 	movb r2, @musicnumber
 	li   r2, >3100
-	jmp  L559
+	jmp  L573
 	.size	musicnext, .-musicnext
 LC33
 	text 'Load game.'
@@ -5263,12 +5350,12 @@ loadgame
 	ai   r9, saveslots
 	jeq  0
 	cb  *r9, @$-1
-	jeq  L579
+	jeq  L593
 	bl   @windowrestore
 	li   r2, >100
 	cb   *r9, r2
-	jeq  L580
-L573
+	jeq  L594
+L587
 	mov  *r10+, r11
 	mov  *r10+, r9
 	mov  *r10+, r13
@@ -5276,8 +5363,8 @@ L573
 	mov  *r10, r15
 	ai   r10, >14
 	b    *r11
-	b    @L581
-L579
+	b    @L595
+L593
 	li   r1, >4
 	li   r2, >9
 	li   r3, LC34
@@ -5292,8 +5379,9 @@ L579
 	bl   @windowrestore
 	li   r2, >100
 	cb   *r9, r2
-	jne  L573
-L580
+	jne  L587
+L594
+	bl   @pausemusic
 	andi r15, >FF
 	li   r1, >A
 	a    r10, r1
@@ -5310,9 +5398,10 @@ L580
 	bl   @dsr_load
 	jeq  0
 	cb  r1, @$-1
-	jeq  JMP_167
-	b    @L582
-JMP_167
+	jeq  JMP_168
+	b    @L596
+JMP_168
+	bl   @startmusic
 	movb @savegamemem, @turnofplayernr
 	movb @savegamemem+1, @np
 	movb @savegamemem+2, @np+1
@@ -5320,7 +5409,7 @@ JMP_167
 	movb @savegamemem+4, @np+3
 	li   r4, >5
 	clr  r3
-L566
+L580
 	mov  r4, r1
 	ai   r1, savegamemem
 	mov  r3, r2
@@ -5328,27 +5417,27 @@ L566
 	ai   r2, playerdata
 	mov  r4, r5
 	ai   r5, savegamemem+4
-L567
+L581
 	movb *r1+, *r2+
 	c    r5, r1
-	jne  L567
+	jne  L581
 	inc  r3
 	ai   r4, >4
 	ci   r3, >4
-	jne  L566
+	jne  L580
 	li   r1, >15
 	mov  r1, @>18(r10)
 	clr  r3
 	mov  r3, @>1A(r10)
 	clr  r15
-L568
+L582
 	mov  @>18(r10), r14
 	ai   r14, savegamemem
 	mov  @>1A(r10), r13
 	sla  r13, >3
 	ai   r13, playerpos
 	clr  r9
-L569
+L583
 	movb r15, r1
 	movb r9, r2
 	li   r4, pawnerase
@@ -5365,7 +5454,7 @@ L569
 	inct r13
 	li   r1, >400
 	cb   r9, r1
-	jne  L569
+	jne  L583
 	ai   r15, >100
 	mov  @>1A(r10), r3
 	inc  r3
@@ -5374,10 +5463,10 @@ L569
 	ai   r4, >8
 	mov  r4, @>18(r10)
 	cb   r15, r9
-	jne  L568
+	jne  L582
 	li   r5, >35
 	clr  r4
-L570
+L584
 	mov  r5, r1
 	ai   r1, savegamemem
 	mov  r4, r2
@@ -5386,14 +5475,14 @@ L570
 	ai   r2, playername
 	mov  r5, r3
 	ai   r3, savegamemem+21
-L571
+L585
 	movb *r1+, *r2+
 	c    r1, r3
-	jne  L571
+	jne  L585
 	inc  r4
 	ai   r5, >15
 	ci   r4, >4
-	jne  L570
+	jne  L584
 	li   r1, >200
 	movb r1, @endofgameflag
 	mov  *r10+, r11
@@ -5403,11 +5492,11 @@ L571
 	mov  *r10, r15
 	ai   r10, >14
 	b    *r11
-	jmp  L581
-L582
+	jmp  L595
+L596
 	bl   @fileerrormessage
-	b    @L573
-L581
+	b    @L587
+L595
 	.size	loadgame, .-loadgame
 LC35
 	text 'Autosave on '
@@ -5428,135 +5517,124 @@ turnhuman
 	mov  r15, *r0
 	li   r14, menumain
 	li   r13, >1D00
-	li   r15, StopSong
-	jmp  L600
-L584
+	li   r15, memcpy
+	jmp  L614
+L598
 	movb r9, r1
 	ai   r1, >F500
 	ci   r1, >2FF
-	jle  L601
-L596
+	jle  L615
+L610
 	li   r1, >1600
 	cb   r9, r1
-	jeq  L601
-L600
+	jeq  L615
+L614
 	bl   *r14
 	movb r1, r9
 	ai   r1, >F400
 	cb   r1, r13
-	jh  L584
+	jh  L598
 	srl  r1, 8
 	a    r1, r1
-	mov  @L594(r1), r2
+	mov  @L608(r1), r2
 	b    *r2
 	even
-L594
-		data		L585
-		data		L586
-		data		L584
-		data		L584
-		data		L584
-		data		L584
-		data		L584
-		data		L584
-		data		L584
-		data		L587
-		data		L588
-		data		L589
-		data		L584
-		data		L584
-		data		L584
-		data		L584
-		data		L584
-		data		L584
-		data		L584
-		data		L590
-		data		L591
-		data		L592
-		data		L584
-		data		L584
-		data		L584
-		data		L584
-		data		L584
-		data		L584
-		data		L584
-		data		L593
-L593
+L608
+		data		L599
+		data		L600
+		data		L598
+		data		L598
+		data		L598
+		data		L598
+		data		L598
+		data		L598
+		data		L598
+		data		L601
+		data		L602
+		data		L603
+		data		L598
+		data		L598
+		data		L598
+		data		L598
+		data		L598
+		data		L598
+		data		L598
+		data		L604
+		data		L605
+		data		L606
+		data		L598
+		data		L598
+		data		L598
+		data		L598
+		data		L598
+		data		L598
+		data		L598
+		data		L607
+L607
 	li   r1, informationcredits
 	bl   *r1
 	li   r1, >1600
 	cb   r9, r1
-	jne  L600
-L601
+	jne  L614
+L615
 	mov  *r10+, r11
 	mov  *r10+, r9
 	mov  *r10+, r13
 	mov  *r10+, r14
 	mov  *r10+, r15
 	b    *r11
-	b    @L603
-L592
+	b    @L617
+L606
 	jeq  0
 	cb  @musicnumber, @$-1
-	jeq  JMP_168
-	b    @L604
-JMP_168
+	jeq  JMP_169
+	b    @L618
+JMP_169
 	li   r3, >100
 	movb r3, @musicnumber
 	li   r1, musicmem
 	clr  r2
-	li   r4, StartSong
-	bl   *r4
-	jmp  L596
-L591
-	bl   *r15
-	li   r2, >9F00
-	movb r2, @>8400
-	li   r4, >BFDF
-	movb r4, @>8400
-	swpb r4
-	movb r4, @>8400
-	li   r3, >FF00
-	movb r3, @>8400
-	swpb r3
-	movb r3, @musicnumber
-	jmp  L596
-L590
-	li   r1, musicnext
-	bl   *r1
-	b    @L596
-L589
+	li   r3, StartSong
+	bl   *r3
+	jmp  L610
+L605
+	li   r3, pausemusic
+	bl   *r3
+	clr  r1
+	movb r1, @musicnumber
+	jmp  L610
+L604
+	li   r2, musicnext
+	bl   *r2
+	jmp  L610
+L603
 	li   r1, >100
 	cb   @autosavetoggle, r1
-	jeq  L605
+	jeq  L619
 	movb r1, @autosavetoggle
 	li   r1, pulldownmenutitles+112
 	li   r2, LC36
 	li   r3, >D
-	li   r4, memcpy
-	bl   *r4
-	b    @L596
-L588
-	li   r4, areyousure
-	bl   *r4
-	li   r2, >100
-	cb   r1, r2
-	jeq  JMP_169
-	b    @L596
-JMP_169
-	bl   @loadgame
-	b    @L596
-L587
-	clr  r1
-	bl   @savegame
-	b    @L596
-L586
+	bl   *r15
+	b    @L610
+L602
 	bl   @areyousure
 	li   r2, >100
 	cb   r1, r2
 	jeq  JMP_170
-	b    @L601
+	b    @L610
 JMP_170
+	bl   @loadgame
+	b    @L610
+L601
+	clr  r1
+	bl   @savegame
+	b    @L610
+L600
+	bl   @areyousure
+	li   r2, >100
+	cb   r1, r2
+	jne  L615
 	movb r1, @endofgameflag
 	mov  *r10+, r11
 	mov  *r10+, r9
@@ -5564,13 +5642,13 @@ JMP_170
 	mov  *r10+, r14
 	mov  *r10+, r15
 	b    *r11
-	jmp  L603
-L585
+	jmp  L617
+L599
 	bl   @areyousure
 	li   r2, >100
 	cb   r1, r2
 	jeq  JMP_171
-	b    @L601
+	b    @L615
 JMP_171
 	li   r3, >300
 	movb r3, @endofgameflag
@@ -5580,23 +5658,23 @@ JMP_171
 	mov  *r10+, r14
 	mov  *r10+, r15
 	b    @gamereset
-L604
-	bl   *r15
+L618
+	li   r2, StopSong
+	bl   *r2
 	li   r1, musicmem
 	clr  r2
-	li   r4, StartSong
-	bl   *r4
-	b    @L596
-L605
+	li   r3, StartSong
+	bl   *r3
+	b    @L610
+L619
 	clr  r1
 	movb r1, @autosavetoggle
 	li   r1, pulldownmenutitles+112
 	li   r2, LC35
 	li   r3, >D
-	li   r4, memcpy
-	bl   *r4
-	b    @L596
-L603
+	bl   *r15
+	b    @L610
+L617
 	.size	turnhuman, .-turnhuman
 LC37
 	text 'DSK1.LUDOCHR'
@@ -5633,7 +5711,7 @@ graphicsinit
 	bl   *r9
 	jeq  0
 	cb  r1, @$-1
-	jne  L613
+	jne  L627
 	li   r13, vdpmemcpy
 	mov  @gPattern, r1
 	li   r2, musicmem
@@ -5645,7 +5723,7 @@ graphicsinit
 	bl   *r9
 	jeq  0
 	cb  r1, @$-1
-	jne  L613
+	jne  L627
 	mov  @gColor, r1
 	li   r2, musicmem
 	li   r3, >19
@@ -5656,14 +5734,14 @@ graphicsinit
 	bl   *r9
 	jeq  0
 	cb  r1, @$-1
-	jne  L613
+	jne  L627
 	li   r1, LC40
 	li   r2, musicmem
 	li   r3, >240
 	bl   *r9
 	jeq  0
 	cb  r1, @$-1
-	jne  L613
+	jne  L627
 	mov  @gImage, r1
 	li   r2, musicmem
 	li   r3, >240
@@ -5671,7 +5749,7 @@ graphicsinit
 	mov  *r10+, r9
 	mov  *r10+, r13
 	b    @vdpmemcpy
-L613
+L627
 	bl   @fileerrormessage
 	bl   @halt
 	.size	graphicsinit, .-graphicsinit
@@ -5693,10 +5771,10 @@ loadconfigfile
 	bl   @dsr_load
 	jeq  0
 	cb  r1, @$-1
-	jne  L615
+	jne  L629
 	li   r5, >5
 	clr  r4
-L616
+L630
 	mov  r5, r1
 	ai   r1, saveslots
 	mov  r4, r2
@@ -5705,24 +5783,24 @@ L616
 	ai   r2, pulldownmenutitles
 	mov  r5, r3
 	ai   r3, saveslots+16
-L618
+L632
 	movb *r1+, *r2+
 	c    r1, r3
-	jne  L618
+	jne  L632
 	inc  r4
 	ai   r5, >10
 	ci   r4, >5
-	jne  L616
+	jne  L630
 	mov  *r10, r11
 	ai   r10, >10
 	b    *r11
-	jmp  L621
-L615
+	jmp  L635
+L629
 	bl   @fileerrormessage
 	mov  *r10, r11
 	ai   r10, >10
 	b    *r11
-L621
+L635
 	.size	loadconfigfile, .-loadconfigfile
 LC41
 	text 'No speech synthesizer detected :('
@@ -5759,20 +5837,20 @@ loadintro
 	mov  r15, *r0
 	mov  r10, r1
 	ai   r1, >A
-	li   r2, C.140.3217
+	li   r2, C.142.3239
 	li   r3, >4
 	bl   @memcpy
 	bl   @loadconfigfile
 	li   r2, safe_read
 	li   r1, >8322
-L623
+L637
 	mov  *r2+, *r1+
 	ci   r1, >832E
-	jne  L623
+	jne  L637
 	bl   @detect_speech
 	ci   r1, 0
 	jeq  JMP_172
-	b    @L624
+	b    @L638
 JMP_172
 	dect r10
 	li   r1, LC41
@@ -5790,9 +5868,9 @@ JMP_172
 	jeq  0
 	cb  r1, @$-1
 	jeq  JMP_173
-	b    @L639
+	b    @L653
 JMP_173
-L626
+L640
 	li   r1, musicmem
 	clr  r2
 	li   r3, StartSong
@@ -5809,30 +5887,30 @@ L626
 	li   r15, cputs
 	li   r14, getkey
 	li   r13, >4D00
-L637
+L651
 	li   r1, >1
 	li   r2, >14
 	li   r3, LC45
 	bl   *r9
 	jeq  0
 	cb  @musicnumber, @$-1
-	jeq  L627
-L640
+	jeq  L641
+L654
 	li   r1, LC46
 	bl   *r15
-L628
+L642
 	mov  r10, r1
 	ai   r1, >A
 	li   r2, >100
 	bl   *r14
 	cb   r1, r13
-	jeq  L630
+	jeq  L644
 	li   r2, >6D00
 	cb   r1, r2
-	jeq  L630
+	jeq  L644
 	li   r2, >D00
 	cb   r1, r2
-	jne  L637
+	jne  L651
 	mov  *r10+, r11
 	mov  *r10+, r9
 	mov  *r10+, r13
@@ -5840,42 +5918,42 @@ L628
 	mov  *r10, r15
 	ai   r10, >6
 	b    *r11
-L630
+L644
 	jeq  0
 	cb  @musicnumber, @$-1
-	jeq  L631
+	jeq  L645
 	li   r3, StopSong
 	bl   *r3
 	li   r1, >9F00
 	movb r1, @>8400
-	li   r6, >BFDF
-	movb r6, @>8400
-	swpb r6
-	movb r6, @>8400
-	li   r5, >FF00
-	movb r5, @>8400
-	swpb r5
-	movb r5, @musicnumber
+	li   r4, >BFDF
+	movb r4, @>8400
+	swpb r4
+	movb r4, @>8400
+	li   r3, >FF00
+	movb r3, @>8400
+	swpb r3
+	movb r3, @musicnumber
 	li   r1, >1
 	li   r2, >14
 	li   r3, LC45
 	bl   *r9
 	jeq  0
 	cb  @musicnumber, @$-1
-	jne  L640
-L627
+	jne  L654
+L641
 	li   r1, LC47
 	bl   *r15
-	jmp  L628
-L631
+	jmp  L642
+L645
 	li   r3, >100
 	movb r3, @musicnumber
 	li   r1, musicmem
 	clr  r2
 	li   r3, StartSong
 	bl   *r3
-	jmp  L637
-L624
+	jmp  L651
+L638
 	li   r1, speech_intro
 	li   r2, >3F9
 	bl   @say_data
@@ -5891,11 +5969,11 @@ L624
 	jeq  0
 	cb  r1, @$-1
 	jne  JMP_174
-	b    @L626
+	b    @L640
 JMP_174
-L639
+L653
 	bl   @fileerrormessage
-	b    @L626
+	b    @L640
 	.size	loadintro, .-loadintro
 LC48
 	text 'Load old game?'
@@ -5944,27 +6022,27 @@ main
 	li   r2, >100
 	cb   r9, r2
 	jne  JMP_175
-	b    @L662
+	b    @L675
 JMP_175
-L642
+L656
 	movb @endofgameflag, r1
 	jne  JMP_176
-	b    @L663
+	b    @L676
 JMP_176
-L643
+L657
 	li   r9, >100
 	li   r14, >300
-L655
+L669
 	jeq  0
 	cb  r1, @$-1
 	jne  JMP_177
-	b    @L644
+	b    @L658
 JMP_177
 	clr  r1
 	movb r1, @endofgameflag
-L645
+L659
 	li   r13, turngeneric
-L658
+L671
 	li   r1, >1700
 	li   r2, >200
 	li   r3, >800
@@ -6015,13 +6093,13 @@ L658
 	jeq  0
 	cb  @playerdata(r1), @$-1
 	jeq  JMP_178
-	b    @L646
+	b    @L660
 JMP_178
 	li   r5, turnhuman
 	bl   *r5
-L647
+L661
 	movb @endofgameflag, r1
-	jne  L648
+	jne  L662
 	bl   *r13
 	movb @turnofplayernr, r2
 	movb r2, r5
@@ -6032,45 +6110,45 @@ L647
 	ai   r1, playerdata
 	jeq  0
 	cb  @>1(r1), @$-1
-	jeq  L664
-L649
+	jeq  L677
+L663
 	movb @zv, r3
-L653
+L667
 	cb   r3, r9
-	jeq  L650
+	jeq  L664
 	seto r1
 	movb r1, @np(r4)
 	movb r5, r2
 	ai   r2, >100
 	cb   r2, r14
-	jle  L651
+	jle  L665
 	clr  r2
-L651
+L665
 	jeq  0
 	cb  r3, @$-1
-	jne  L652
+	jne  L666
 	movb r2, r5
 	movb r2, r4
 	srl  r4, 8
-L650
+L664
 	clr  r3
 	mov  r4, r1
 	sla  r1, >2
 	ai   r1, playerdata
 	jeq  0
 	cb  @>1(r1), @$-1
-	jeq  L653
-L652
+	jeq  L667
+L666
 	movb r2, @turnofplayernr
 	movb r3, @zv
 	movb @endofgameflag, r1
 	jne  JMP_179
-	b    @L658
+	b    @L671
 JMP_179
-L648
+L662
 	cb   r1, r9
 	jeq  JMP_180
-	b    @L655
+	b    @L669
 JMP_180
 	bl   @clrscr
 	clr  r1
@@ -6079,47 +6157,34 @@ JMP_180
 	mov  r1, r2
 	li   r3, LC52
 	bl   *r15
-	jeq  0
-	cb  @musicnumber, @$-1
-	jne  L665
+	bl   @pausemusic
 	bl   @halt
-L664
+L677
 	bl   @playerwins
 	movb @turnofplayernr, r2
 	movb r2, r5
 	movb r2, r4
 	srl  r4, 8
-	jmp  L649
-L646
+	jmp  L663
+L660
 	li   r1, >17
 	li   r2, >5
 	li   r3, LC51
 	li   r4, cputsxy
 	bl   *r4
-	b    @L647
-L644
+	b    @L661
+L658
 	li   r2, inputofnames
 	bl   *r2
-	b    @L645
-L665
-	bl   @StopSong
-	li   r8, >9FBF
-	movb r8, @>8400
-	swpb r8
-	movb r8, @>8400
-	li   r7, >DFFF
-	movb r7, @>8400
-	swpb r7
-	movb r7, @>8400
-	bl   @halt
-L663
+	b    @L659
+L676
 	bl   @loadmainscreen
 	movb @endofgameflag, r1
-	b    @L643
-L662
+	b    @L657
+L675
 	bl   @loadmainscreen
 	bl   @loadgame
-	b    @L642
+	b    @L656
 	.size	main, .-main
 
 	def	speech_intro
@@ -7144,6 +7209,16 @@ speech_intro
 	byte	29
 	byte	2
 
+	def	speech_playercolor
+	even
+	.type	speech_playercolor, @object
+	.size	speech_playercolor, 8
+speech_playercolor
+	data	12829
+	data	22465
+	data	7050
+	data	31992
+
 	def	windownumber
 
 	even
@@ -7633,36 +7708,36 @@ joyinterface
 autosavetoggle
 	byte	1
 	pseg
-	.type	C.140.3217, @object
-	.size	C.140.3217, 4
-C.140.3217
+	.type	C.142.3239, @object
+	.size	C.142.3239, 4
+C.142.3239
 	byte	109
 	byte	77
 	byte	13
 	byte	0
-	.type	C.124.2742, @object
-	.size	C.124.2742, 5
-C.124.2742
+	.type	C.126.2753, @object
+	.size	C.126.2753, 5
+C.126.2753
 	byte	8
 	byte	9
 	byte	11
 	byte	10
 	byte	13
 	even
-	.type	random_mask.1614, @object
-	.size	random_mask.1614, 2
-random_mask.1614
+	.type	random_mask.1615, @object
+	.size	random_mask.1615, 2
+random_mask.1615
 	data	-19456
 	dseg
 	even
-	.type	seed.1613, @object
-	.size	seed.1613, 2
-seed.1613
+	.type	seed.1614, @object
+	.size	seed.1614, 2
+seed.1614
 	data	-21846
 	pseg
-	.type	C.59.2134, @object
-	.size	C.59.2134, 4
-C.59.2134
+	.type	C.61.2145, @object
+	.size	C.61.2145, 4
+C.61.2145
 	byte	8
 	byte	9
 	byte	13
@@ -7709,11 +7784,9 @@ musicmem
 mainscreen
 	bss 768
 
-	ref	halt
-
-	ref	StopSong
-
 	ref	cputsxy
+
+	ref	halt
 
 	ref	bgcolor
 
@@ -7730,6 +7803,8 @@ mainscreen
 	ref	memset
 
 	ref	StartSong
+
+	ref	StopSong
 
 	ref	cputs
 
