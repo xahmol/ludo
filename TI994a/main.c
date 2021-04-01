@@ -367,6 +367,24 @@ void printcentered(unsigned char* text, unsigned char xpos, unsigned char ypos, 
     cputs(text);
 }
 
+/* Music functions */
+void pausemusic()
+{
+    if(musicnumber)
+    {
+        StopSong();
+        MUTE_SOUND();
+    }
+}
+
+void startmusic()
+{
+    if(musicnumber)
+    {
+        StartSong(musicmem,0);
+    }
+}
+
 /* Generic input routines */
 unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
 {
@@ -1265,23 +1283,6 @@ void musicnext()
     ferr = dsr_load(fname,musicmem,3200);
     if (ferr) { fileerrormessage(ferr); }
     StartSong(musicmem,0);
-}
-
-void pausemusic()
-{
-    if(musicnumber)
-    {
-        StopSong();
-        MUTE_SOUND();
-    }
-}
-
-void startmusic()
-{
-    if(musicnumber)
-    {
-        StartSong(musicmem,0);
-    }
 }
 
 void informationcredits()
