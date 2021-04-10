@@ -1,6 +1,9 @@
+# Path variables
 TMS9900_DIR?=/home/xahmol/tms9900gcc/bin
 LIBTI99?=/home/xahmol/libti99
 LIBTIVGM2?=/home/xahmol/vgmcomp2/Players/libtivgm2
+CLASSIC99_DSK1?=/mnt/l/Retro/TI994a/classic99/DSK1/
+TIPI_HOST?=tipi@192.168.1.50
 
 # Paths to TMS9900 compilation tools
 GAS=$(TMS9900_DIR)/tms9900-as
@@ -13,7 +16,6 @@ OBJDUMP=$(TMS9900_DIR)/tms9900-objdump
 ELF2EA5=$(TMS9900_DIR)/elf2ea5
 ELF2CART=$(TMS9900_DIR)/elf2cart
 EA5SPLIT=$(TMS9900_DIR)/ea5split
-CLASSIC99_DSK1?=/mnt/l/Retro/TI994a/classic99/DSK1/
 
 FNAME=ludo
 UCFNAME=$(shell echo -n $(FNAME) | tr 'a-z' 'A-Z')
@@ -48,6 +50,7 @@ $(FNAME): $(FNAME).bin
 	$(EA5SPLIT) $(FNAME).bin
 	zip $(ZIP) $(shell echo $(UCFNAME)| rev| cut -c2-| rev)?*
 	cp $(shell echo $(UCFNAME)| rev| cut -c2-| rev)?* $(CLASSIC99_DSK1)
+	scp $(shell echo $(UCFNAME)| rev| cut -c2-| rev)?* $(TIPI_HOST):/home/tipi/tipi_disk/LUDO/
 
 $(FNAME).bin: $(FNAME).elf
 	$(ELF2EA5) $(FNAME).elf $(FNAME).bin

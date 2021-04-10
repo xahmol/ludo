@@ -8,10 +8,21 @@
 /* gPattern         0x0800                        */
 
 #define WINDOWBASE  0x1000      // Window save memory base
+
+/* File operations */
 #define VPAB        0x1800      // PAB memory base
 #define FBUF        0x1A00      // Filebuffer memory base
+#define CRU_ENABLE(c) __asm__("mov %0,r12\n\tsbo 0" : : "r"(c) : "r12")
+#define CRU_DISABLE(c) __asm__("mov %0,r12\n\tsbz 0" : : "r"(c) : "r12")
+#define GPLWSR12	*((volatile unsigned int*)0x83F8)
 
-#define SPEECH_TURN 0x7092
+/* PEEK POKE */
+#define peek(address)		( *((unsigned char*)address) )
+#define poke(address,value)	( *((unsigned char*)address)=(unsigned char)value )
+#define deek(address)		( *((unsigned int*)address) )
+#define doke(address,value)	( *((unsigned int*)address)=(unsigned int)value )
+
+/* Speech */
 #define SPEECH_WIN  0x7ddb
 
 /* References to redefined chars */
