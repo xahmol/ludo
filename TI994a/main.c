@@ -371,11 +371,20 @@ unsigned char dsr_save(unsigned char* filename, unsigned char* source, unsigned 
 /* General screen functions */
 void cspaces(unsigned char number)
 {
-    /* Function to print specified number of spaces */
+    /* Function to print specified number of spaces, cursor set by conio.h functions */
 
     unsigned char x;
 
     for(x=0;x<number;x++) { cputc(C_SPACE); }
+}
+
+void vdpspaces(unsigned char number)
+{
+    /* Function to print specified number of spaces, cursor set by vdp.h functions */
+
+    unsigned char x;
+
+    for(x=0;x<number;x++) { VDPWD = C_SPACE; }
 }
 
 void cleararea(unsigned char xpos, unsigned char ypos, unsigned char height, unsigned char width)
@@ -386,8 +395,8 @@ void cleararea(unsigned char xpos, unsigned char ypos, unsigned char height, uns
 
     for(x=0;x<height;x++)
     {
-        gotoxy(xpos,ypos+x);
-        cspaces(width);
+        VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos+x)*32);
+        vdpspaces(width);
     }
 }
 
@@ -503,7 +512,8 @@ int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned c
     strcat(validkeys,updownenter);
     strcat(validkeys,leftright);
   
-    for(x=0;x<size+1;x++) { vdpchar(gImage+xpos+x+(ypos*32),C_WUNDERL); }
+    VDP_SET_ADDRESS_WRITE(gImage+xpos+x+(ypos*32));
+    for(x=0;x<size+1;x++) { VDPWD = C_WUNDERL; }
 
     cputsxy(xpos, ypos, str);
     vdpchar(gImage+xpos+strlen(str)+(ypos*32),C_INVSPACE);
@@ -632,19 +642,21 @@ void menumakeborder(unsigned char xpos, unsigned char ypos, unsigned char height
     
     windowsave(ypos, height+2);
 
-    vdpchar(gImage+xpos+(ypos*32),C_LOWRIGHT);
-    for(x=0;x<width;x++) {vdpchar(gImage+(xpos+x+1)+(ypos*32),C_LOWLINE); }
-    vdpchar(gImage+(xpos+width)+(ypos*32),C_LOWLEFT);
+    VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos*32));
+    VDPWD = C_LOWRIGHT;
+    for(x=0;x<width;x++) { VDPWD = C_LOWLINE; }
+    VDPWD = C_LOWLEFT;
     for(y=0;y<height;y++)
     {
-        vdpchar(gImage+xpos+(ypos+y+1)*32,C_RIGHTLINE);
-        gotoxy(xpos+1,ypos+y+1);
-        cspaces(width);
-        vdpchar(gImage+(xpos+width)+(ypos+y+1)*32,C_LEFTLINE);
+        VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos+y+1)*32);
+        VDPWD = C_RIGHTLINE;
+        vdpspaces(width);
+        VDPWD = C_LEFTLINE;
     }
-    vdpchar(gImage+xpos+(ypos+height+1)*32,C_UPRIGHT);
-    for(x=0;x<width;x++) { vdpchar(gImage+(xpos+x+1)+(ypos+height+1)*32,C_UPLINE); }
-    vdpchar(gImage+(xpos+width)+(ypos+height+1)*32,C_UPLEFT);
+    VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos+height+1)*32);
+    VDPWD = C_UPRIGHT;
+    for(x=0;x<width;x++) { VDPWD = C_UPLINE; }
+    VDPWD = C_UPLEFT;
 }
 
 void menuplacebar()
@@ -678,8 +690,9 @@ unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char
     windowsave(ypos, pulldownmenuoptions[menunumber-1]+4);
     if(menunumber>menubaroptions)
     {
-        vdpchar(gImage+xpos+(ypos*32),C_LOWRIGHT);
-        for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+2;x++) { vdpchar(gImage+xpos+x+1+(ypos*32),C_LOWLINE); }
+        VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos*32));
+        VDPWD = C_LOWRIGHT;
+        for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+2;x++) { VDPWD = C_LOWLINE; }
     }
     for(x=0;x<pulldownmenuoptions[menunumber-1];x++)
     {
@@ -688,10 +701,11 @@ unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char
         cprintf(" %s ",pulldownmenutitles[menunumber-1][x]);
         vdpchar(gImage+xpos+strlen(pulldownmenutitles[menunumber-1][x])+2+(ypos+x+1)*32,C_RIGHTLINE);
     }
-    vdpchar(gImage+xpos+(ypos+pulldownmenuoptions[menunumber-1]+1)*32,C_UPRIGHT);
+    VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos+pulldownmenuoptions[menunumber-1]+1)*32);
+    VDPWD = C_UPRIGHT;
     for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+2;x++)
     {
-        vdpchar(gImage+xpos+x+1+(ypos+pulldownmenuoptions[menunumber-1]+1)*32,C_UPLINE);
+        VDPWD = C_UPLINE;
     }
 
     strcpy(validkeys, updownenter);
@@ -759,13 +773,14 @@ unsigned char menumain()
     {
         do
         {
+            VDP_SET_ADDRESS_WRITE(gImage+menubarcoords[menubarchoice-1]+32);
             for(x=0;x<strlen(menubartitles[menubarchoice-1]);x++)
             {
-                vdpchar(gImage+menubarcoords[menubarchoice-1]+x+32,C_UPLINE);
+                VDPWD = C_UPLINE;
             }
             key = getkey(validkeys,joyinterface);
-            gotoxy(menubarcoords[menubarchoice-1],1);
-            cspaces(strlen(menubartitles[menubarchoice-1]));
+            VDP_SET_ADDRESS_WRITE(gImage+menubarcoords[menubarchoice-1]+32);
+            vdpspaces(strlen(menubartitles[menubarchoice-1]));
             if(key==C_LEFT)
             {
                 menubarchoice--;

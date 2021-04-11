@@ -2,14 +2,14 @@
 # 1 "<built-in>"
 # 1 "<command-line>"
 # 1 "main.c"
-# 72 "main.c"
+# 75 "main.c"
 # 1 "/home/xahmol/libti99/system.h" 1
 # 9 "/home/xahmol/libti99/system.h"
 void halt() __attribute__ ((noreturn));
 
 
 void exit() __attribute__ ((noreturn));
-# 73 "main.c" 2
+# 76 "main.c" 2
 # 1 "/home/xahmol/libti99/files.h" 1
 # 60 "/home/xahmol/libti99/files.h"
 struct __attribute__((__packed__)) PAB {
@@ -36,7 +36,7 @@ unsigned char dsrlnk(struct PAB *pab, unsigned int vdp);
 
 
 void dsrlnkraw(unsigned int vdppab);
-# 74 "main.c" 2
+# 77 "main.c" 2
 # 1 "/home/xahmol/libti99/conio.h" 1
 # 15 "/home/xahmol/libti99/conio.h"
 # 1 "/home/xahmol/libti99/vdp.h" 1
@@ -435,7 +435,7 @@ inline int wherex() { return conio_x; }
 
 
 inline int wherey() { return conio_y; }
-# 75 "main.c" 2
+# 78 "main.c" 2
 # 1 "/home/xahmol/libti99/kscan.h" 1
 # 54 "/home/xahmol/libti99/kscan.h"
 unsigned char kscan(unsigned char mode);
@@ -449,7 +449,7 @@ void kscanfast(int mode);
 
 
 void joystfast(int unit);
-# 76 "main.c" 2
+# 79 "main.c" 2
 # 1 "/home/xahmol/libti99/string.h" 1
 
 
@@ -497,9 +497,9 @@ char* uint2hex(unsigned int x);
 
 
 void gets(char *buf, int maxlen);
-# 77 "main.c" 2
+# 80 "main.c" 2
 # 1 "/home/xahmol/libti99/vdp.h" 1
-# 78 "main.c" 2
+# 81 "main.c" 2
 # 1 "/home/xahmol/vgmcomp2/Players/libtivgm2/TISNPlay.h" 1
 # 13 "/home/xahmol/vgmcomp2/Players/libtivgm2/TISNPlay.h"
 typedef int int16;
@@ -536,7 +536,7 @@ void SongLoop30();
 extern uint8 songVol[4];
 # 64 "/home/xahmol/vgmcomp2/Players/libtivgm2/TISNPlay.h"
 extern uint16 songNote[4];
-# 79 "main.c" 2
+# 82 "main.c" 2
 # 1 "/home/xahmol/libti99/sound.h" 1
 # 40 "/home/xahmol/libti99/sound.h"
 inline void SET_SOUND_PTR(unsigned int x) { *((volatile unsigned int*)0x83cc) = x; }
@@ -552,7 +552,7 @@ inline void START_SOUND() { *((volatile unsigned char*)0x83ce) = 1; }
 
 
 inline void MUTE_SOUND() { *((volatile unsigned char*)0x8400)=0x90|0x0f; *((volatile unsigned char*)0x8400)=0xB0|0x0f; *((volatile unsigned char*)0x8400)=0xD0|0x0f; *((volatile unsigned char*)0x8400)=0xF0|0x0f; }
-# 80 "main.c" 2
+# 83 "main.c" 2
 # 1 "speech.h" 1
 # 33 "speech.h"
 void speech_reset();
@@ -687,9 +687,9 @@ void speech_wait() {
     ((read_func)(0x8320 +2))();
   }
 }
-# 81 "main.c" 2
+# 84 "main.c" 2
 # 1 "defines.h" 1
-# 82 "main.c" 2
+# 85 "main.c" 2
 
 
 
@@ -986,6 +986,15 @@ void cspaces(unsigned char number)
     for(x=0;x<number;x++) { cputc(32); }
 }
 
+void vdpspaces(unsigned char number)
+{
+
+
+    unsigned char x;
+
+    for(x=0;x<number;x++) { *((volatile unsigned char*)0x8C00) = 32; }
+}
+
 void cleararea(unsigned char xpos, unsigned char ypos, unsigned char height, unsigned char width)
 {
 
@@ -994,8 +1003,8 @@ void cleararea(unsigned char xpos, unsigned char ypos, unsigned char height, uns
 
     for(x=0;x<height;x++)
     {
-        conio_x = (xpos); conio_y = (ypos+x);
-        cspaces(width);
+        VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos+x)*32);
+        vdpspaces(width);
     }
 }
 
@@ -1090,7 +1099,7 @@ unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
 
 int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned char size)
 {
-# 494 "main.c"
+# 506 "main.c"
     unsigned char idx = strlen(str);
     unsigned char c, x, b, flag;
     unsigned char validkeys[70] = {32 ,3,0};
@@ -1100,7 +1109,8 @@ int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned c
     strcat(validkeys,updownenter);
     strcat(validkeys,leftright);
 
-    for(x=0;x<size+1;x++) { vdpchar(gImage+xpos+x+(ypos*32),26); }
+    VDP_SET_ADDRESS_WRITE(gImage+xpos+x+(ypos*32));
+    for(x=0;x<size+1;x++) { *((volatile unsigned char*)0x8C00) = 26; }
 
     cputsxy(xpos, ypos, str);
     vdpchar(gImage+xpos+strlen(str)+(ypos*32),25);
@@ -1229,19 +1239,21 @@ void menumakeborder(unsigned char xpos, unsigned char ypos, unsigned char height
 
     windowsave(ypos, height+2);
 
-    vdpchar(gImage+xpos+(ypos*32),6);
-    for(x=0;x<width;x++) {vdpchar(gImage+(xpos+x+1)+(ypos*32),1); }
-    vdpchar(gImage+(xpos+width)+(ypos*32),7);
+    VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos*32));
+    *((volatile unsigned char*)0x8C00) = 6;
+    for(x=0;x<width;x++) { *((volatile unsigned char*)0x8C00) = 1; }
+    *((volatile unsigned char*)0x8C00) = 7;
     for(y=0;y<height;y++)
     {
-        vdpchar(gImage+xpos+(ypos+y+1)*32,2);
-        conio_x = (xpos+1); conio_y = (ypos+y+1);
-        cspaces(width);
-        vdpchar(gImage+(xpos+width)+(ypos+y+1)*32,3);
+        VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos+y+1)*32);
+        *((volatile unsigned char*)0x8C00) = 2;
+        vdpspaces(width);
+        *((volatile unsigned char*)0x8C00) = 3;
     }
-    vdpchar(gImage+xpos+(ypos+height+1)*32,4);
-    for(x=0;x<width;x++) { vdpchar(gImage+(xpos+x+1)+(ypos+height+1)*32,0); }
-    vdpchar(gImage+(xpos+width)+(ypos+height+1)*32,5);
+    VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos+height+1)*32);
+    *((volatile unsigned char*)0x8C00) = 4;
+    for(x=0;x<width;x++) { *((volatile unsigned char*)0x8C00) = 0; }
+    *((volatile unsigned char*)0x8C00) = 5;
 }
 
 void menuplacebar()
@@ -1275,8 +1287,9 @@ unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char
     windowsave(ypos, pulldownmenuoptions[menunumber-1]+4);
     if(menunumber>menubaroptions)
     {
-        vdpchar(gImage+xpos+(ypos*32),6);
-        for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+2;x++) { vdpchar(gImage+xpos+x+1+(ypos*32),1); }
+        VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos*32));
+        *((volatile unsigned char*)0x8C00) = 6;
+        for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+2;x++) { *((volatile unsigned char*)0x8C00) = 1; }
     }
     for(x=0;x<pulldownmenuoptions[menunumber-1];x++)
     {
@@ -1285,10 +1298,11 @@ unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char
         cprintf(" %s ",pulldownmenutitles[menunumber-1][x]);
         vdpchar(gImage+xpos+strlen(pulldownmenutitles[menunumber-1][x])+2+(ypos+x+1)*32,2);
     }
-    vdpchar(gImage+xpos+(ypos+pulldownmenuoptions[menunumber-1]+1)*32,4);
+    VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos+pulldownmenuoptions[menunumber-1]+1)*32);
+    *((volatile unsigned char*)0x8C00) = 4;
     for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+2;x++)
     {
-        vdpchar(gImage+xpos+x+1+(ypos+pulldownmenuoptions[menunumber-1]+1)*32,0);
+        *((volatile unsigned char*)0x8C00) = 0;
     }
 
     strcpy(validkeys, updownenter);
@@ -1356,13 +1370,14 @@ unsigned char menumain()
     {
         do
         {
+            VDP_SET_ADDRESS_WRITE(gImage+menubarcoords[menubarchoice-1]+32);
             for(x=0;x<strlen(menubartitles[menubarchoice-1]);x++)
             {
-                vdpchar(gImage+menubarcoords[menubarchoice-1]+x+32,0);
+                *((volatile unsigned char*)0x8C00) = 0;
             }
             key = getkey(validkeys,joyinterface);
-            conio_x = (menubarcoords[menubarchoice-1]); conio_y = (1);
-            cspaces(strlen(menubartitles[menubarchoice-1]));
+            VDP_SET_ADDRESS_WRITE(gImage+menubarcoords[menubarchoice-1]+32);
+            vdpspaces(strlen(menubartitles[menubarchoice-1]));
             if(key==8)
             {
                 menubarchoice--;
@@ -1935,9 +1950,9 @@ void informationcredits()
 
     unsigned char version[30] = {
         'v','1','9','9',' ','-',' ',
-        ("Apr 10 2021"[ 7]),("Apr 10 2021"[ 8]),("Apr 10 2021"[ 9]),("Apr 10 2021"[10]),
-        ((("Apr 10 2021"[0] == 'O') || ("Apr 10 2021"[0] == 'N') || ("Apr 10 2021"[0] == 'D')) ? '1' : '0'),( (("Apr 10 2021"[0] == 'J' && "Apr 10 2021"[1] == 'a' && "Apr 10 2021"[2] == 'n')) ? '1' : (("Apr 10 2021"[0] == 'F')) ? '2' : (("Apr 10 2021"[0] == 'M' && "Apr 10 2021"[1] == 'a' && "Apr 10 2021"[2] == 'r')) ? '3' : (("Apr 10 2021"[0] == 'A' && "Apr 10 2021"[1] == 'p')) ? '4' : (("Apr 10 2021"[0] == 'M' && "Apr 10 2021"[1] == 'a' && "Apr 10 2021"[2] == 'y')) ? '5' : (("Apr 10 2021"[0] == 'J' && "Apr 10 2021"[1] == 'u' && "Apr 10 2021"[2] == 'n')) ? '6' : (("Apr 10 2021"[0] == 'J' && "Apr 10 2021"[1] == 'u' && "Apr 10 2021"[2] == 'l')) ? '7' : (("Apr 10 2021"[0] == 'A' && "Apr 10 2021"[1] == 'u')) ? '8' : (("Apr 10 2021"[0] == 'S')) ? '9' : (("Apr 10 2021"[0] == 'O')) ? '0' : (("Apr 10 2021"[0] == 'N')) ? '1' : (("Apr 10 2021"[0] == 'D')) ? '2' : '?' ),(("Apr 10 2021"[4] >= '0') ? ("Apr 10 2021"[4]) : '0'),("Apr 10 2021"[ 5]),'-',
-        ("14:35:14"[0]),("14:35:14"[1]),("14:35:14"[3]),("14:35:14"[4]) };
+        ("Apr 11 2021"[ 7]),("Apr 11 2021"[ 8]),("Apr 11 2021"[ 9]),("Apr 11 2021"[10]),
+        ((("Apr 11 2021"[0] == 'O') || ("Apr 11 2021"[0] == 'N') || ("Apr 11 2021"[0] == 'D')) ? '1' : '0'),( (("Apr 11 2021"[0] == 'J' && "Apr 11 2021"[1] == 'a' && "Apr 11 2021"[2] == 'n')) ? '1' : (("Apr 11 2021"[0] == 'F')) ? '2' : (("Apr 11 2021"[0] == 'M' && "Apr 11 2021"[1] == 'a' && "Apr 11 2021"[2] == 'r')) ? '3' : (("Apr 11 2021"[0] == 'A' && "Apr 11 2021"[1] == 'p')) ? '4' : (("Apr 11 2021"[0] == 'M' && "Apr 11 2021"[1] == 'a' && "Apr 11 2021"[2] == 'y')) ? '5' : (("Apr 11 2021"[0] == 'J' && "Apr 11 2021"[1] == 'u' && "Apr 11 2021"[2] == 'n')) ? '6' : (("Apr 11 2021"[0] == 'J' && "Apr 11 2021"[1] == 'u' && "Apr 11 2021"[2] == 'l')) ? '7' : (("Apr 11 2021"[0] == 'A' && "Apr 11 2021"[1] == 'u')) ? '8' : (("Apr 11 2021"[0] == 'S')) ? '9' : (("Apr 11 2021"[0] == 'O')) ? '0' : (("Apr 11 2021"[0] == 'N')) ? '1' : (("Apr 11 2021"[0] == 'D')) ? '2' : '?' ),(("Apr 11 2021"[4] >= '0') ? ("Apr 11 2021"[4]) : '0'),("Apr 11 2021"[ 5]),'-',
+        ("13:22:13"[0]),("13:22:13"[1]),("13:22:13"[3]),("13:22:13"[4]) };
     menumakeborder(0,5,14,30);
     printcentered("L U D O",2,7,28);
     printcentered(version,2,8,28);
