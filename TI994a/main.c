@@ -378,15 +378,6 @@ void cspaces(unsigned char number)
     for(x=0;x<number;x++) { cputc(C_SPACE); }
 }
 
-void vdpspaces(unsigned char number)
-{
-    /* Function to print specified number of spaces, cursor set by vdp.h functions */
-
-    unsigned char x;
-
-    for(x=0;x<number;x++) { VDPWD = C_SPACE; }
-}
-
 void cleararea(unsigned char xpos, unsigned char ypos, unsigned char height, unsigned char width)
 {
     /* Function to clear area */
@@ -395,8 +386,7 @@ void cleararea(unsigned char xpos, unsigned char ypos, unsigned char height, uns
 
     for(x=0;x<height;x++)
     {
-        VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos+x)*32);
-        vdpspaces(width);
+        hchar(ypos+x,xpos,C_SPACE,width);
     }
 }
 
@@ -642,20 +632,16 @@ void menumakeborder(unsigned char xpos, unsigned char ypos, unsigned char height
     
     windowsave(ypos, height+2);
 
+    cleararea(xpos+1,ypos+1,height,width);
     VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos*32));
     VDPWD = C_LOWRIGHT;
-    for(x=0;x<width;x++) { VDPWD = C_LOWLINE; }
+    hchar(ypos,xpos+1,C_LOWLINE,width);
     VDPWD = C_LOWLEFT;
-    for(y=0;y<height;y++)
-    {
-        VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos+y+1)*32);
-        VDPWD = C_RIGHTLINE;
-        vdpspaces(width);
-        VDPWD = C_LEFTLINE;
-    }
+    vchar(ypos+1,xpos,C_RIGHTLINE,height);
+    vchar(ypos+1,xpos+width+1,C_LEFTLINE,height);
     VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos+height+1)*32);
     VDPWD = C_UPRIGHT;
-    for(x=0;x<width;x++) { VDPWD = C_UPLINE; }
+    hchar(ypos+height+1,xpos+1,C_UPLINE,width);
     VDPWD = C_UPLEFT;
 }
 
@@ -692,7 +678,7 @@ unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char
     {
         VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos*32));
         VDPWD = C_LOWRIGHT;
-        for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+2;x++) { VDPWD = C_LOWLINE; }
+        hchar(ypos,xpos+1,C_LOWLINE,strlen(pulldownmenutitles[menunumber-1][0])+2);
     }
     for(x=0;x<pulldownmenuoptions[menunumber-1];x++)
     {
@@ -703,11 +689,7 @@ unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char
     }
     VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos+pulldownmenuoptions[menunumber-1]+1)*32);
     VDPWD = C_UPRIGHT;
-    for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+2;x++)
-    {
-        VDPWD = C_UPLINE;
-    }
-
+    hchar(ypos+pulldownmenuoptions[menunumber-1]+1,xpos+1,C_UPLINE,strlen(pulldownmenutitles[menunumber-1][0])+2);
     strcpy(validkeys, updownenter);
     if(menunumber<=menubaroptions)
     {
@@ -773,14 +755,9 @@ unsigned char menumain()
     {
         do
         {
-            VDP_SET_ADDRESS_WRITE(gImage+menubarcoords[menubarchoice-1]+32);
-            for(x=0;x<strlen(menubartitles[menubarchoice-1]);x++)
-            {
-                VDPWD = C_UPLINE;
-            }
+            hchar(1,menubarcoords[menubarchoice-1],C_UPLINE,strlen(menubartitles[menubarchoice-1]));
             key = getkey(validkeys,joyinterface);
-            VDP_SET_ADDRESS_WRITE(gImage+menubarcoords[menubarchoice-1]+32);
-            vdpspaces(strlen(menubartitles[menubarchoice-1]));
+            hchar(1,menubarcoords[menubarchoice-1],C_SPACE,strlen(menubartitles[menubarchoice-1]));
             if(key==C_LEFT)
             {
                 menubarchoice--;
@@ -831,7 +808,7 @@ unsigned char areyousure()
     /* Pull down menu to verify if player is sure */
     unsigned char choice;
 
-    menumakeborder(10,5,6,20);
+    menumakeborder(10,5,6,19);
     cputsxy(12,7,"Are you sure?");
     choice = menupulldown(20,8,5);
     windowrestore();
@@ -842,7 +819,7 @@ void fileerrormessage(unsigned char ferr)
 {
     /* Show message for file error encountered */
 
-    menumakeborder(10,5,6,20);
+    menumakeborder(10,5,6,19);
     cputsxy(12,7,"File error!");
     gotoxy(12,8);
     cprintf("Error nr.: %2X",ferr);
@@ -954,7 +931,7 @@ unsigned char dicethrow()
 
     unsigned char dicethrow, x;
 
-    menumakeborder(22,10,6,7);
+    menumakeborder(22,10,6,6);
     for(x=0;x<10;x++)
     {
         if(musicnumber)
@@ -1168,7 +1145,7 @@ void savegame(unsigned char autosave)
     }
     else
     {
-        menumakeborder(2,5,12,28);
+        menumakeborder(2,5,12,27);
         cputsxy(4,7,"Save game.");
         cputsxy(4,8,"Choose slot:");
         do
@@ -1248,7 +1225,7 @@ void loadgame()
     
     len = strlen(fname);
     
-    menumakeborder(2,5,12,28);
+    menumakeborder(2,5,12,27);
     cputsxy(4,7,"Load game.");
     cputsxy(4,9,"Choose slot:");
     slot = menupulldown(10,10,8) - 1;
@@ -1304,7 +1281,7 @@ void inputofnames()
     /* Enter player nanes */
     unsigned char x, choice;
 
-    menumakeborder(2,8,6,28);
+    menumakeborder(2,8,6,27);
     for(x=0;x<4;x++)
     {
         gotoxy(4,10);
@@ -1357,16 +1334,16 @@ void informationcredits()
         BUILD_MONTH_CH0,BUILD_MONTH_CH1,BUILD_DAY_CH0,BUILD_DAY_CH1,'-',
         BUILD_HOUR_CH0,BUILD_HOUR_CH1,BUILD_MIN_CH0,BUILD_MIN_CH1 };
     menumakeborder(0,5,14,30);
-    printcentered("L U D O",2,7,28);
-    printcentered(version,2,8,28);
-    printcentered("Written by Xander Mol",2,10,28);
-    printcentered("Converted TI-99/4a, 2021",2,11,28);
-    printcentered("From Commodore 128 1992",2,12,28);
-    printcentered("Build with/using code of",2,14,28);
-    printcentered("TMS9900-GCC by Insomnia",2,15,28);
-    printcentered("Libti99 lib by Tursi",2,16,28);
-    printcentered("Jedimatt42 help/code",2,17,28);
-    printcentered("Press a key.",2,18,28);
+    printcentered("L U D O",2,7,30);
+    printcentered(version,2,8,30);
+    printcentered("Written by Xander Mol",2,10,30);
+    printcentered("Converted TI-99/4a, 2021",2,11,30);
+    printcentered("From Commodore 128 1992",2,12,30);
+    printcentered("Build with/using code of",2,14,30);
+    printcentered("TMS9900-GCC by Insomnia",2,15,30);
+    printcentered("Libti99 lib by Tursi",2,16,30);
+    printcentered("Jedimatt42 help/code",2,17,30);
+    printcentered("Press a key.",2,18,30);
     getkey("",1);
     windowrestore();
 }
@@ -1473,7 +1450,7 @@ unsigned char humanchoosepawn(unsigned char playernumber, unsigned char possible
     unsigned char key;
     unsigned char validkeys[5] = { C_LEFT, C_RIGHT, C_UP, C_DOWN, C_ENTER };
 
-    menumakeborder(22,6,2,9);
+    menumakeborder(22,6,2,8);
     cputsxy(24,7,"Pawn?");
     gotoxy(24,8);
     cprintf("Dice=%d", throw);
@@ -1508,7 +1485,7 @@ void playerwins()
 {
     unsigned char choice;
 
-    menumakeborder(3,5,10,25);
+    menumakeborder(3,5,10,24);
     gotoxy(5,7);
     cprintf("%s has won!", playername[turnofplayernr]);
 
@@ -1867,7 +1844,7 @@ int main()
     loadintro();
 
     //Ask for loading save game
-    menumakeborder(8,5,6,20);
+    menumakeborder(8,5,6,19);
     cputsxy(10,7,"Load old game?");
     choice = menupulldown(17,8,5);
     windowrestore();

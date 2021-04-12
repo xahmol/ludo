@@ -986,15 +986,6 @@ void cspaces(unsigned char number)
     for(x=0;x<number;x++) { cputc(32); }
 }
 
-void vdpspaces(unsigned char number)
-{
-
-
-    unsigned char x;
-
-    for(x=0;x<number;x++) { *((volatile unsigned char*)0x8C00) = 32; }
-}
-
 void cleararea(unsigned char xpos, unsigned char ypos, unsigned char height, unsigned char width)
 {
 
@@ -1003,8 +994,7 @@ void cleararea(unsigned char xpos, unsigned char ypos, unsigned char height, uns
 
     for(x=0;x<height;x++)
     {
-        VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos+x)*32);
-        vdpspaces(width);
+        hchar(ypos+x,xpos,32,width);
     }
 }
 
@@ -1099,7 +1089,7 @@ unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
 
 int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned char size)
 {
-# 506 "main.c"
+# 496 "main.c"
     unsigned char idx = strlen(str);
     unsigned char c, x, b, flag;
     unsigned char validkeys[70] = {32 ,3,0};
@@ -1239,20 +1229,16 @@ void menumakeborder(unsigned char xpos, unsigned char ypos, unsigned char height
 
     windowsave(ypos, height+2);
 
+    cleararea(xpos+1,ypos+1,height,width);
     VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos*32));
     *((volatile unsigned char*)0x8C00) = 6;
-    for(x=0;x<width;x++) { *((volatile unsigned char*)0x8C00) = 1; }
+    hchar(ypos,xpos+1,1,width);
     *((volatile unsigned char*)0x8C00) = 7;
-    for(y=0;y<height;y++)
-    {
-        VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos+y+1)*32);
-        *((volatile unsigned char*)0x8C00) = 2;
-        vdpspaces(width);
-        *((volatile unsigned char*)0x8C00) = 3;
-    }
+    vchar(ypos+1,xpos,2,height);
+    vchar(ypos+1,xpos+width+1,3,height);
     VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos+height+1)*32);
     *((volatile unsigned char*)0x8C00) = 4;
-    for(x=0;x<width;x++) { *((volatile unsigned char*)0x8C00) = 0; }
+    hchar(ypos+height+1,xpos+1,0,width);
     *((volatile unsigned char*)0x8C00) = 5;
 }
 
@@ -1289,7 +1275,7 @@ unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char
     {
         VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos*32));
         *((volatile unsigned char*)0x8C00) = 6;
-        for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+2;x++) { *((volatile unsigned char*)0x8C00) = 1; }
+        hchar(ypos,xpos+1,1,strlen(pulldownmenutitles[menunumber-1][0])+2);
     }
     for(x=0;x<pulldownmenuoptions[menunumber-1];x++)
     {
@@ -1300,11 +1286,7 @@ unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char
     }
     VDP_SET_ADDRESS_WRITE(gImage+xpos+(ypos+pulldownmenuoptions[menunumber-1]+1)*32);
     *((volatile unsigned char*)0x8C00) = 4;
-    for(x=0;x<strlen(pulldownmenutitles[menunumber-1][0])+2;x++)
-    {
-        *((volatile unsigned char*)0x8C00) = 0;
-    }
-
+    hchar(ypos+pulldownmenuoptions[menunumber-1]+1,xpos+1,0,strlen(pulldownmenutitles[menunumber-1][0])+2);
     strcpy(validkeys, updownenter);
     if(menunumber<=menubaroptions)
     {
@@ -1370,14 +1352,9 @@ unsigned char menumain()
     {
         do
         {
-            VDP_SET_ADDRESS_WRITE(gImage+menubarcoords[menubarchoice-1]+32);
-            for(x=0;x<strlen(menubartitles[menubarchoice-1]);x++)
-            {
-                *((volatile unsigned char*)0x8C00) = 0;
-            }
+            hchar(1,menubarcoords[menubarchoice-1],0,strlen(menubartitles[menubarchoice-1]));
             key = getkey(validkeys,joyinterface);
-            VDP_SET_ADDRESS_WRITE(gImage+menubarcoords[menubarchoice-1]+32);
-            vdpspaces(strlen(menubartitles[menubarchoice-1]));
+            hchar(1,menubarcoords[menubarchoice-1],32,strlen(menubartitles[menubarchoice-1]));
             if(key==8)
             {
                 menubarchoice--;
@@ -1428,7 +1405,7 @@ unsigned char areyousure()
 
     unsigned char choice;
 
-    menumakeborder(10,5,6,20);
+    menumakeborder(10,5,6,19);
     cputsxy(12,7,"Are you sure?");
     choice = menupulldown(20,8,5);
     windowrestore();
@@ -1439,7 +1416,7 @@ void fileerrormessage(unsigned char ferr)
 {
 
 
-    menumakeborder(10,5,6,20);
+    menumakeborder(10,5,6,19);
     cputsxy(12,7,"File error!");
     conio_x = (12); conio_y = (8);
     cprintf("Error nr.: %2X",ferr);
@@ -1551,7 +1528,7 @@ unsigned char dicethrow()
 
     unsigned char dicethrow, x;
 
-    menumakeborder(22,10,6,7);
+    menumakeborder(22,10,6,6);
     for(x=0;x<10;x++)
     {
         if(musicnumber)
@@ -1765,7 +1742,7 @@ void savegame(unsigned char autosave)
     }
     else
     {
-        menumakeborder(2,5,12,28);
+        menumakeborder(2,5,12,27);
         cputsxy(4,7,"Save game.");
         cputsxy(4,8,"Choose slot:");
         do
@@ -1845,7 +1822,7 @@ void loadgame()
 
     len = strlen(fname);
 
-    menumakeborder(2,5,12,28);
+    menumakeborder(2,5,12,27);
     cputsxy(4,7,"Load game.");
     cputsxy(4,9,"Choose slot:");
     slot = menupulldown(10,10,8) - 1;
@@ -1901,7 +1878,7 @@ void inputofnames()
 
     unsigned char x, choice;
 
-    menumakeborder(2,8,6,28);
+    menumakeborder(2,8,6,27);
     for(x=0;x<4;x++)
     {
         conio_x = (4); conio_y = (10);
@@ -1950,20 +1927,20 @@ void informationcredits()
 
     unsigned char version[30] = {
         'v','1','9','9',' ','-',' ',
-        ("Apr 11 2021"[ 7]),("Apr 11 2021"[ 8]),("Apr 11 2021"[ 9]),("Apr 11 2021"[10]),
-        ((("Apr 11 2021"[0] == 'O') || ("Apr 11 2021"[0] == 'N') || ("Apr 11 2021"[0] == 'D')) ? '1' : '0'),( (("Apr 11 2021"[0] == 'J' && "Apr 11 2021"[1] == 'a' && "Apr 11 2021"[2] == 'n')) ? '1' : (("Apr 11 2021"[0] == 'F')) ? '2' : (("Apr 11 2021"[0] == 'M' && "Apr 11 2021"[1] == 'a' && "Apr 11 2021"[2] == 'r')) ? '3' : (("Apr 11 2021"[0] == 'A' && "Apr 11 2021"[1] == 'p')) ? '4' : (("Apr 11 2021"[0] == 'M' && "Apr 11 2021"[1] == 'a' && "Apr 11 2021"[2] == 'y')) ? '5' : (("Apr 11 2021"[0] == 'J' && "Apr 11 2021"[1] == 'u' && "Apr 11 2021"[2] == 'n')) ? '6' : (("Apr 11 2021"[0] == 'J' && "Apr 11 2021"[1] == 'u' && "Apr 11 2021"[2] == 'l')) ? '7' : (("Apr 11 2021"[0] == 'A' && "Apr 11 2021"[1] == 'u')) ? '8' : (("Apr 11 2021"[0] == 'S')) ? '9' : (("Apr 11 2021"[0] == 'O')) ? '0' : (("Apr 11 2021"[0] == 'N')) ? '1' : (("Apr 11 2021"[0] == 'D')) ? '2' : '?' ),(("Apr 11 2021"[4] >= '0') ? ("Apr 11 2021"[4]) : '0'),("Apr 11 2021"[ 5]),'-',
-        ("13:22:13"[0]),("13:22:13"[1]),("13:22:13"[3]),("13:22:13"[4]) };
+        ("Apr 12 2021"[ 7]),("Apr 12 2021"[ 8]),("Apr 12 2021"[ 9]),("Apr 12 2021"[10]),
+        ((("Apr 12 2021"[0] == 'O') || ("Apr 12 2021"[0] == 'N') || ("Apr 12 2021"[0] == 'D')) ? '1' : '0'),( (("Apr 12 2021"[0] == 'J' && "Apr 12 2021"[1] == 'a' && "Apr 12 2021"[2] == 'n')) ? '1' : (("Apr 12 2021"[0] == 'F')) ? '2' : (("Apr 12 2021"[0] == 'M' && "Apr 12 2021"[1] == 'a' && "Apr 12 2021"[2] == 'r')) ? '3' : (("Apr 12 2021"[0] == 'A' && "Apr 12 2021"[1] == 'p')) ? '4' : (("Apr 12 2021"[0] == 'M' && "Apr 12 2021"[1] == 'a' && "Apr 12 2021"[2] == 'y')) ? '5' : (("Apr 12 2021"[0] == 'J' && "Apr 12 2021"[1] == 'u' && "Apr 12 2021"[2] == 'n')) ? '6' : (("Apr 12 2021"[0] == 'J' && "Apr 12 2021"[1] == 'u' && "Apr 12 2021"[2] == 'l')) ? '7' : (("Apr 12 2021"[0] == 'A' && "Apr 12 2021"[1] == 'u')) ? '8' : (("Apr 12 2021"[0] == 'S')) ? '9' : (("Apr 12 2021"[0] == 'O')) ? '0' : (("Apr 12 2021"[0] == 'N')) ? '1' : (("Apr 12 2021"[0] == 'D')) ? '2' : '?' ),(("Apr 12 2021"[4] >= '0') ? ("Apr 12 2021"[4]) : '0'),("Apr 12 2021"[ 5]),'-',
+        ("09:46:02"[0]),("09:46:02"[1]),("09:46:02"[3]),("09:46:02"[4]) };
     menumakeborder(0,5,14,30);
-    printcentered("L U D O",2,7,28);
-    printcentered(version,2,8,28);
-    printcentered("Written by Xander Mol",2,10,28);
-    printcentered("Converted TI-99/4a, 2021",2,11,28);
-    printcentered("From Commodore 128 1992",2,12,28);
-    printcentered("Build with/using code of",2,14,28);
-    printcentered("TMS9900-GCC by Insomnia",2,15,28);
-    printcentered("Libti99 lib by Tursi",2,16,28);
-    printcentered("Jedimatt42 help/code",2,17,28);
-    printcentered("Press a key.",2,18,28);
+    printcentered("L U D O",2,7,30);
+    printcentered(version,2,8,30);
+    printcentered("Written by Xander Mol",2,10,30);
+    printcentered("Converted TI-99/4a, 2021",2,11,30);
+    printcentered("From Commodore 128 1992",2,12,30);
+    printcentered("Build with/using code of",2,14,30);
+    printcentered("TMS9900-GCC by Insomnia",2,15,30);
+    printcentered("Libti99 lib by Tursi",2,16,30);
+    printcentered("Jedimatt42 help/code",2,17,30);
+    printcentered("Press a key.",2,18,30);
     getkey("",1);
     windowrestore();
 }
@@ -2070,7 +2047,7 @@ unsigned char humanchoosepawn(unsigned char playernumber, unsigned char possible
     unsigned char key;
     unsigned char validkeys[5] = { 8, 9, 11, 10, 13 };
 
-    menumakeborder(22,6,2,9);
+    menumakeborder(22,6,2,8);
     cputsxy(24,7,"Pawn?");
     conio_x = (24); conio_y = (8);
     cprintf("Dice=%d", throw);
@@ -2105,7 +2082,7 @@ void playerwins()
 {
     unsigned char choice;
 
-    menumakeborder(3,5,10,25);
+    menumakeborder(3,5,10,24);
     conio_x = (5); conio_y = (7);
     cprintf("%s has won!", playername[turnofplayernr]);
 
@@ -2464,7 +2441,7 @@ int main()
     loadintro();
 
 
-    menumakeborder(8,5,6,20);
+    menumakeborder(8,5,6,19);
     cputsxy(10,7,"Load old game?");
     choice = menupulldown(17,8,5);
     windowrestore();
