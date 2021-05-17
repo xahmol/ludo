@@ -568,15 +568,15 @@ L116
 JMP_11
 L78
 	mov  @>20(r10), r5
-	clr  r1
-	movb r1, r3
+	clr  r2
+	movb r2, r1
 	li   r4, >B1E0
 	li   r7, >100
 	li   r6, >400
 	mov  @>26(r10), r8
 L103
-	mov  *r8, r2
-	c    r2, r4
+	mov  *r8, r3
+	c    r3, r4
 	jlt  L100
 	jeq  L100
 	cb   *r5, r7
@@ -584,16 +584,16 @@ L103
 	b    @L114
 JMP_12
 L100
-	mov  r4, r2
-	ai   r3, >100
+	mov  r4, r3
+	ai   r2, >100
 	inct r8
 	inc  r5
-	cb   r3, r6
+	cb   r2, r6
 	jne  JMP_13
 	b    @L115
 JMP_13
 L102
-	mov  r2, r4
+	mov  r3, r4
 	jmp  L103
 L95
 	li   r2, >7D0
@@ -741,11 +741,11 @@ L97
 	mov  r2, *r14
 	b    @L61
 L114
-	movb r3, r1
-	ai   r3, >100
+	movb r2, r1
+	ai   r2, >100
 	inct r8
 	inc  r5
-	cb   r3, r6
+	cb   r2, r6
 	jeq  JMP_24
 	b    @L102
 JMP_24
@@ -2359,7 +2359,7 @@ humanchoosepawn
 	mov  r2, r14
 	mov  r10, r1
 	ai   r1, >A
-	li   r2, C.133.2735
+	li   r2, C.133.2733
 	li   r3, >5
 	bl   @memcpy
 	li   r1, >1600
@@ -2598,15 +2598,15 @@ informationcredits
 	movb r7, @>10(r10)
 	swpb r7
 	movb r7, @>11(r10)
-	li   r6, >322D
+	li   r6, >352D
 	movb r6, @>12(r10)
 	swpb r6
 	movb r6, @>13(r10)
-	li   r5, >3039
+	li   r5, >3130
 	movb r5, @>14(r10)
 	swpb r5
 	movb r5, @>15(r10)
-	li   r4, >3436
+	li   r4, >3237
 	movb r4, @>16(r10)
 	swpb r4
 	movb r4, @>17(r10)
@@ -2773,7 +2773,7 @@ JMP_86
 	li   r2, vdpwaitvint
 	bl   *r2
 * Begin inline assembler code
-* 940 "main.c" 1
+* 938 "main.c" 1
 	bl @SongLoop
 * 0 "" 2
 * End of inline assembler code
@@ -3302,7 +3302,7 @@ menumain
 	mov  r15, *r0
 	mov  r10, r1
 	ai   r1, >A
-	li   r2, C.59.2119
+	li   r2, C.59.2117
 	li   r3, >4
 	bl   @memcpy
 L360
@@ -5016,7 +5016,7 @@ L478
 	b    @L468
 JMP_151
 L480
-	cb   r2, r5
+	cb   r5, r2
 	jeq  L478
 	cb   *r6, r0
 	jne  L478
@@ -5257,7 +5257,7 @@ loadintro
 	li   r13, memcpy
 	mov  r10, r1
 	ai   r1, >A
-	li   r2, C.150.3221
+	li   r2, C.150.3219
 	li   r3, >4
 	bl   *r13
 	li   r2, safe_read
@@ -7970,16 +7970,16 @@ joyinterface
 autosavetoggle
 	byte	1
 	pseg
-	.type	C.150.3221, @object
-	.size	C.150.3221, 4
-C.150.3221
+	.type	C.150.3219, @object
+	.size	C.150.3219, 4
+C.150.3219
 	byte	109
 	byte	77
 	byte	13
 	byte	0
-	.type	C.133.2735, @object
-	.size	C.133.2735, 5
-C.133.2735
+	.type	C.133.2733, @object
+	.size	C.133.2733, 5
+C.133.2733
 	byte	8
 	byte	9
 	byte	11
@@ -7997,9 +7997,9 @@ random_mask.1617
 seed.1616
 	data	-21846
 	pseg
-	.type	C.59.2119, @object
-	.size	C.59.2119, 4
-C.59.2119
+	.type	C.59.2117, @object
+	.size	C.59.2117, 4
+C.59.2117
 	byte	8
 	byte	9
 	byte	13

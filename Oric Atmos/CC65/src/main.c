@@ -120,10 +120,10 @@ void menuplacebar();
 unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char menunumber);
 unsigned char menumain();
 unsigned char areyousure();
-unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed);
-int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned char size);
+unsigned char getkey(char* allowedkeys, unsigned char joyallowed);
+int input(unsigned char xpos, unsigned char ypos, char *str, unsigned char size);
 void wait(unsigned int wait_cs);
-void printcentered(unsigned char* text, unsigned char color, unsigned char xpos, unsigned char ypos, unsigned char width);
+void printcentered(char* text, unsigned char color, unsigned char xpos, unsigned char ypos, unsigned char width);
 void cspaces(unsigned char number);
 void cleararea(unsigned char xpos, unsigned char ypos, unsigned char height, unsigned char width);
 
@@ -145,10 +145,10 @@ unsigned char windownumber = 0;
 //Menu data
 unsigned char menubaroptions = 4;
 unsigned char pulldownmenunumber = 8;
-unsigned char menubartitles[4][12] = {"Game","Disc","Music","Information"};
+char menubartitles[4][12] = {"Game","Disc","Music","Information"};
 unsigned char menubarcoords[4] = {1,6,11,17};
 unsigned char pulldownmenuoptions[8] = {3,3,3,1,2,2,3,5};
-unsigned char pulldownmenutitles[8][5][16] = {
+char pulldownmenutitles[8][5][16] = {
     {"Throw dice",
      "Restart   ",
      "Stop      "},
@@ -174,10 +174,10 @@ unsigned char pulldownmenutitles[8][5][16] = {
 };
 
 //Input validation strings
-unsigned char numbers[11]="0123456789";
-unsigned char letters[53]="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-unsigned char updownenter[4] = {C_DOWN,C_UP,C_ENTER,0};
-unsigned char leftright[3] = {C_LEFT,C_RIGHT,0};
+char numbers[11]="0123456789";
+char letters[53]="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+char updownenter[4] = {C_DOWN,C_UP,C_ENTER,0};
+ char leftright[3] = {C_LEFT,C_RIGHT,0};
 
 //Pawn position co-ords main field
 unsigned char fieldcoords[40][2] = {
@@ -221,13 +221,13 @@ unsigned char playerpos[4][4][2] = {
     {{1,0}, {1,1}, {1,2}, {1,3}}
 };
 /* Player names */
-unsigned char playername[4][21];
+char playername[4][21];
 
 signed char np[4] = { -1, -1, -1, -1};
 unsigned char dp[4] = { 8, 8, 8, 8 };
 
 //Dice graphics string data
-unsigned char dicegraphics[6][2][3] = {
+char dicegraphics[6][2][3] = {
     {{C_DICE01,C_DICE02,0},{C_DICE03,C_DICE04,0}},
     {{C_DICE05,C_DICE06,0},{C_DICE06,C_DICE07,0}},
     {{C_DICE08,C_DICE02,0},{C_DICE03,C_DICE09,0}},
@@ -362,10 +362,10 @@ void loadintro()
 
     int rc, x, y;
     int len = 0;
-    unsigned char buffer[40];
-    unsigned char joys[4];
-    unsigned char music[4];
-    unsigned char validkeys[4] = {'j','m', C_ENTER, 0 };
+    char buffer[40];
+    char joys[4];
+    char music[4];
+    char validkeys[4] = {'j','m', C_ENTER, 0 };
     unsigned char key;
 
     /* Load title screen */
@@ -621,7 +621,7 @@ void informationcredits()
 {
     /* Print version information and credits */
 
-    unsigned char version[30];
+    char version[30];
     sprintf(version,
             "Version: v%i%i - %c%c%c%c%c%c%c%c-%c%c%c%c",
             VERSION_MAJOR, VERSION_MINOR,
@@ -895,7 +895,7 @@ unsigned char humanchoosepawn(unsigned char playernumber, unsigned char possible
     signed char pawnnumber = 0;
     signed char direction;
     unsigned char key;
-    unsigned char validkeys[5] = { C_LEFT, C_RIGHT, C_UP, C_DOWN, C_ENTER };
+    char validkeys[5] = { C_LEFT, C_RIGHT, C_UP, C_DOWN, C_ENTER };
 
     menumakeborder(20,1,2,18);
     gotoxy(22,3);
@@ -1027,7 +1027,7 @@ void savegame(unsigned char autosave)
     /* Save game to a gameslot
        Input: autosave is 1 for autosave, else 0 */
 
-    unsigned char filename[15];
+    char filename[15];
     unsigned char slot = 0;
     unsigned char x, y;
     unsigned char yesno = 1;
@@ -1113,7 +1113,7 @@ void loadgame()
 {
      /* Load game from a gameslot */
 
-    unsigned char filename[15];
+    char filename[15];
     unsigned char slot, rc, x, y;
     unsigned char yesno = 1;
     int len;
@@ -1178,7 +1178,7 @@ void musicnext()
 
     int rc;
     int len = 0;
-    unsigned char musicfilename[15];
+    char musicfilename[15];
 
     StopMusic();
     if(++musicnumber>3) { musicnumber = 1;}
@@ -1271,7 +1271,7 @@ unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char
          number of the menu as defined in pulldownmenuoptions array */
 
     unsigned char x;
-    unsigned char validkeys[6];
+    char validkeys[6];
     unsigned char key;
     unsigned char exit = 0;
     unsigned char menuchoice = 1;
@@ -1361,7 +1361,7 @@ unsigned char menumain()
     unsigned char menubarchoice = 1;
     unsigned char menuoptionchoice = 0;
     unsigned char key;
-    unsigned char validkeys[4] = {8,9,13,0};
+    char validkeys[4] = {8,9,13,0};
     unsigned char xpos;
 
     do
@@ -1433,7 +1433,7 @@ unsigned char areyousure()
 
 /* Generic input routines */
 
-unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
+unsigned char getkey(char* allowedkeys, unsigned char joyallowed)
 {
     /* Function to wait on valid key or joystick press/move
        Input: allowedkeys = String with valid key press options
@@ -1478,7 +1478,7 @@ unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
     return key;
 }
 
-int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned char size)
+int input(unsigned char xpos, unsigned char ypos, char *str, unsigned char size)
 {
     /**
     * input/modify a string.
@@ -1494,7 +1494,7 @@ int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned c
 
     unsigned char idx = strlen(str);
     unsigned char c, x, b, flag;
-    unsigned char validkeys[70] = {C_SPACE ,C_DELETE,0};
+    char validkeys[70] = {C_SPACE ,C_DELETE,0};
 
     strcat(validkeys,numbers);
     strcat(validkeys,letters);
@@ -1589,7 +1589,7 @@ void wait(unsigned int wait_cycles)
     while (clock() - starttime < wait_cycles);
 }
 
-void printcentered(unsigned char* text, unsigned char color, unsigned char xpos, unsigned char ypos, unsigned char width)
+void printcentered(char* text, unsigned char color, unsigned char xpos, unsigned char ypos, unsigned char width)
 {
     /* Function to print a text centered
        Input:

@@ -627,9 +627,7 @@ void menumakeborder(unsigned char xpos, unsigned char ypos, unsigned char height
        - ypos: y-coordinate of right upper corner
        - height: number of rows in window
        - width: window width in characters        */
-
-    unsigned char x, y;
-    
+ 
     windowsave(ypos, height+2);
 
     cleararea(xpos+1,ypos+1,height,width);

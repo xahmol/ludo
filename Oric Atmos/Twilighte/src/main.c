@@ -118,10 +118,10 @@ void menuplacebar();
 unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char menunumber);
 unsigned char menumain();
 unsigned char areyousure();
-unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed);
-int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned char size);
+char getkey(char* allowedkeys, unsigned char joyallowed);
+int input(unsigned char xpos, unsigned char ypos, char *str, unsigned char size);
 void wait(unsigned int wait_cs);
-void printcentered(unsigned char* text, unsigned char color, unsigned char xpos, unsigned char ypos, unsigned char width);
+void printcentered(char* text, unsigned char color, unsigned char xpos, unsigned char ypos, unsigned char width);
 void cspaces(unsigned char number);
 void cleararea(unsigned char xpos, unsigned char ypos, unsigned char height, unsigned char width);
 
@@ -143,10 +143,10 @@ unsigned char windownumber = 0;
 //Menu data
 unsigned char menubaroptions = 4;
 unsigned char pulldownmenunumber = 8;
-unsigned char menubartitles[4][12] = {"Game","Disc","Music","Information"};
+char menubartitles[4][12] = {"Game","Disc","Music","Information"};
 unsigned char menubarcoords[4] = {1,6,11,17};
 unsigned char pulldownmenuoptions[8] = {3,3,3,1,2,2,3,5};
-unsigned char pulldownmenutitles[8][5][16] = {
+char pulldownmenutitles[8][5][16] = {
     {"Throw dice",
      "Restart   ",
      "Stop      "},
@@ -172,10 +172,10 @@ unsigned char pulldownmenutitles[8][5][16] = {
 };
 
 //Input validation strings
-unsigned char numbers[11]="0123456789";
-unsigned char letters[53]="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-unsigned char updownenter[4] = {C_DOWN,C_UP,C_ENTER,0};
-unsigned char leftright[3] = {C_LEFT,C_RIGHT,0};
+char numbers[11]="0123456789";
+char letters[53]="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+char updownenter[4] = {C_DOWN,C_UP,C_ENTER,0};
+char leftright[3] = {C_LEFT,C_RIGHT,0};
 
 //Pawn position co-ords main field
 unsigned char fieldcoords[40][2] = {
@@ -219,13 +219,13 @@ unsigned char playerpos[4][4][2] = {
     {{1,0}, {1,1}, {1,2}, {1,3}}
 };
 /* Player names */
-unsigned char playername[4][21];
+char playername[4][21];
 
 signed char np[4] = { -1, -1, -1, -1};
 unsigned char dp[4] = { 8, 8, 8, 8 };
 
 //Dice graphics string data
-unsigned char dicegraphics[6][2][3] = {
+char dicegraphics[6][2][3] = {
     {{C_DICE01,C_DICE02,0},{C_DICE03,C_DICE04,0}},
     {{C_DICE05,C_DICE06,0},{C_DICE06,C_DICE07,0}},
     {{C_DICE08,C_DICE02,0},{C_DICE03,C_DICE09,0}},
@@ -253,12 +253,14 @@ unsigned int* savegamemem;
 void main()
 {
     unsigned char x, choice;
+    unsigned char Res = joy_install (joy_static_stddrv);
+    if (Res != JOY_ERR_OK) {
+        printf ("Error in joy_load_driver: %u\nPress key.\n", Res);
+        joyinterface = 0;
+        cgetc();
+    }
 
     setflags(SCREEN);
-
-    x = joy_install(&telestratjoy);
-    cprintf("Joystick driver: %d",x);
-    cgetc();
 
     //Save game memory allocation
     saveslots = (unsigned int*) malloc(85);
@@ -362,20 +364,20 @@ void loadintro()
 
     unsigned char x, y;
     unsigned int nb;
-    unsigned char buffer[40];
-    unsigned char joys[4];
-    unsigned char music[4];
-    unsigned char validkeys[4] = {'j','m', C_ENTER, 0 };
+    char buffer[40];
+    char joys[4];
+    char music[4];
+    char validkeys[4] = {'j','m', C_ENTER, 0 };
     unsigned char key;
     FILE* fp;
 
     /* Load title screen */
-    fp = fopen("/bin/games/ludo/ludotitl.bin","r");
+    fp = fopen("/bin/ludodata/ludotitl.bin","r");
     nb = fread((void*)0xb500,2784,1,fp);
     fclose(fp);
 
     /* Load and read game config file */
-    fp = fopen("/bin/games/ludo/ludodata.bin","r");
+    fp = fopen("/bin/ludodata/ludodata.bin","r");
     nb = fread((void*)saveslots,85,1,fp);
     fclose(fp);
 
@@ -388,7 +390,7 @@ void loadintro()
     }
 
     /* Load and start first music file */
-    //fp = fopen("/bin/games/ludo/ludomus1.bin","r");
+    //fp = fopen("/bin/ludodata/ludomus1.bin","r");
     //nb = fread((void*)0x9400,7550,1,fp);
     //fclose(fp);
     //PlayMusic(); 
@@ -436,7 +438,7 @@ void loadmainscreen()
     FILE* fp;
     unsigned int nb;
     //if(musicnumber) { PauseMusic(1); }
-    fp = fopen("/bin/games/ludo/ludoscrm.bin","r");
+    fp = fopen("/bin/ludodata/ludoscrm.bin","r");
     nb = fread((void*)0xb500,2784,1,fp);
     fclose(fp);
     //if(musicnumber) { PauseMusic(0); }
@@ -447,7 +449,7 @@ void gamereset()
 {
     /* Reset all player data */
 
-    unsigned char n;
+    char n;
 
     loadmainscreen();
     turnofplayernr=0;
@@ -631,7 +633,7 @@ void informationcredits()
 {
     /* Print version information and credits */
 
-    unsigned char version[30];
+    char version[30];
     sprintf(version,
             "Version: v%i%i - %c%c%c%c%c%c%c%c-%c%c%c%c",
             VERSION_MAJOR, VERSION_MINOR,
@@ -905,7 +907,7 @@ unsigned char humanchoosepawn(unsigned char playernumber, unsigned char possible
     signed char pawnnumber = 0;
     signed char direction;
     unsigned char key;
-    unsigned char validkeys[5] = { C_LEFT, C_RIGHT, C_UP, C_DOWN, C_ENTER };
+    char validkeys[5] = { C_LEFT, C_RIGHT, C_UP, C_DOWN, C_ENTER };
 
     menumakeborder(20,1,2,18);
     gotoxy(22,3);
@@ -1037,7 +1039,7 @@ void savegame(unsigned char autosave)
     /* Save game to a gameslot
        Input: autosave is 1 for autosave, else 0 */
 
-    unsigned char filename[30];
+    char filename[30];
     unsigned char slot = 0;
     unsigned char x, y;
     unsigned char yesno = 1;
@@ -1046,7 +1048,7 @@ void savegame(unsigned char autosave)
 
     if(autosave==1)
     {
-        strcpy(filename,"/bin/games/ludo/ludosav0.bin");
+        strcpy(filename,"/bin/ludodata/ludosav0.bin");
     }
     else
     {
@@ -1076,7 +1078,7 @@ void savegame(unsigned char autosave)
                 pulldownmenutitles[7][slot][x] = C_SPACE;
             }
             pulldownmenutitles[7][slot][15] = 0;
-            sprintf(filename,"/bin/games/ludo/ludosav%d.bin", slot);
+            sprintf(filename,"/bin/ludodata/ludosav%d.bin", slot);
             for(x=0;x<16;x++)
             {
                 poke(saveslots+(slot*16)+5+x,pulldownmenutitles[7][slot][x]);
@@ -1088,17 +1090,17 @@ void savegame(unsigned char autosave)
     {
         //if(musicnumber) { PauseMusic(1); }
         poke(saveslots+slot,1);
-        fp = fopen("/bin/games/ludo/ludodata.bin", "r");
+        fp = fopen("/bin/ludodata/ludodata.bin", "r");
         if(fp)
         {
             fclose(fp);
-            remove("/bin/games/ludo/ludodata.bin");
+            remove("/bin/ludodata/ludodata.bin");
         }
         else
         {
             fclose(fp);
         }
-        fp = fopen("/bin/games/ludo/ludodata.bin", "wb");
+        fp = fopen("/bin/ludodata/ludodata.bin", "wb");
         nb = fwrite(saveslots,1,85,fp);
         fclose(fp);
         poke(savegamemem,turnofplayernr);
@@ -1149,7 +1151,7 @@ void loadgame()
 {
      /* Load game from a gameslot */
 
-    unsigned char filename[30];
+    char filename[30];
     unsigned char slot, x, y;
     unsigned char yesno = 1;
     FILE* fp;
@@ -1173,7 +1175,7 @@ void loadgame()
     if(peek(saveslots+slot)==1)
     {
         //if(musicnumber) { PauseMusic(1); }
-        sprintf(filename,"/bin/games/ludo/ludosav%d.bin", slot);
+        sprintf(filename,"/bin/ludodata/ludosav%d.bin", slot);
         fp = fopen(filename, "r");
         nb=fread(savegamemem,136,1,fp);
         fclose(fp);
@@ -1217,11 +1219,11 @@ void musicnext()
 
     FILE* fp;
     unsigned int nb;
-    unsigned char musicfilename[30];
+    char musicfilename[30];
 
     //StopMusic();
     if(++musicnumber>3) { musicnumber = 1;}
-    sprintf((char*)musicfilename,"/bin/games/ludo/ludomus%d.bin", musicnumber);
+    sprintf((char*)musicfilename,"/bin/ludodata/ludomus%d.bin", musicnumber);
     fp=fopen(musicfilename, "r");
     nb=fread((void*)0x9400,8192,1,fp);
     fclose(fp);
@@ -1312,7 +1314,7 @@ unsigned char menupulldown(unsigned char xpos, unsigned char ypos, unsigned char
          number of the menu as defined in pulldownmenuoptions array */
 
     unsigned char x;
-    unsigned char validkeys[6];
+    char validkeys[6];
     unsigned char key;
     unsigned char exit = 0;
     unsigned char menuchoice = 1;
@@ -1402,7 +1404,7 @@ unsigned char menumain()
     unsigned char menubarchoice = 1;
     unsigned char menuoptionchoice = 0;
     unsigned char key;
-    unsigned char validkeys[4] = {8,9,13,0};
+    char validkeys[4] = {8,9,13,0};
     unsigned char xpos;
 
     do
@@ -1474,7 +1476,7 @@ unsigned char areyousure()
 
 /* Generic input routines */
 
-unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
+char getkey(char* allowedkeys, unsigned char joyallowed)
 {
     /* Function to wait on valid key or joystick press/move
        Input: allowedkeys = String with valid key press options
@@ -1517,7 +1519,7 @@ unsigned char getkey(unsigned char* allowedkeys, unsigned char joyallowed)
     return key;
 }
 
-int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned char size)
+int input(unsigned char xpos, unsigned char ypos, char *str, unsigned char size)
 {
     /**
     * input/modify a string.
@@ -1533,7 +1535,7 @@ int input(unsigned char xpos, unsigned char ypos, unsigned char *str, unsigned c
 
     unsigned char idx = strlen(str);
     unsigned char c, x, b, flag;
-    unsigned char validkeys[70] = {C_SPACE ,C_DELETE,0};
+    char validkeys[70] = {C_SPACE ,C_DELETE,0};
 
     strcat(validkeys,numbers);
     strcat(validkeys,letters);
@@ -1628,7 +1630,7 @@ void wait(unsigned int wait_cycles)
     while (clock() - starttime < wait_cycles);
 }
 
-void printcentered(unsigned char* text, unsigned char color, unsigned char xpos, unsigned char ypos, unsigned char width)
+void printcentered(char* text, unsigned char color, unsigned char xpos, unsigned char ypos, unsigned char width)
 {
     /* Function to print a text centered
        Input:
