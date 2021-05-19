@@ -3,7 +3,8 @@
         {
             "name": "OSDK",
             "includePath": [
-                "L:/Retro/Oric/OSDK/include/**"
+                "L:/Retro/Oric/OSDK/include/**",
+                "${workspaceFolder}/Oric Atmos/CC65/include"
             ],
             "defines": [
                 "_DEBUG",

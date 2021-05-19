@@ -280,10 +280,12 @@ void main()
     cprintf("%cLoad old game?%c",A_FWYELLOW, A_FWRED);
     choice = menupulldown(27,11,5);
     windowrestore();
+
+    loadmainscreen();
+    
     if(choice==1) { loadgame(); }
 
     srand(clock());
-    loadmainscreen();
 
     //Main game loop
     do
