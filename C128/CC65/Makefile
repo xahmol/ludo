@@ -1,0 +1,46 @@
+# Prerequisites for building:
+# - CC65 compiled and included in path with sudo make avail
+# - ZIP packages installed: sudo apt-get install zip
+# - wput command installed: sudo apt-get install wput
+
+SOURCESMAIN = src/main.c src/vdc_core.c
+SOURCESLIB = src/vdc_core_assembly.s
+OBJECTS = ludo.chr1.prg ludo.chr2.prg
+
+ZIP = LudoC128-$(shell date "+%Y%m%d-%H%M").zip
+
+# Hostname of Ultimate II+ target for deployment. Edit for proper IP and usb number
+ULTHOST = ftp://192.168.1.72/usb1/dev/
+
+MAIN = ludo.prg
+
+CC65_TARGET = c128
+CC = cl65
+CFLAGS  = -t $(CC65_TARGET) --create-dep $(<:.c=.d) -O -I include
+LDFLAGSMAIN = -t $(CC65_TARGET) -m $(MAIN).map
+
+########################################
+
+.SUFFIXES:
+.PHONY: all clean deploy
+all: $(MAIN)
+
+ifneq ($(MAKECMDGOALS),clean)
+-include $(SOURCESMAIN:.c=.d)
+endif
+
+%.o: %.c
+	$(CC) -c $(CFLAGS) -o $@ $<
+  
+$(MAIN): $(SOURCESLIB) $(SOURCESMAIN:.c=.o)
+	$(CC) $(LDFLAGSMAIN) -o $@ $^
+
+#$(ZIP): $(MAIN) $(OBJECTS)
+#	zip $@ $^
+
+clean:
+	$(RM) $(SOURCESMAIN:.c=.o) $(SOURCESMAIN:.c=.d) $(MAIN) $(MAIN).map
+	
+# To deploy software to UII+ enter make deploy. Obviously C128 needs to powered on with UII+ and USB drive connected.
+deploy: $(MAIN)
+	wput -u $(MAIN) $(OBJECTS) $(ULTHOST)

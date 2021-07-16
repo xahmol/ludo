@@ -2594,19 +2594,19 @@ informationcredits
 	movb r8, @>E(r10)
 	swpb r8
 	movb r8, @>F(r10)
-	li   r7, >3431
+	li   r7, >3533
 	movb r7, @>10(r10)
 	swpb r7
 	movb r7, @>11(r10)
-	li   r6, >352D
+	li   r6, >312D
 	movb r6, @>12(r10)
 	swpb r6
 	movb r6, @>13(r10)
-	li   r5, >3130
+	li   r5, >3135
 	movb r5, @>14(r10)
 	swpb r5
 	movb r5, @>15(r10)
-	li   r4, >3237
+	li   r4, >3235
 	movb r4, @>16(r10)
 	swpb r4
 	movb r4, @>17(r10)

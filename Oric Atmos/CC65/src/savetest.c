@@ -20,7 +20,7 @@ void main(void)
     int rc, x, y, len;
     unsigned int* saveslots;
     unsigned int* savegamemem;
-    unsigned char filename[15];
+    char filename[15];
 
     saveslots = (unsigned int*) malloc(85);
     savegamemem = (unsigned int*) malloc(120);

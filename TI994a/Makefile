@@ -1,8 +1,16 @@
+# Dependencies to be installed:
+
+# TMS9900-GCC, binary tools and Libti99:
+# Installation instructions https://atariage.com/forums/topic/164295-gcc-for-the-ti/page/24/?tab=comments#comment-4776745
+
+# Libtivgm2:
+# git clone https://github.com/tursilion/vgmcomp2/
+
 # Path variables
 TMS9900_DIR?=/home/xahmol/tms9900gcc/bin
 LIBTI99?=/home/xahmol/libti99
 LIBTIVGM2?=/home/xahmol/vgmcomp2/Players/libtivgm2
-CLASSIC99_DSK1?=/mnt/l/Retro/TI994a/classic99/DSK1/
+CLASSIC99_DSK1?=/home/xahmol/retro/ti994a/Classic99DummyDir
 TIPI_HOST?=tipi@192.168.1.50
 
 # Paths to TMS9900 compilation tools
