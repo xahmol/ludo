@@ -34,6 +34,11 @@
 #define VDC_CURSORMODE_FAST       2
 #define VDC_CURSORMODE_NORMAL     3
 
+#define VDC_A_BLINK              16
+#define VDC_A_UNDERLINE          32
+#define VDC_A_REVERSE            64
+#define VDC_A_ALTCHAR           128
+
 // Variables in core Functions
 extern unsigned char VDC_regadd;
 extern unsigned char VDC_regval;
@@ -73,7 +78,6 @@ void VDC_CopyMemToVDC(unsigned int vdcAddress, unsigned int memAddress, unsigned
 void VDC_CopyVDCToMem(unsigned int vdcAddress, unsigned int memAddress, unsigned char memBank, unsigned int length);
 void VDC_RedefineCharset(unsigned int source, unsigned char sourcebank, unsigned int dest, unsigned char lengthinchars);
 void VDC_FillArea(unsigned char row, unsigned char col, unsigned char character, unsigned char length, unsigned char heigth, unsigned char attribute);
-
 void VDC_Init(void);
 void VDC_Exit(void);
 unsigned char VDC_PetsciiToScreenCode(unsigned char p);
@@ -82,10 +86,11 @@ unsigned int VDC_RowColToAddress(unsigned char row, unsigned char col);
 void VDC_BackColor(unsigned char color);
 unsigned char VDC_CursorAt(unsigned char row, unsigned char col);
 unsigned char VDC_PrintAt(unsigned char row, unsigned char col, char *text, unsigned char attribute);
-//void VDC_SetCursorMode(int cursorMode);
-//int VDC_CopyMemToVDC(int memAddress, int vdcAddress, int length);
 void VDC_LoadCharset(char* filename, unsigned int source, unsigned char sourcebank, unsigned char stdoralt);
+void VDC_LoadScreen(char* filename, unsigned int source, unsigned char sourcebank, unsigned char show);
 unsigned char VDC_Attribute(unsigned char textcolor, unsigned char blink, unsigned char underline, unsigned char reverse, unsigned char alternate);
+void VDC_Plot(unsigned char row, unsigned char col, unsigned char screencode, unsigned char attribute);
+void VDC_PlotString(unsigned char row, unsigned char col, char* plotstring, unsigned char length, unsigned char attribute);
 void SetLoadSaveBank(unsigned char bank);
 
 #endif

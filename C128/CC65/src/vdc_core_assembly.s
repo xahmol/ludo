@@ -97,10 +97,12 @@ notyetready:							; Start of wait loop to wait for VDC status ready
 	sta _VDC_regval                     ; Load A to return variable
     rts
 
+; ------------------------------------------------------------------------------------------
 _VDC_WriteRegister_core:
 ; Function to write a VDC register
 ; Input:	VDC_regadd = register numnber
 ;			VDC_regval = value to write
+; ------------------------------------------------------------------------------------------
 
     ldx _VDC_regadd                     ; Load register address in X
 	lda _VDC_regval				        ; Load register value in A

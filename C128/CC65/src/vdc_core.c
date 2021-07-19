@@ -164,11 +164,7 @@ void VDC_CopyVDCToMem(unsigned int vdcAddress, unsigned int memAddress, unsigned
 	VDC_tmp2 = length & 0xff;				// Obtain length in last page to copy
 	VDC_tmp3 = memBank;						// Obtain source bank number
 
-	gotoxy(0,20);
-	cprintf("%2X%2X %2X%2X %2X%2X %u", VDC_addrh, VDC_addrl, VDC_desth, VDC_destl, VDC_tmp1, VDC_tmp2, VDC_tmp3);
-	cgetc();
-
-	VDC_CopyMemToVDC_core();
+	VDC_CopyVDCToMem_core();
 }
 
 void VDC_RedefineCharset(unsigned int source, unsigned char sourcebank, unsigned int dest, unsigned char lengthinchars)
@@ -323,35 +319,6 @@ unsigned char VDC_PrintAt(unsigned char row, unsigned char col, char *text, unsi
 		return -1;
 }
 
-//void VDC_SetCursorMode(int cursorMode)
-//{
-//	if (cursorMode > VDC_CURSORMODE_NORMAL || cursorMode < VDC_CURSORMODE_SOLID)
-//		return;
-//
-//	/* Hi-byte of the address to register 18 */
-//	VDC.ctrl = 18;
-//	VDC.data = 0;
-//
-//	/* Lo-byte of the address to register 19 */
-//	VDC.ctrl = 19;
-//	VDC.data = 0;
-//
-//	/* Set cursor mode via register 10 */
-//	VDC.ctrl = 10;
-//	VDC.data = cursorMode;
-//
-//}
-
-//int VDC_CopyMemToVDC(int memAddress, int vdcAddress, int length)
-//{
-//	int x;
-//
-//	for(x=0; x< length; x++)
-//		VDC_Poke(vdcAddress+x, PEEK(memAddress+x)); 
-//
-//	return 0;
-//}
-
 void VDC_LoadCharset(char* filename, unsigned int source, unsigned char sourcebank, unsigned char stdoralt)
 {
 	// Function to load charset definition from disk and redefine VDC charset using that
@@ -383,12 +350,64 @@ void VDC_LoadCharset(char* filename, unsigned int source, unsigned char sourceba
 	SetLoadSaveBank(0);
 }
 
+void VDC_LoadScreen(char* filename, unsigned int source, unsigned char sourcebank, unsigned char show)
+{
+	// Function to load a screen to disk and store to memory, if wanted also copy to VDC
+	// Input: filename, memory address, memory bank, flag if copy to VDC is wanted (0=no, 1=yes)
+
+	unsigned int length;
+
+	// Set device ID
+	cbm_k_setlfs(0, getcurrentdevice(), 0);
+
+	// Set filename
+	cbm_k_setnam(filename);
+
+	// Set bank
+	SetLoadSaveBank(sourcebank);
+	
+	// Load from file to memory
+	length = cbm_k_load(0,source);
+
+	// Copy screen to VDC
+	if(length>source  && show ==1)
+	{
+		VDC_CopyMemToVDC(0,source,sourcebank, length-source+1);
+	}
+
+	// Restore I/O bank to 0
+	SetLoadSaveBank(0);
+} 
+
 unsigned char VDC_Attribute(unsigned char textcolor, unsigned char blink, unsigned char underline, unsigned char reverse, unsigned char alternate)
 {
 	// Function to calculate attribute code from color and other attribute bits
 	// Input: Color code 0-15 and flags for blink, underline, reverse and alternate charset
 
 	return textcolor + (blink*16) + (underline*32) + (reverse*64) + (alternate*128);
+}
+
+void VDC_Plot(unsigned char row, unsigned char col, unsigned char screencode, unsigned char attribute)
+{
+	// Function to plot a screencodes at VDC screem
+	// Input: row and column, screencode to plot, attribute code
+
+	unsigned int address = VDC_RowColToAddress(row,col);
+	VDC_Poke(address,screencode);
+	VDC_Poke(address+0x0800,attribute);
+}
+
+void VDC_PlotString(unsigned char row, unsigned char col, char* plotstring, unsigned char length, unsigned char attribute)
+{
+	// Function to plot a string of screencodes at VDC screem, no trailing zero needed
+	// Input: row and column, string to plot, length to plot, attribute code
+	
+	unsigned char x;
+
+	for(x=0;x<length;x++)
+	{
+		VDC_Plot(row,col++,plotstring[x],attribute);
+	}
 }
 
 void SetLoadSaveBank(unsigned char bank)
