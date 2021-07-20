@@ -487,11 +487,10 @@ waitlowaddressm2v:						; Start of wait loop to wait for VDC status ready
 	sta VDC_DATA_REGISTER	        	; Store A to VDC data
 
 	; Start of copy loop
-loopm2v1:								; Start of outer loop
 	ldy #$00    						; Set Y as counter on 0
 	
 	; Read value and store at VDC address
-loopm2v2:								; Start of 8 bytes character copy loop
+copyloopm2v:							; Start of copy loop
 	lda #$fb							; Store address vector in A
 	ldx _VDC_tmp3						; Store banknumber in X
 	jsr $ff74							; Call INDFET kernal routine to do lda ($fb),y from given bank
@@ -502,21 +501,19 @@ waitvaluem2v:							; Start of wait loop to wait for VDC status ready
 	bpl waitvaluem2v		        	; Continue loop if status is not ready
 	sta VDC_DATA_REGISTER	        	; Store A to VDC data
 
-	; Increase counter within page and check for last page
-	iny 								; Increase Y counter
-	cpy #$00							; Compare with zero
-	beq nextpagem2v						; If complete page go to next page
-	lda _VDC_tmp1						; Load page counter in A
-	cmp #$01							; Check if this is the last page
-	bne loopm2v2						; Continue loop if not yet last page if check is untrue
-	cpy _VDC_tmp2						; Compare with number to move in last page
-	bne loopm2v2				       	; If not yet number of bytes in last page, loop
-
-	; Next page
-nextpagem2v:
-	inc $fc								; Increase high byte of source address
-	dec _VDC_tmp1						; Decrease page counter
-	bne loopm2v1						; Loop outer loop until page counter is zero
+	; Increase source address (VDC auto increments)
+	inc $fb								; Increment low byte of source address
+	bne nextm2v1						; If not yet zero, branch to next label
+	inc $fc								; Increment high byte of source address
+nextm2v1:								; Next label
+	dec _VDC_tmp2						; Decrease low byte of length
+	lda _VDC_tmp2						; Load low byte of length to A
+	cmp #$ff							; Check if below zero
+	bne copyloopm2v						; Continue loop if not yet below zero
+	dec _VDC_tmp1						; Decrease high byte of length
+	lda _VDC_tmp1						; Load high byte of length to A
+	cmp #$ff							; Check if below zero
+	bne copyloopm2v						; Continue loop if not yet below zero
 
 ; Restore $fb and $fc
 	lda ZPtmp1							; Obtain stored value of $fb
@@ -552,10 +549,10 @@ _VDC_CopyVDCToMem_core:
 	sta $2b9							; Save in STAVEC vector
 
 	; Start of copy loop
-loopv2m1:								; Start of outer loop
 	ldy #$00    						; Set Y as counter on 0
 
-loopv2m2:								; Start of 8 bytes character copy loop
+copyloopv2m:							; Start of copy loop
+
 	; Hi-byte of the source VDC address to register 18
 	ldx #$12    						; Load $12 for register 18 (VDC RAM address high) in X	
 	lda _VDC_addrh		        		; Load high byte of address in A
@@ -584,28 +581,23 @@ waitvaluev2m:							; Start of wait loop to wait for VDC status ready
 	ldx _VDC_tmp3						; Store banknumber in X
 	jsr $ff77							; Call INDSTA kernal routine to do sta ($fb),y from given bank
 
-	; Increase counter within page and check for last page
-	clc									; Clear carry
-	lda _VDC_addrl						; Store low byte of VDC source address in A
-	adc #$01							; Increase one with carry
-	sta _VDC_addrl						; Store low byte back
-	lda _VDC_addrh						; Store high byte of VDC source address in A
-	adc #$00							; Add 0 with carry
-	sta _VDC_addrh						; Store high byte back
-	iny 								; Increase Y counter
-	cpy #$00							; Compare with zero
-	beq nextpagev2m						; If complete page go to next page
-	lda _VDC_tmp1						; Load page counter in A
-	cmp #$01							; Check if this is the last page
-	bne loopv2m2						; Continue loop if not yet last page if check is untrue
-	cpy _VDC_tmp2						; Compare with number to move in last page
-	bne loopv2m2				       	; If not yet number of bytes in last page, loop
-
-	; Next page
-nextpagev2m:
-	inc $fc								; Increase high byte of source address
-	dec _VDC_tmp1						; Decrease page counter
-	bne loopv2m1						; Loop outer loop until page counter is zero
+	; Increase VDC source address and target memory address
+	inc $fb								; Increment low byte of target address
+	bne nextv2m1						; If not yet zero, branch to next label
+	inc $fc								; Increment high byte of target address
+nextv2m1:								; Next label
+	inc _VDC_addrl						; Increment low byte of VDC address
+	bne nextv2m2						; If not yet zero, branch to next label
+	inc _VDC_addrh						; Increment hight byte of VDC address
+nextv2m2:								; Next label
+	dec _VDC_tmp2						; Decrease low byte of length
+	lda _VDC_tmp2						; Load low byte of length to A
+	cmp #$ff							; Check if below zero
+	bne copyloopv2m						; Continue loop if not yet below zero
+	dec _VDC_tmp1						; Decrease high byte of length
+	lda _VDC_tmp1						; Load high byte of length to A
+	cmp #$ff							; Check if below zero
+	bne copyloopv2m						; Continue loop if not yet below zero
 
 ; Restore $fb and $fc
 	lda ZPtmp1							; Obtain stored value of $fb

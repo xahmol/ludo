@@ -184,13 +184,13 @@ signed char np[4] = { -1, -1, -1, -1};
 unsigned char dp[4] = { 8, 8, 8, 8 };
 
 //Pawn, field and dice graphics string data
-char dicegraphics[6][2][3] = {
-    {{C_DICE01,C_DICE02,0},{C_DICE03,C_DICE04,0}},
-    {{C_DICE05,C_DICE06,0},{C_DICE06,C_DICE07,0}},
-    {{C_DICE08,C_DICE02,0},{C_DICE03,C_DICE09,0}},
-    {{C_DICE05,C_DICE10,0},{C_DICE11,C_DICE07,0}},
-    {{C_DICE08,C_DICE12,0},{C_DICE13,C_DICE09,0}},
-    {{C_DICE14,C_DICE14,0},{C_DICE15,C_DICE15,0}}
+char dicegraphics[6][3][4] = {
+    {{160,160,160, 97} , {160,252,160, 97} , {226,226,226,126}},
+    {{236,160,160, 97} , {160,160,236, 97} , {226,226,226,126}},
+    {{236,160,160, 97} , {160,252,236, 97} , {226,226,226,126}},
+    {{236,160,236, 97} , {236,160,236, 97} , {226,226,226,126}},
+    {{236,160,236, 97} , {236,252,236, 97} , {226,226,226,126}},
+    {{236,236,236, 97} , {236,236,236, 97} , {226,226,226,126}}
 };
 
 char pawngraphics[2][4] = {
@@ -218,6 +218,10 @@ unsigned char throw;
 unsigned char musicnumber = 1;
 unsigned char joyinterface;
 unsigned char autosavetoggle = 1;
+
+//Save game and config file memory allocation and variables
+unsigned char saveslots[85];
+unsigned char savegamemem[136];
 
 /* General functions */
 void wait(clock_t wait_cycles)
@@ -455,7 +459,7 @@ void menumakeborder(unsigned char xpos, unsigned char ypos, unsigned char height
        - height: number of rows in window
        - width: window width in characters        */
  
-    windowsave(ypos, height+2);
+    windowsave(ypos, height+4);
 
     VDC_FillArea(ypos+1,xpos+1,C_SPACE,width,height,VDC_LYELLOW);
     VDC_Plot(ypos,xpos,C_LOWRIGHT,VDC_LRED);
@@ -655,15 +659,103 @@ unsigned char areyousure()
     return choice;
 }
 
+void fileerrormessage(unsigned char error)
+{
+    /* Show message for file error encountered */
+
+    menumakeborder(8,8,6,30);
+    cputsxy(10,10,"File error!");
+    if(error<255)
+    {
+        gotoxy(10,12);
+        cprintf("Error nr.: %2X",error);
+    }
+    cputsxy(10,12,"Press key.");
+    getkey("",1);
+    windowrestore();    
+}
+
+/* Config file and save functions */
+
+void saveconfigfile()
+{
+    // Function to save config file
+
+    char filename[] = "ludo.cfg";
+    unsigned char error;
+
+    // Remove old file
+    remove(filename);
+
+    // Set device ID
+	cbm_k_setlfs(0, getcurrentdevice(), 0);
+
+    // Set filename
+	cbm_k_setnam(filename);
+
+    // Set bank to 0
+    SetLoadSaveBank(0);
+
+    // Save saveslots memory
+	error = cbm_k_save((unsigned int)saveslots, (unsigned int)saveslots+85);
+
+    if (error) { fileerrormessage(error); }
+}
+
+void loadconfigfile()
+{
+    // Load configuration file or create one if not present
+
+    char filename[] = "ludo.cfg";
+    unsigned int length;
+    unsigned char x,y;
+
+    // Set device ID
+	cbm_k_setlfs(0, getcurrentdevice(), 0);
+
+	// Set filename
+	cbm_k_setnam(filename);
+
+	// Set bank to 0
+	SetLoadSaveBank(0);
+	
+	// Load config from file to memory
+	length = cbm_k_load(0,(unsigned int)saveslots);
+
+    if (length>(unsigned int)saveslots) {
+        for(y=0;y<5;y++)
+        {
+            for(x=0;x<16;x++)
+            {
+                pulldownmenutitles[7][y][x]=saveslots[(y*16)+5+x];
+            }
+        }
+    }
+    else
+    {
+        memset(saveslots,0,85);
+        for(y=0;y<5;y++)
+        {
+            for(x=0;x<16;x++)
+            {
+                saveslots[(y*16)+5+x]=pulldownmenutitles[7][y][x];
+            }
+        }
+        saveconfigfile();
+    }
+}
+
 /* Graphics and screen initialisation functions */
 
 void graphicsinit()
 {
     // Initialize VDC screen and load charsets
-
     VDC_Init();
     VDC_LoadCharset("ludo.chr1",0x0400,1,0);
     VDC_LoadCharset("ludo.chr2",0x0400,1,1);
+
+    /* Load and read game config file */
+    loadconfigfile();
 
     // Load main screen to memory
     VDC_LoadScreen("ludo.mscr",MAINSCREENADDRESS,1,0);
@@ -675,6 +767,29 @@ void loadmainscreen()
 
     VDC_CopyMemToVDC(0,MAINSCREENADDRESS,1,4096);
     menuplacebar();
+}
+
+/* Game routines */
+
+unsigned char dicethrow()
+{
+    /* Throw the dice. Returns the dice value */
+
+    unsigned char dicethrow, x;
+
+    menumakeborder(60,12,6,8);
+    for(x=0;x<10;x++)
+    {
+        dicethrow = rand()%6+1;
+        VDC_PlotString(14,62,dicegraphics[dicethrow-1][0],4,VDC_WHITE+VDC_A_ALTCHAR);
+        VDC_PlotString(15,62,dicegraphics[dicethrow-1][1],4,VDC_WHITE+VDC_A_ALTCHAR);
+        VDC_PlotString(16,62,dicegraphics[dicethrow-1][2],4,VDC_WHITE+VDC_A_ALTCHAR);
+        wait(5);
+    }
+    cputsxy(62,17,"Key.");
+    getkey("",1);
+    windowrestore();
+    return dicethrow;
 }
 
 unsigned char pawncoord(unsigned char playernumber, unsigned char pawnnumber, unsigned char xy)
@@ -743,6 +858,652 @@ void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned ch
     VDC_PlotString(ypos+1,xpos,pawngraphics[1],4,color+VDC_A_ALTCHAR);
 }
 
+void savegame(unsigned char autosave)
+{
+    /* Save game to a gameslot
+       Input: autosave is 1 for autosave, else 0 */
+
+    char fname[25] = "ludo.sav";
+    unsigned char slot = 0;
+    unsigned char x, y, len, ferr;
+    unsigned char yesno = 1;
+
+    len = strlen(fname);
+
+    if(autosave==1)
+    {
+        fname[len]=48;
+        fname[len+1]=0;
+    }
+    else
+    {
+        menumakeborder(5,5,12,30);
+        cputsxy(7,7,"Save game.");
+        cputsxy(7,8,"Choose slot:");
+        do
+        {
+            slot = menupulldown(14,10,8) - 1;
+        } while (slot<1);
+        if(saveslots[slot]==1)
+        {
+            cputsxy(7,9,"Slot not empty. Sure?");
+            yesno = menupulldown(18,10,5);
+        }
+        if(yesno==1)
+        {
+            cputsxy(7,9,"Choose name of save. ");
+            if(saveslots[slot]==0) { memset(pulldownmenutitles[7][slot],0,15); }
+            input(7,10,pulldownmenutitles[7][slot],15);
+            for(x=strlen(pulldownmenutitles[7][slot]);x<15;x++)
+            {
+                pulldownmenutitles[7][slot][x] = C_SPACE;
+            }
+            pulldownmenutitles[7][slot][15] = 0;
+            fname[len]=48+slot;
+            fname[len+1]=0;
+            for(x=0;x<16;x++)
+            {
+                saveslots[(slot*16)+5+x]=pulldownmenutitles[7][slot][x];
+            }
+        }
+        windowrestore();
+    }
+    if(yesno==1)
+    {
+        saveslots[slot]=1;
+        saveconfigfile();
+        savegamemem[0]=turnofplayernr;
+        for(x=0;x<4;x++)
+        {
+            savegamemem[x+1] = np[x];
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<4;y++)
+            {
+                savegamemem[5+(x*4)+y]=playerdata[x][y];
+            }
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<4;y++)
+            {
+                savegamemem[21+(x*8)+(y*2)]=playerpos[x][y][0];
+                savegamemem[22+(x*8)+(y*2)]=playerpos[x][y][1];
+            }
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<21;y++)
+            {
+                savegamemem[53+(x*21)+y]=playername[x][y];
+            }
+        }
+
+         // Remove old file
+        remove(fname);
+
+        // Set device ID
+	    cbm_k_setlfs(0, getcurrentdevice(), 0);
+
+        // Set filename
+	    cbm_k_setnam(fname);
+
+        // Set bank to 0
+        SetLoadSaveBank(0);
+
+        // Save saveslots
+	    ferr = cbm_k_save((unsigned int)savegamemem, (unsigned int)savegamemem+136);
+
+        if (ferr) { fileerrormessage(ferr); }
+    }
+}
+
+void loadgame()
+{
+     /* Load game from a gameslot */
+    
+    char fname[25] = "ludo.sav";
+    unsigned char slot, x, y, len;
+    unsigned char yesno = 1;
+    unsigned int length;
+    
+    len = strlen(fname);
+    
+    menumakeborder(5,5,12,30);
+    cputsxy(7,7,"Load game.");
+    cputsxy(7,9,"Choose slot:");
+    slot = menupulldown(14,10,8) - 1;
+    if(saveslots[slot]==0)
+    {
+        cputsxy(7,9,"Slot empty. ");
+        cputsxy(7,10,"Press key.");
+        getkey("",1);
+    }
+    windowrestore();
+    if(saveslots[slot]==1)
+    {
+        fname[len]=48+slot;
+        fname[len+1]=0;
+
+        // Set device ID
+	    cbm_k_setlfs(0, getcurrentdevice(), 0);
+
+	    // Set filename
+	    cbm_k_setnam(fname);
+
+	    // Set bank to 0
+	    SetLoadSaveBank(0);
+	
+	    // Load config from file to memory
+	    length = cbm_k_load(0,(unsigned int)savegamemem);
+
+        if (length <= (unsigned int)savegamemem) { fileerrormessage(255); return; }
+
+        turnofplayernr=savegamemem[0];
+        for(x=0;x<4;x++)
+        {
+            np[x]=savegamemem[1+x];
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<4;y++)
+            {
+                playerdata[x][y]=savegamemem[5+(x*4)+y];
+            }
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<4;y++)
+            {
+                pawnerase(x,y);
+                playerpos[x][y][0]=savegamemem[21+(x*8)+(y*2)];
+                playerpos[x][y][1]=savegamemem[22+(x*8)+(y*2)];
+                pawnplace(x,y,0);
+            }
+        }
+        for(x=0;x<4;x++)
+        {
+            for(y=0;y<21;y++)
+            {
+                playername[x][y]=savegamemem[53+(x*21)+y];
+            }
+        }
+        endofgameflag = 2;
+    }
+}
+
+void inputofnames()
+{
+    /* Enter player nanes */
+    unsigned char x, choice;
+
+    menumakeborder(30,8,6,45);
+    for(x=0;x<4;x++)
+    {
+        gotoxy(32,10);
+        cputs("Computer plays player ");
+        textcolor(COLOR_CYAN);
+        cprintf("%d",x+1);
+        textcolor(COLOR_YELLOW);
+        cputs("?");
+        choice = menupulldown(69,11,5);
+        if(choice==1)
+        {
+            playerdata[x][0]=1;
+        }
+        else
+        {
+            playerdata[x][0]=0;
+        }
+        gotoxy(32,10);
+        cprintf("Input name player ");
+        textcolor(COLOR_CYAN);
+        cprintf("%d",x+1);
+        textcolor(COLOR_YELLOW);
+        cputs(":    ");
+        input(32,12,playername[x],20);
+    }
+    windowrestore();
+}
+
+void informationcredits()
+{
+    /* Print version information and credits */
+
+    char version[30];
+    sprintf(version,
+            "Version: v%i%i - %c%c%c%c%c%c%c%c-%c%c%c%c",
+            VERSION_MAJOR, VERSION_MINOR,
+            BUILD_YEAR_CH0, BUILD_YEAR_CH1, BUILD_YEAR_CH2, BUILD_YEAR_CH3, BUILD_MONTH_CH0, BUILD_MONTH_CH1, BUILD_DAY_CH0, BUILD_DAY_CH1,BUILD_HOUR_CH0, BUILD_HOUR_CH1, BUILD_MIN_CH0, BUILD_MIN_CH1);
+    menumakeborder(5,5,14,70);
+    textcolor(COLOR_CYAN);
+    printcentered("L U D O",7,7,70);
+    textcolor(COLOR_WHITE);
+    printcentered(version,7,8,70);
+    textcolor(COLOR_YELLOW);
+    printcentered("Written in 2021 by Xander Mol",7,10,70);
+    printcentered("Converted to C from the C128 original written in BASIC in 1992",7,11,70);
+    printcentered("See source code on Github for full code credits.",7,13,70);
+    printcentered("Music credits:",7,15,70);
+    textcolor(COLOR_GREEN);
+    printcentered("Press a key.",7,18,70);
+    textcolor(COLOR_YELLOW);
+    getkey("",1);
+    windowrestore();
+}
+
+void gamereset()
+{
+    /* Reset all player data */
+
+    unsigned char n;
+
+    loadmainscreen();
+    turnofplayernr=0;
+    for(n=0;n<4;n++)
+    {
+        playerdata[n][1]=4;
+        playerdata[n][3]=4;
+        np[n]=-1;
+        dp[n]=8;
+    }
+}
+
+void turnhuman()
+{
+    /* Turn for the human players */
+
+    unsigned char choice;
+    unsigned char yesno;
+
+    do
+    {
+        choice = menumain();
+        switch (choice)
+        {
+            case 12:
+                yesno = areyousure();
+                if(yesno==1) { endofgameflag=3;  gamereset(); }
+                break;
+
+            case 13:
+                yesno = areyousure();
+                if(yesno==1) { endofgameflag=1; }
+                break;
+
+            case 21:
+                savegame(0);
+                break;
+
+            case 22:
+                yesno = areyousure();
+                if(yesno==1) { loadgame(); }
+                break;
+
+            case 23:
+                if(autosavetoggle==1)
+                {
+                    autosavetoggle=0;
+                    strcpy(pulldownmenutitles[1][2],"Autosave on ");
+                }
+                else
+                {
+                    autosavetoggle=1;
+                    strcpy(pulldownmenutitles[1][2],"Autosave off");
+                }
+                break;
+
+            case 31:
+                //musicnext();
+                break;
+
+            case 32:
+                //StopSong();
+                //MUTE_SOUND();
+                musicnumber=0;
+                break;
+
+            case 33:
+                if(musicnumber)
+                { 
+                    //StopSong();
+                }
+                else
+                {
+                    musicnumber=1;
+                }
+                //StartSong(musicmem,0);
+                break;
+
+            case 41:
+                informationcredits();
+                break;
+
+            default:
+                break;
+        }
+    } while (choice!=11 && choice!=12 && choice!=13 && choice!=22);
+}
+
+unsigned char humanchoosepawn(unsigned char playernumber, unsigned char possible[4])
+{
+    /* Human has to choose a pawn, returns pawnnumber chosen */
+
+    signed char pawnnumber = 0;
+    signed char direction;
+    unsigned char key;
+    char validkeys[5] = { C_LEFT, C_RIGHT, C_UP, C_DOWN, C_ENTER };
+
+    menumakeborder(60,10,5,18);
+    cputsxy(62,12,"Which pawn?");
+    gotoxy(62,14);
+    cputs("Dice thow = ");
+    textcolor(COLOR_GREEN);
+    cprintf("%d", throw);
+    textcolor(COLOR_YELLOW);
+    while (possible[++pawnnumber]!=1 && pawnnumber<4);
+    do
+    {
+        pawnplace(playernumber,pawnnumber,1);
+        key = getkey(validkeys,1);
+        pawnplace(playernumber,pawnnumber,0);
+        if(key==C_LEFT || key==C_DOWN) { pawnnumber--; direction=-1; }
+        if(key==C_RIGHT || key==C_UP) { pawnnumber++; direction=1; }
+        if(key!=C_ENTER)
+        {
+            if(pawnnumber>3) { pawnnumber = 0; }
+            if(pawnnumber<0) { pawnnumber = 3; }
+            do
+            {
+                if(possible[pawnnumber]!=1)
+                {
+                    pawnnumber+=direction;
+                    if(pawnnumber>3) { pawnnumber = 0; }
+                    if(pawnnumber<0) { pawnnumber = 3; }
+                }
+            } while (possible[pawnnumber]!=1);
+        }
+    } while (key!=C_ENTER);
+    windowrestore();
+    return pawnnumber;
+}
+
+void playerwins()
+{
+    unsigned char choice;
+
+    menumakeborder(35,8,10,40);
+    gotoxy(37,10);
+    textcolor(COLOR_GREEN);
+    cprintf("%s", playername[turnofplayernr]);
+    textcolor(COLOR_YELLOW);
+    cputs(" has won!");
+
+    cputsxy(37,12,"Your choice?");
+    do
+    {
+        choice = menupulldown(59,13,7);
+        if(choice==2) { endofgameflag=3; gamereset(); zv=1; }
+        if(choice==3) { endofgameflag=1; zv=1; }
+    } while (choice==1 && playerdata[0][1]==0 && playerdata[1][1]==0 && playerdata[2][1]==0 && playerdata[3][1]==0);
+    windowrestore();
+}
+
+unsigned char computerchoosepawn(unsigned char playernumber, unsigned char possible[4])
+{
+    /* Computer has to choose a pawn, returns pawnnumber chosen */
+
+    signed int pawnscore[4] = { 0,0,0,0 };
+    unsigned char pawnnumber = 0;
+    signed int minimumpawnscore;
+    unsigned char vr, vn, nn, no, nr, x,y,z ;
+
+    for(x=0;x<4;x++)
+    {
+        if(possible[x]==0)
+        {
+            pawnscore[x]=-10000;
+        }
+        else{
+            vr=playerpos[playernumber][x][0];
+            vn=playerpos[playernumber][x][1];
+            nn=vn+throw;
+            no=nn;
+            nr=vr;
+            if(vr==0)
+            {
+                if(playernumber==0 && nn>39 && vn<40) { nn-=36; nr=1; }
+                if(playernumber==1 && nn> 9 && vn<10) { nn-= 6; nr=1; }
+                if(playernumber==2 && nn>19 && vn<20) { nn-=16; nr=1; }
+                if(playernumber==3 && nn>29 && vn<30) { nn-=26; nr=1; }
+            }
+            if(nr==0 && nn>39) { nn-=40; }
+            if(nr==1 && nn>3 && playerdata[playernumber][1]==1) { pawnscore[x]=10000; x=3; }
+            else
+            {
+                if(nr==1 && nn>3) { pawnscore[x]+=6000; }
+                for(y=0;y<4;y++)
+                {
+                    for(z=0;z<4;z++)
+                    {
+                        if(playernumber==y && playerpos[y][z][0]==nr && playerpos[y][z][1]==nn) { pawnscore[x]-=8000; }
+                        if(playernumber!=y && playerpos[y][z][0]==nr && playerpos[y][z][1]==nn)
+                        {
+                            pawnscore[x]+=4000;
+                            if(playerpos[y][z][0]==0)
+                            {
+                                if(y==0 && playerpos[y][z][1]>33) { pawnscore[x]+=3000; }
+                                if(y==1 && playerpos[y][z][1]> 3) { pawnscore[x]+=3000; }
+                                if(y==2 && playerpos[y][z][1]>13) { pawnscore[x]+=3000; }
+                                if(y==3 && playerpos[y][z][1]>23) { pawnscore[x]+=3000; }
+                            }
+                        }
+                        if(playerpos[y][z][0]==0 && nr==0 && playernumber!=y)
+                        {
+                            if((vn-playerpos[y][z][1])<6 && vn-playerpos[y][z][1]>0) { pawnscore[x]+=400; }
+                            if((no-playerpos[y][z][1])<6 && no-playerpos[y][z][1]>0) { pawnscore[x]-=200; }
+                            if((playerpos[y][z][1]-nn)<6 && (playerpos[y][z][1]-nn)>0) { pawnscore[x]+=100; }
+                        }
+                    }
+                }
+                if(nr==0 && (nn==0 || nn==10 || nn==20 || nn==30)) { pawnscore[x]-=4000; }
+                if(vr==0 && (vn==0 || vn==10 || vn==20 || vn==30)) { pawnscore[x]+=2000; }
+                if(playernumber==0) { pawnscore[x]+=nn; }
+                if(playernumber==1) { pawnscore[x]+=no-10; }
+                if(playernumber==2) { pawnscore[x]+=no-20; }
+                if(playernumber==3) { pawnscore[x]+=no-30; }
+            }
+        }
+    }
+    minimumpawnscore=-20000;
+    for(x=0;x<4;x++)
+    {
+        if(pawnscore[x]>minimumpawnscore && possible[x]==1) { minimumpawnscore=pawnscore[x]; pawnnumber=x; }
+    }
+
+    return pawnnumber;
+}
+
+void turngeneric()
+{
+    /* Generic turn sequence */
+
+    unsigned char pawnpossible[4] = { 0,0,0,0 };
+    unsigned char dicethrows = 1;
+    unsigned char noturnpossible = 0;
+    unsigned char mp = 0;
+    signed char pawnnumber = -1;
+    unsigned char ap = 0;
+    signed char as;
+    unsigned char vr, vl, vn, nr, gv, ov, ro, x,y;
+
+    if(playerdata[turnofplayernr][3]==playerdata[turnofplayernr][1])
+    {
+        dicethrows = 3;
+        for(x=0;x<4;x++)
+        {
+            if(playerpos[turnofplayernr][x][0]==0)
+            {
+                dicethrows = 1;
+            }
+            if(playerpos[turnofplayernr][x][0]==1 && playerpos[turnofplayernr][x][1]<playerdata[turnofplayernr][1]+4 && playerpos[turnofplayernr][x][1]<playerdata[turnofplayernr][1]>3)
+            {
+                dicethrows = 1;
+            }
+        }
+        if(dicethrows == 3)
+        {
+            cputsxy(60,8,"Throw 3x");
+        }
+    }
+    for(x=0;x<dicethrows;x++)
+    {
+        throw = dicethrow();
+        if(throw==6) { break; }
+    }
+    cputsxy(60,8,"        ");
+    if(playerdata[turnofplayernr][3]==playerdata[turnofplayernr][1] && dicethrows == 3 && throw!=6) { noturnpossible=1; }
+    if(np[turnofplayernr]>=0)
+    {
+        if(playerdata[turnofplayernr][3]>0)
+        {
+            pawnnumber=np[turnofplayernr];
+        }
+        np[turnofplayernr]=-1;
+    }
+    if(noturnpossible==0 && pawnnumber==-1)
+    {
+        for(x=0;x<4;x++)
+        {
+            vr=playerpos[turnofplayernr][x][0];
+            vl=playerpos[turnofplayernr][x][1];
+            gv=0;
+            if(vr==1 && vl<4)
+            {
+                gv=1;
+                if(throw==6)
+                {
+                    pawnnumber=x;
+                    np[turnofplayernr]=x;
+                    x=3;
+                }
+            }
+            if(gv==0)
+            {
+                vn=vl+throw;
+                nr=vr;
+                if(vr==0)
+                {
+                    if(turnofplayernr==0 && vn>39 && vl<40) { vn-=36; nr=1; }
+                    if(turnofplayernr==1 && vn> 9 && vl<10) { vn-= 6; nr=1; }
+                    if(turnofplayernr==2 && vn>19 && vl<20) { vn-=16; nr=1; }
+                    if(turnofplayernr==3 && vn>29 && vl<30) { vn-=26; nr=1; }
+                }
+                if(nr==1)
+                {
+                    if(vn>7) { gv=1; }
+                    else
+                    {
+                        for(y=0;y<4;y++)
+                        {
+                            if(x!=y && playerpos[turnofplayernr][y][0]==1 && playerpos[turnofplayernr][y][1]<=vn && playerpos[turnofplayernr][y][1]>3)
+                            {
+                                gv=1;
+                                y=3;
+                            }
+                        }
+                    }
+                }
+                if(gv==0) { pawnpossible[x]=1; }
+            }
+        }
+    }
+    if(pawnnumber==-1)
+    {
+        for(x=0;x<4;x++)
+        {
+            if(pawnpossible[x]==1) { ap++; pawnnumber=x; }
+        }
+    }
+    else { ap=1; }
+    if(ap>1)
+    {
+        if(playerdata[turnofplayernr][0]==0) { pawnnumber = humanchoosepawn(turnofplayernr,pawnpossible); }
+        else { pawnnumber = computerchoosepawn(turnofplayernr,pawnpossible); }
+    }
+    if(throw==6) { zv=1; }
+    if(ap==0 || noturnpossible==1)
+    {
+        cputsxy(60,8,"No move possible.");
+        cputsxy(60,9,"Press key.");
+        getkey("",1);
+        return;
+    }
+    pawnerase(turnofplayernr,pawnnumber);
+    ov=playerpos[turnofplayernr][pawnnumber][1];
+    ro=playerpos[turnofplayernr][pawnnumber][0];
+    if(ro==1 && ov<4)
+    {
+        playerpos[turnofplayernr][pawnnumber][0]=0;
+        playerpos[turnofplayernr][pawnnumber][1]=turnofplayernr*10;
+        playerdata[turnofplayernr][3]--;
+    }
+    else { playerpos[turnofplayernr][pawnnumber][1]+=throw; }
+    if(turnofplayernr==0 && playerpos[turnofplayernr][pawnnumber][1]>39 && ov<40 && ro==0)
+        { playerpos[turnofplayernr][pawnnumber][0]=1; playerpos[turnofplayernr][pawnnumber][1]-=36; }
+    if(turnofplayernr==1 && playerpos[turnofplayernr][pawnnumber][1]> 9 && ov<10 && ro==0)
+        { playerpos[turnofplayernr][pawnnumber][0]=1; playerpos[turnofplayernr][pawnnumber][1]-= 6; }
+    if(turnofplayernr==2 && playerpos[turnofplayernr][pawnnumber][1]>19 && ov<20 && ro==0)
+        { playerpos[turnofplayernr][pawnnumber][0]=1; playerpos[turnofplayernr][pawnnumber][1]-=16; }
+    if(turnofplayernr==3 && playerpos[turnofplayernr][pawnnumber][1]>29 && ov<30 && ro==0)
+        { playerpos[turnofplayernr][pawnnumber][0]=1; playerpos[turnofplayernr][pawnnumber][1]-=26; }
+    if(playerpos[turnofplayernr][pawnnumber][0]==1 && playerpos[turnofplayernr][pawnnumber][1]>3)
+        { dp[turnofplayernr]=playerpos[turnofplayernr][pawnnumber][1]; }
+    if(playerpos[turnofplayernr][pawnnumber][1]==playerdata[turnofplayernr][1]+3 && playerpos[turnofplayernr][pawnnumber][0]==1)
+        { playerdata[turnofplayernr][1]--; }
+    if(playerpos[turnofplayernr][pawnnumber][1]>39) { playerpos[turnofplayernr][pawnnumber][1]-=40; }
+    ap=0;
+    as=-1;
+    for(x=0;x<4;x++)
+    {
+        for(y=0;y<4;y++)
+        {
+            if(y!=pawnnumber || x!=turnofplayernr)
+            {
+                if(playerpos[x][y][0]==0 && playerpos[turnofplayernr][pawnnumber][0]==0)
+                {
+                    if(playerpos[x][y][1]==playerpos[turnofplayernr][pawnnumber][1])
+                    {
+                        ap=y;
+                        as=x;
+                        y=3;
+                        x=3;
+                    }
+                }
+            }
+        }
+    }
+    if(as!=-1)
+    {
+        pawnerase(as,ap);
+        playerpos[as][ap][0]=1;
+        playerpos[as][ap][1]=ap;
+        playerdata[as][3]++;
+        pawnplace(as,ap,0);
+    }
+    pawnplace(turnofplayernr,pawnnumber,0);
+    if(playerdata[turnofplayernr][0]==0 && autosavetoggle==1)
+    {
+        savegame(1); /* Autosave on end human turn */
+    }
+    else
+    {
+        cputsxy(60,8,"Press key.");
+        getkey("",1);
+    }
+}
+
 void loadintro()
 {
     /* Game intro */
@@ -786,7 +1547,7 @@ void loadintro()
 
 void main()
 {
-    unsigned char x, choice;
+    unsigned char choice;
 
     //Game intro
     graphicsinit();
@@ -798,79 +1559,65 @@ void main()
     cputsxy(42,10,"Load old game?");
     choice = menupulldown(69,11,5);
     windowrestore();
-    //if(choice==1) { loadmainscreen(); loadgame(); }
+    if(choice==1) { loadmainscreen(); loadgame(); }
 
-    wait(10);
+    srand(clock());
 
     if(endofgameflag==0) { loadmainscreen(); }
 
-    for(choice=0;choice<4;choice++)
+    // Main game loop
+    do
     {
-        for(x=0;x<40;x++)
+        if(endofgameflag>0)
         {
-            pawnerase(choice,0);
-            playerpos[choice][0][0] = 0;
-            playerpos[choice][0][1] = x;
-            pawnplace(choice,0,0);
-            wait(10);
+            endofgameflag = 0;
         }
-        for(x=0;x<8;x++)
+        else
         {
-            pawnerase(choice,0);
-            playerpos[choice][0][0] = 1;
-            playerpos[choice][0][1] = x;
-            pawnplace(choice,0,0);
-            wait(10);
+            inputofnames();
         }
-    }
+        do
+        {
+            VDC_FillArea(3,60,C_SPACE,20,10,VDC_LYELLOW);
+            gotoxy(60,3);
+            cputs("Player ");
+            textcolor(COLOR_CYAN);
+            cprintf("%u", turnofplayernr+1);
+            textcolor(COLOR_YELLOW);
+            cputs(":");
+            VDC_Plot(3,70,C_SPACE,playerdata[turnofplayernr][2]+VDC_A_REVERSE);
+            VDC_Plot(3,71,C_SPACE,playerdata[turnofplayernr][2]+VDC_A_REVERSE);
+            textcolor(COLOR_GREEN);
+            cputsxy(60,4,playername[turnofplayernr]);
+            textcolor(COLOR_YELLOW);
 
-    //Main game loop
-    //do
-    //{
-    //    if(endofgameflag>0)
-    //    {
-    //        endofgameflag = 0;
-    //    }
-    //    else
-    //    {
-    //        inputofnames();
-    //    }
-    //    do
-    //    {
-    //        cleararea(23,2,8,8);
-    //        gotoxy(23,2);
-    //        cprintf("Player %d", turnofplayernr+1);
-    //        cputsxy(23,3,"Color");
-    //        cputcxy(30,3,playerdata[turnofplayernr][2]);
-    //        cputsxy(23,4,playername[turnofplayernr]);
-//
-    //        if(playerdata[turnofplayernr][0]==0)
-    //        {
-    //            turnhuman();
-    //        }
-    //        else
-    //        {
-    //            cputsxy(23,5,"Computer");
-    //        }
-    //        if(endofgameflag!=0) { break; }
-    //        turngeneric();
-//
-    //        if(playerdata[turnofplayernr][1]==0) { playerwins(); }
-    //        do
-    //        {
-    //            if(zv==1)
-    //            {
-    //                zv=0;
-    //            }
-    //            else
-    //            {
-    //                np[turnofplayernr]=-1;
-    //                turnofplayernr++;
-    //                if(turnofplayernr>3) { turnofplayernr=0; }
-    //            }
-    //        } while (zv==0 && playerdata[turnofplayernr][1]==0);
-    //    } while (endofgameflag==0);
-    //} while (endofgameflag!=1); 
+            if(playerdata[turnofplayernr][0]==0)
+            {
+                turnhuman();
+            }
+            else
+            {
+               cputsxy(60,6,"Computer plays.");
+            }
+            if(endofgameflag!=0) { break; }
+            turngeneric();
+
+            if(playerdata[turnofplayernr][1]==0) { playerwins(); }
+            do
+            {
+                if(zv==1)
+                {
+                    zv=0;
+                }
+                else
+                {
+                    np[turnofplayernr]=-1;
+                    turnofplayernr++;
+                    if(turnofplayernr>3) { turnofplayernr=0; }
+                }
+            } while (zv==0 && playerdata[turnofplayernr][1]==0);
+        } while (endofgameflag==0);
+    } while (endofgameflag!=1); 
 
     VDC_Exit();
     cputsxy(0,0,"Thanks for playing, goodbye.");

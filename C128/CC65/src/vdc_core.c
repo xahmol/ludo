@@ -140,11 +140,13 @@ void VDC_CopyMemToVDC(unsigned int vdcAddress, unsigned int memAddress, unsigned
 	// Function to copy memory from VDC memory to standard memory
 	// Input: Source VDC address, destination standard memory address and bank, number of bytes to copy
 
+	length--;
+
 	VDC_addrh = (memAddress>>8) & 0xff;		// Obtain high byte of source address
 	VDC_addrl = memAddress & 0xff;			// Obtain low byte of source address
 	VDC_desth = (vdcAddress>>8) & 0xff;		// Obtain high byte of destination address
 	VDC_destl = vdcAddress & 0xff;			// Obtain low byte of destination address
-	VDC_tmp1 = ((length>>8) & 0xff)+1;		// Obtain number of 256 byte pages to copy
+	VDC_tmp1 = ((length>>8) & 0xff);		// Obtain number of 256 byte pages to copy
 	VDC_tmp2 = length & 0xff;				// Obtain length in last page to copy
 	VDC_tmp3 = memBank;						// Obtain source bank number
 
@@ -156,11 +158,13 @@ void VDC_CopyVDCToMem(unsigned int vdcAddress, unsigned int memAddress, unsigned
 	// Function to copy memory from VDC memory to standard memory
 	// Input: Source VDC address, destination standard memory address and bank, number of bytes to copy
 
+	length--;
+	
 	VDC_addrh = (vdcAddress>>8) & 0xff;		// Obtain high byte of source VDC address
 	VDC_addrl = vdcAddress & 0xff;			// Obtain low byte of source VDC address
 	VDC_desth = (memAddress>>8) & 0xff;		// Obtain high byte of destination address
 	VDC_destl = memAddress & 0xff;			// Obtain low byte of destination address
-	VDC_tmp1 = ((length>>8) & 0xff)+1;		// Obtain number of 256 byte pages to copy
+	VDC_tmp1 = ((length>>8) & 0xff);		// Obtain number of 256 byte pages to copy
 	VDC_tmp2 = length & 0xff;				// Obtain length in last page to copy
 	VDC_tmp3 = memBank;						// Obtain source bank number
 
