@@ -151,3 +151,27 @@ rst2:
         lda     #$00
         sta     $d418
 		rts
+
+
+/* Snippets:
+lda #$40 ; enable ram from bank 1)
+Verzonden door Bart: Gisteren om 19:47
+sta $ff00 ; change memory config
+Verzonden door Bart: Gisteren om 19:47
+jsr <sid player in bank 1>
+Verzonden door Bart: Gisteren om 19:47
+lda #$00
+Verzonden door Bart: Gisteren om 19:47
+sta $ff00
+Verzonden door Bart: Gisteren om 19:47
+rts
+
+
+Dus even checken of ik het goed begrijp:
+- eerst oude 314/315 opslaan
+- adres eigen code in 314/315 opslaan
+- jump naar oude adres in 314/315?
+
+http://www.oxyron.de/html/registers_mmu.html
+
+*/

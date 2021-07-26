@@ -159,7 +159,7 @@ void VDC_CopyVDCToMem(unsigned int vdcAddress, unsigned int memAddress, unsigned
 	// Input: Source VDC address, destination standard memory address and bank, number of bytes to copy
 
 	length--;
-	
+
 	VDC_addrh = (vdcAddress>>8) & 0xff;		// Obtain high byte of source VDC address
 	VDC_addrl = vdcAddress & 0xff;			// Obtain low byte of source VDC address
 	VDC_desth = (memAddress>>8) & 0xff;		// Obtain high byte of destination address
@@ -356,7 +356,7 @@ void VDC_LoadCharset(char* filename, unsigned int source, unsigned char sourceba
 
 void VDC_LoadScreen(char* filename, unsigned int source, unsigned char sourcebank, unsigned char show)
 {
-	// Function to load a screen to disk and store to memory, if wanted also copy to VDC
+	// Function to load a screen from disk and store to memory, if wanted also copy to VDC
 	// Input: filename, memory address, memory bank, flag if copy to VDC is wanted (0=no, 1=yes)
 
 	unsigned int length;
@@ -381,6 +381,35 @@ void VDC_LoadScreen(char* filename, unsigned int source, unsigned char sourceban
 
 	// Restore I/O bank to 0
 	SetLoadSaveBank(0);
+}
+
+unsigned char VDC_SaveScreen(char* filename, unsigned int bufferaddress, unsigned char bufferbank)
+{
+	// Function to save a screen to disk via buffer memory
+	// Input: filename, buffer memory address, buffer memory bank
+	// Output: error code
+
+	unsigned char error;
+
+	// Copy screen from VDC to buffer memory
+	VDC_CopyVDCToMem(0,bufferaddress,bufferbank,4096);
+
+	// Set device ID
+	cbm_k_setlfs(0, getcurrentdevice(), 0);
+
+	// Set filename
+	cbm_k_setnam(filename);
+
+	// Set bank
+	SetLoadSaveBank(bufferbank);
+	
+	// Load from file to memory
+	error = cbm_k_save(bufferaddress,bufferaddress+4096);
+
+	// Restore I/O bank to 0
+	SetLoadSaveBank(0);
+
+	return error;
 } 
 
 unsigned char VDC_Attribute(unsigned char textcolor, unsigned char blink, unsigned char underline, unsigned char reverse, unsigned char alternate)

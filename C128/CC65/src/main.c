@@ -84,6 +84,7 @@ BUT WITHOUT ANY WARRANTY. USE THEM AT YOUR OWN RISK!
 #include <accelerator.h>
 #include <c128.h>
 #include <time.h>
+#include <joystick.h>
 #include "vdc_core.h"
 #include "defines.h"
 
@@ -216,7 +217,7 @@ unsigned char zv = 0;
 unsigned char ns = 0;
 unsigned char throw;
 unsigned char musicnumber = 1;
-unsigned char joyinterface;
+unsigned char joyinterface = 0;
 unsigned char autosavetoggle = 1;
 
 //Save game and config file memory allocation and variables
@@ -269,31 +270,33 @@ unsigned char getkey(char* allowedkeys, unsigned char joyallowed)
                             Empty string means any key allowed
        Output: key value (or joystick converted to key value)    */
 
-    unsigned char key;
+    unsigned char key, joy1, joy2;
 
     do
     {
         key = 0;
         if(joyinterface && joyallowed)
         {
-            //ijk_read();
-            //if(ijk_ljoy&4) { key = C_ENTER; }
-            //if(ijk_ljoy&1) { key = C_RIGHT; }
-            //if(ijk_ljoy&2) { key = C_LEFT; }
-            //if(ijk_ljoy&8) { key = C_DOWN; }
-            //if(ijk_ljoy&16) { key = C_UP; }
-            //if(ijk_rjoy&4) { key = C_ENTER; }
-            //if(ijk_rjoy&1) { key = C_RIGHT; }
-            //if(ijk_rjoy&2) { key = C_LEFT; }
-            //if(ijk_rjoy&8) { key = C_DOWN; }
-            //if(ijk_rjoy&16) { key = C_UP; }
-            //if(key){
-            //    do
-            //    {
-            //       ijk_read();
-            //    } while (ijk_ljoy || ijk_rjoy);
-            //    wait(10);
-            //}
+            joy1 = joy_read(JOY_1);
+            joy2 = joy_read(JOY_2);
+            if(joy1&JOY_BTN_1_MASK) { key = C_ENTER; }
+            if(joy1&JOY_RIGHT_MASK) { key = C_RIGHT; }
+            if(joy1&JOY_LEFT_MASK) { key = C_LEFT; }
+            if(joy1&JOY_DOWN_MASK) { key = C_DOWN; }
+            if(joy1&JOY_UP_MASK) { key = C_UP; }
+            if(joy2&JOY_BTN_1_MASK) { key = C_ENTER; }
+            if(joy2&JOY_RIGHT_MASK) { key = C_RIGHT; }
+            if(joy2&JOY_LEFT_MASK) { key = C_LEFT; }
+            if(joy2&JOY_DOWN_MASK) { key = C_DOWN; }
+            if(joy2&JOY_UP_MASK) { key = C_UP; }
+            if(key){
+                do
+                {
+                    wait(10);
+                    joy1 = joy_read(JOY_1);
+                    joy2 = joy_read(JOY_2);
+                } while (joy1 || joy2);
+            }
         }
         if(key == 0)
         {
@@ -304,6 +307,7 @@ unsigned char getkey(char* allowedkeys, unsigned char joyallowed)
             }
         }
     } while ( (strchr(allowedkeys, key)==0 && key != C_ENTER) || key == 0);
+    POKE(208,0);    // Clear keyboard buffer
     return key;
 }
 
@@ -332,7 +336,7 @@ int input(unsigned char xpos, unsigned char ypos, char *str, unsigned char size)
   
     VDC_HChar(ypos,xpos,C_SPACE,size,VDC_WHITE+VDC_A_UNDERLINE+VDC_A_ALTCHAR);
     VDC_PrintAt(ypos,xpos,str,VDC_WHITE+VDC_A_UNDERLINE+VDC_A_ALTCHAR);
-    VDC_Plot(ypos,xpos,C_SPACE,VDC_WHITE+VDC_A_REVERSE+VDC_A_ALTCHAR);
+    VDC_Plot(ypos,xpos+idx,C_SPACE,VDC_WHITE+VDC_A_REVERSE+VDC_A_ALTCHAR);
   
     while(1)
     {
@@ -751,14 +755,9 @@ void graphicsinit()
 {
     // Initialize VDC screen and load charsets
     VDC_Init();
+    printcentered("Loading...",0,10,80);
     VDC_LoadCharset("ludo.chr1",0x0400,1,0);
     VDC_LoadCharset("ludo.chr2",0x0400,1,1);
-
-    /* Load and read game config file */
-    loadconfigfile();
-
-    // Load main screen to memory
-    VDC_LoadScreen("ludo.mscr",MAINSCREENADDRESS,1,0);
 }
 
 void loadmainscreen()
@@ -886,14 +885,14 @@ void savegame(unsigned char autosave)
         } while (slot<1);
         if(saveslots[slot]==1)
         {
-            cputsxy(7,9,"Slot not empty. Sure?");
+            cputsxy(7,8,"Slot not empty. Sure?");
             yesno = menupulldown(18,10,5);
         }
         if(yesno==1)
         {
-            cputsxy(7,9,"Choose name of save. ");
+            cputsxy(7,8,"Choose name of save. ");
             if(saveslots[slot]==0) { memset(pulldownmenutitles[7][slot],0,15); }
-            input(7,10,pulldownmenutitles[7][slot],15);
+            input(7,9,pulldownmenutitles[7][slot],15);
             for(x=strlen(pulldownmenutitles[7][slot]);x<15;x++)
             {
                 pulldownmenutitles[7][slot][x] = C_SPACE;
@@ -1506,21 +1505,42 @@ void turngeneric()
 
 void loadintro()
 {
+    unsigned char error;
+
     /* Game intro */
 
     char validkeys[4] = {'m', 'M', C_ENTER, 0 };
     unsigned char key;
 
+    /* Title screen */
+    VDC_LoadScreen("ludo.tscr",LOADSAVEBUFFER,1,1);
+
+    /* Load and read game config file */
+    loadconfigfile();
+
+    // Load main screen to memory
+    VDC_LoadScreen("ludo.mscr",MAINSCREENADDRESS,1,0);
+
+    // Imstall joystick driver
+    error = joy_install(&joy_static_stddrv);
+    if(error == JOY_ERR_OK)
+    {
+        joyinterface = 1;
+    }
+    else
+    {
+        cputsxy(0,24,"Joystick driver unavailable.");
+    }
+
     /* Load and start first music file */
 
-    /* Wait for ENTER of FIRE while player can toggle music */
-    
-    cputsxy(1,21,"Press ENTER/FIRE to start game.");
-    cputsxy(1,22,"M=toggle music.");
+    /* Wait for ENTER of FIRE while player can toggle music */ 
+    cputsxy(65,20,"M=toggle music.");
+    printcentered("Press ENTER or FIRE to start game.",0,22,80);
 
     do
     {
-        cputsxy(1,20,"Music: ");
+        cputsxy(0,20,"Music: ");
         if(musicnumber) { cputs("Yes "); } else { cputs("No "); }
         key = getkey(validkeys,1);
         switch (key)
@@ -1620,6 +1640,7 @@ void main()
     } while (endofgameflag!=1); 
 
     VDC_Exit();
+    joy_uninstall();
     cputsxy(0,0,"Thanks for playing, goodbye.");
     //StopSong();
     //MUTE_SOUND();

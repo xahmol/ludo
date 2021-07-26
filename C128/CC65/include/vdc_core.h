@@ -88,6 +88,7 @@ unsigned char VDC_CursorAt(unsigned char row, unsigned char col);
 unsigned char VDC_PrintAt(unsigned char row, unsigned char col, char *text, unsigned char attribute);
 void VDC_LoadCharset(char* filename, unsigned int source, unsigned char sourcebank, unsigned char stdoralt);
 void VDC_LoadScreen(char* filename, unsigned int source, unsigned char sourcebank, unsigned char show);
+unsigned char VDC_SaveScreen(char* filename, unsigned int bufferaddress, unsigned char bufferbank);
 unsigned char VDC_Attribute(unsigned char textcolor, unsigned char blink, unsigned char underline, unsigned char reverse, unsigned char alternate);
 void VDC_Plot(unsigned char row, unsigned char col, unsigned char screencode, unsigned char attribute);
 void VDC_PlotString(unsigned char row, unsigned char col, char* plotstring, unsigned char length, unsigned char attribute);
