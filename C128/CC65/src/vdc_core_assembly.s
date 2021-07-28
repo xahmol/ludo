@@ -50,7 +50,7 @@
 VDC_ADDRESS_REGISTER    = $D600
 VDC_DATA_REGISTER       = $D601
 
-.segment	"BSS"
+.segment	"MACO"
 
 _VDC_regadd:
 	.res	1
@@ -78,8 +78,8 @@ ZPtmp1:
 	.res	1
 ZPtmp2:
 	.res	1
-
-.segment	"CODE"
+MemConfTmp:
+	.res	1
 
 ; ------------------------------------------------------------------------------------------
 _VDC_ReadRegister_core:
@@ -453,9 +453,15 @@ _VDC_CopyMemToVDC_core:
 ;			VDC_destl = low byte of VDC destination address
 ;			VDC_tmp1 = number of 256 byte pages to copy
 ;			VDC_tmp2 = length in last page to copy
-;			VDC_tmp3 = memory bank of source
+;			VDC_tmp3 = MMU config of source
 ; ------------------------------------------------------------------------------------------
 
+	; Safeguard memory configuration and set memory config to selected MMU config
+	lda	$ff00							; Obtain present memory configuration
+	sta MemConfTmp						; Store in temp location for safeguarding
+	lda _VDC_tmp3						; Obtain selected MMU config
+	sta $ff00							; Store selected MMU config
+	
 	; Store $FA and $FB addresses for safety to be restored at exit
 	lda $fb								; Obtain present value at $fb
 	sta ZPtmp1							; Store to be restored later
@@ -491,9 +497,7 @@ waitlowaddressm2v:						; Start of wait loop to wait for VDC status ready
 	
 	; Read value and store at VDC address
 copyloopm2v:							; Start of copy loop
-	lda #$fb							; Store address vector in A
-	ldx _VDC_tmp3						; Store banknumber in X
-	jsr $ff74							; Call INDFET kernal routine to do lda ($fb),y from given bank
+	lda ($fb),y							; Load source data
 	ldx #$1f    						; Load $1f for register 31 (VDC data) in X
 	stx VDC_ADDRESS_REGISTER	        ; Store X in VDC address register
 waitvaluem2v:							; Start of wait loop to wait for VDC status ready
@@ -520,6 +524,10 @@ nextm2v1:								; Next label
 	sta $fb								; Restore value
 	lda ZPtmp2							; Obtain stored value of $fc
 	sta $fc								; Restore value
+
+; Restore memory configuration
+	lda MemConfTmp						; Obtain saved memory config
+	sta $ff00							; Restore memory config
     rts
 
 ; ------------------------------------------------------------------------------------------
@@ -534,6 +542,12 @@ _VDC_CopyVDCToMem_core:
 ;			VDC_tmp3 = memory bank of destination
 ; ------------------------------------------------------------------------------------------
 
+	; Safeguard memory configuration and set memory config to selected MMU config
+	lda	$ff00							; Obtain present memory configuration
+	sta MemConfTmp						; Store in temp location for safeguarding
+	lda _VDC_tmp3						; Obtain selected MMU config
+	sta $ff00							; Store selected MMU config
+		
 	; Store $FA and $FB addresses for safety to be restored at exit
 	lda $fb								; Obtain present value at $fb
 	sta ZPtmp1							; Store to be restored later
@@ -578,8 +592,7 @@ waitvaluev2m:							; Start of wait loop to wait for VDC status ready
 	bit VDC_ADDRESS_REGISTER        	; Check status bit 7 of VDC address register
 	bpl waitvaluev2m		        	; Continue loop if status is not ready
 	lda VDC_DATA_REGISTER	        	; Read VDC data to A
-	ldx _VDC_tmp3						; Store banknumber in X
-	jsr $ff77							; Call INDSTA kernal routine to do sta ($fb),y from given bank
+	sta ($fb),y							; Store in target memory
 
 	; Increase VDC source address and target memory address
 	inc $fb								; Increment low byte of target address
@@ -604,6 +617,10 @@ nextv2m2:								; Next label
 	sta $fb								; Restore value
 	lda ZPtmp2							; Obtain stored value of $fc
 	sta $fc								; Restore value
+	
+; Restore memory configuration
+	lda MemConfTmp						; Obtain saved memory config
+	sta $ff00							; Restore memory config
     rts
 
 ; ------------------------------------------------------------------------------------------
@@ -617,6 +634,12 @@ _VDC_RedefineCharset_core:
 ;			VDC_tmp1 = lengthinchars;				// Obtain number of characters to copy
 ; ------------------------------------------------------------------------------------------
 
+	; Safeguard memory configuration and set memory config to selected MMU config
+	lda	$ff00							; Obtain present memory configuration
+	sta MemConfTmp						; Store in temp location for safeguarding
+	lda _VDC_tmp2						; Obtain selected MMU config
+	sta $ff00							; Store selected MMU config
+	
 	; Store $FA and $FB addresses for safety to be restored at exit
 	lda $fb								; Obtain present value at $fb
 	sta ZPtmp1							; Store to be restored later
@@ -653,9 +676,7 @@ looprc1:								; Start of outer loop
 	
 	; Read value from data register
 looprc2:								; Start of 8 bytes character copy loop
-	lda #$fb							; Store address vector in A
-	ldx _VDC_tmp2						; Store banknumber in X
-	jsr $ff74							; Call INDFET kernal routine to do lda ($fb),y from given bank
+	lda ($fb),y							; Load from source address
 	ldx #$1f    						; Load $1f for register 31 (VDC data) in X
 	stx VDC_ADDRESS_REGISTER	        ; Store X in VDC address register
 waitvalue6:								; Start of wait loop to wait for VDC status ready
@@ -693,9 +714,7 @@ waitvalue7:								; Start of wait loop to wait for VDC status ready
 	; Copy one final char
 	ldy #$00       						; Set Y as counter on 0
 looprc4:								; Start of 8 bytes character copy loop
-	lda #$fb							; Store address vector in A
-	ldx _VDC_tmp2						; Store banknumber in X
-	jsr $ff74							; Call INDFET kernal routine to do lda ($fb),y from given bank
+	lda ($fb),y							; Load from source address
 	ldx #$1f    						; Load $1f for register 31 (VDC data) in X
 	stx VDC_ADDRESS_REGISTER	        ; Store X in VDC address register
 waitvalue8:								; Start of wait loop to wait for VDC status ready
@@ -724,7 +743,11 @@ waitvalue9:								; Start of wait loop to wait for VDC status ready
 	sta $fb								; Restore value
 	lda ZPtmp2							; Obtain stored value of $fc
 	sta $fc								; Restore value
-    rts
+	
+; Restore memory configuration
+	lda MemConfTmp						; Obtain saved memory config
+	sta $ff00							; Restore memory config
+	rts
 
 ; ------------------------------------------------------------------------------------------
 _VDC_FillArea_core:

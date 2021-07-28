@@ -756,8 +756,8 @@ void graphicsinit()
     // Initialize VDC screen and load charsets
     VDC_Init();
     printcentered("Loading...",0,10,80);
-    VDC_LoadCharset("ludo.chr1",0x0400,1,0);
-    VDC_LoadCharset("ludo.chr2",0x0400,1,1);
+    VDC_LoadCharset("ludo.chr1",LOADSAVEBUFFER,1,0);
+    VDC_LoadCharset("ludo.chr2",LOADSAVEBUFFER,1,1);
 }
 
 void loadmainscreen()

@@ -36,8 +36,6 @@
 #include "defines.h"
 #include "vdc_core.h"
 
-char loadbuffer[4096];
-
 unsigned char VDC_ReadRegister(unsigned char registeraddress)
 {
 	// Function to read a VDC register
@@ -148,7 +146,7 @@ void VDC_CopyMemToVDC(unsigned int vdcAddress, unsigned int memAddress, unsigned
 	VDC_destl = vdcAddress & 0xff;			// Obtain low byte of destination address
 	VDC_tmp1 = ((length>>8) & 0xff);		// Obtain number of 256 byte pages to copy
 	VDC_tmp2 = length & 0xff;				// Obtain length in last page to copy
-	VDC_tmp3 = memBank;						// Obtain source bank number
+	VDC_tmp3 = (memBank==0)? 0x3e:0x7e;		// Set proper MMU config based on bank 0 or 1
 
 	VDC_CopyMemToVDC_core();
 }
@@ -166,7 +164,7 @@ void VDC_CopyVDCToMem(unsigned int vdcAddress, unsigned int memAddress, unsigned
 	VDC_destl = memAddress & 0xff;			// Obtain low byte of destination address
 	VDC_tmp1 = ((length>>8) & 0xff);		// Obtain number of 256 byte pages to copy
 	VDC_tmp2 = length & 0xff;				// Obtain length in last page to copy
-	VDC_tmp3 = memBank;						// Obtain source bank number
+	VDC_tmp3 = (memBank==0)? 0x3e:0x7e;		// Set proper MMU config based on bank 0 or 1
 
 	VDC_CopyVDCToMem_core();
 }
@@ -182,7 +180,7 @@ void VDC_RedefineCharset(unsigned int source, unsigned char sourcebank, unsigned
 
 	VDC_addrh = (source>>8) & 0xff;			// Obtain high byte of destination address
 	VDC_addrl = source & 0xff;				// Obtain low byte of destination address
-	VDC_tmp2 = sourcebank;					// Obtain bank number for source
+	VDC_tmp2 = (sourcebank==0)? 0x3e:0x7e;	// Set proper MMU config based on bank 0 or 1
 	VDC_desth = (dest>>8) & 0xff;			// Obtain high byte of destination address
 	VDC_destl = dest & 0xff;				// Obtain low byte of destination address
 	VDC_tmp1 = lengthinchars;				// Obtain number of characters to copy
@@ -210,13 +208,43 @@ void VDC_FillArea(unsigned char row, unsigned char col, unsigned char character,
 
 void VDC_Init(void)
 {
-	set_c128_speed(SPEED_FAST);         // Set 2 MHz mode
+	unsigned int r = 0;
+
+	// Set 8Kb shared memory size
+	printf("Peek 0xD506: %2X", PEEK(0xd506));
+	cgetc();
+	POKE(0xd506,0x06);
+	printf("Peek 0xD506: %2X", PEEK(0xd506));
+	cgetc();
+
+	// Set 2 MHz mode
+	set_c128_speed(SPEED_FAST);
   
     // Init screen
     bordercolor(COLOR_BLACK);
     bgcolor(COLOR_BLACK);
     textcolor(COLOR_YELLOW);
     clrscr();
+
+	// Load $1300 area machine code
+	r = cbm_open(2, getcurrentdevice(), 2, "ludo.maco");
+
+	if(r == 0)
+	{
+		r = cbm_read(2, MACOSTART, MACOSIZE);
+
+		cbm_close(2);
+
+		if(r == 0 )
+		{
+			printf("Machine code file reading error.", r);
+			exit(1);
+		}
+	}
+	else{
+		printf("Machine code file opening error.\n");
+		exit(1);
+	}
 }
 
 void VDC_Exit(void)

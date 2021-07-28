@@ -5,7 +5,7 @@
 
 SOURCESMAIN = src/main.c src/vdc_core.c
 SOURCESLIB = src/vdc_core_assembly.s
-OBJECTS = ludo.chr1.prg ludo.chr2.prg ludo.tscr.prg ludo.mscr.prg
+OBJECTS = ludo.maco.prg ludo.chr1.prg ludo.chr2.prg ludo.tscr.prg ludo.mscr.prg
 
 ZIP = LudoC128-$(shell date "+%Y%m%d-%H%M").zip
 D64 = ludoc128.d64
@@ -19,7 +19,7 @@ MAIN = ludo.prg
 CC65_TARGET = c128
 CC = cl65
 CFLAGS  = -t $(CC65_TARGET) --create-dep $(<:.c=.d) -O -I include
-LDFLAGSMAIN = -t $(CC65_TARGET) -m $(MAIN).map
+LDFLAGSMAIN = -t $(CC65_TARGET) -C ludo-c128.cfg -m $(MAIN).map
 
 ########################################
 
@@ -43,6 +43,7 @@ $(MAIN): $(SOURCESLIB) $(SOURCESMAIN:.c=.o)
 $(D64):	$(MAIN) $(OBJECTS)
 	c1541 -format "ludo c128,id" d64 $(D64)
 	c1541 -attach $(D64) -write ludo.prg ludo
+	c1541 -attach $(D64) -write ludo.maco.prg ludo.maco
 	c1541 -attach $(D64) -write ludo.chr1.prg ludo.chr1
 	c1541 -attach $(D64) -write ludo.chr2.prg ludo.chr2
 	c1541 -attach $(D64) -write ludo.tscr.prg ludo.tscr
@@ -54,4 +55,4 @@ clean:
 # To deploy software to UII+ enter make deploy. Obviously C128 needs to powered on with UII+ and USB drive connected.
 deploy: $(MAIN)
 	wput -u $(MAIN) $(OBJECTS) $(D64) $(ULTHOST)
-	wput -u $(MAIN) $(OBJECTS) $(D64) $(ULTHOST2)
+#	wput -u $(MAIN) $(OBJECTS) $(D64) $(ULTHOST2)

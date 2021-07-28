@@ -1,11 +1,15 @@
 #ifndef __DEFINES_H_
 #define __DEFINES_H_
 
+/* Machine code area addresses mapping */
+#define MACOSTART           0x1300      // Start of machine code area
+#define MACOSIZE            0x0800      // Length of machine code area
+
 /* Bank 1 memory addresses mapping */
-#define SIDBASEADDRESS      0x1000      // 8 Kilobytes for SID data
-#define LOADSAVEBUFFER      0x3000      // 4 Kilobytes load and save buffer
-#define MAINSCREENADDRESS   0x4000      // 4 Kilobytes to store main screen
-#define WINDOWBASEADDRESS   0x5000      // Base address for windows system data
+#define SIDBASEADDRESS      0x2000      // 8 Kilobytes for SID data
+#define LOADSAVEBUFFER      0x4000      // 4 Kilobytes load and save buffer
+#define MAINSCREENADDRESS   0x5000      // 4 Kilobytes to store main screen
+#define WINDOWBASEADDRESS   0x6000      // Base address for windows system data
 
 /* References to redefined chars */
 /* Dice graphics */
