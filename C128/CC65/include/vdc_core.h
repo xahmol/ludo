@@ -39,6 +39,10 @@
 #define VDC_A_REVERSE            64
 #define VDC_A_ALTCHAR           128
 
+// Defines for MMU modes, MMU $FF00 configuration values
+#define MMU_BANK0               0x3e  // Bank 0 with full RAM apart from I/O area
+#define MMU_BANK1               0x7e  // Bank 1 with full RAM apart from I/O area
+
 // Variables in core Functions
 extern unsigned char VDC_regadd;
 extern unsigned char VDC_regval;

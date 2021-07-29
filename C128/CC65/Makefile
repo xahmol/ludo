@@ -24,7 +24,7 @@ LDFLAGSMAIN = -t $(CC65_TARGET) -C ludo-c128.cfg -m $(MAIN).map
 ########################################
 
 .SUFFIXES:
-.PHONY: all clean deploy
+.PHONY: all clean deploy vice
 all: $(MAIN) $(D64)
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -56,3 +56,7 @@ clean:
 deploy: $(MAIN)
 	wput -u $(MAIN) $(OBJECTS) $(D64) $(ULTHOST)
 #	wput -u $(MAIN) $(OBJECTS) $(D64) $(ULTHOST2)
+
+# To run software in VICE
+vice: $(D64)
+	x128 -autostart $(D64)

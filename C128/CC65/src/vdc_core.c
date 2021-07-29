@@ -140,13 +140,13 @@ void VDC_CopyMemToVDC(unsigned int vdcAddress, unsigned int memAddress, unsigned
 
 	length--;
 
-	VDC_addrh = (memAddress>>8) & 0xff;		// Obtain high byte of source address
-	VDC_addrl = memAddress & 0xff;			// Obtain low byte of source address
-	VDC_desth = (vdcAddress>>8) & 0xff;		// Obtain high byte of destination address
-	VDC_destl = vdcAddress & 0xff;			// Obtain low byte of destination address
-	VDC_tmp1 = ((length>>8) & 0xff);		// Obtain number of 256 byte pages to copy
-	VDC_tmp2 = length & 0xff;				// Obtain length in last page to copy
-	VDC_tmp3 = (memBank==0)? 0x3e:0x7e;		// Set proper MMU config based on bank 0 or 1
+	VDC_addrh = (memAddress>>8) & 0xff;					// Obtain high byte of source address
+	VDC_addrl = memAddress & 0xff;						// Obtain low byte of source address
+	VDC_desth = (vdcAddress>>8) & 0xff;					// Obtain high byte of destination address
+	VDC_destl = vdcAddress & 0xff;						// Obtain low byte of destination address
+	VDC_tmp1 = ((length>>8) & 0xff);					// Obtain number of 256 byte pages to copy
+	VDC_tmp2 = length & 0xff;							// Obtain length in last page to copy
+	VDC_tmp3 = (memBank==0)? MMU_BANK0:MMU_BANK1;		// Set proper MMU config based on bank 0 or 1
 
 	VDC_CopyMemToVDC_core();
 }
@@ -158,13 +158,13 @@ void VDC_CopyVDCToMem(unsigned int vdcAddress, unsigned int memAddress, unsigned
 
 	length--;
 
-	VDC_addrh = (vdcAddress>>8) & 0xff;		// Obtain high byte of source VDC address
-	VDC_addrl = vdcAddress & 0xff;			// Obtain low byte of source VDC address
-	VDC_desth = (memAddress>>8) & 0xff;		// Obtain high byte of destination address
-	VDC_destl = memAddress & 0xff;			// Obtain low byte of destination address
-	VDC_tmp1 = ((length>>8) & 0xff);		// Obtain number of 256 byte pages to copy
-	VDC_tmp2 = length & 0xff;				// Obtain length in last page to copy
-	VDC_tmp3 = (memBank==0)? 0x3e:0x7e;		// Set proper MMU config based on bank 0 or 1
+	VDC_addrh = (vdcAddress>>8) & 0xff;					// Obtain high byte of source VDC address
+	VDC_addrl = vdcAddress & 0xff;						// Obtain low byte of source VDC address
+	VDC_desth = (memAddress>>8) & 0xff;					// Obtain high byte of destination address
+	VDC_destl = memAddress & 0xff;						// Obtain low byte of destination address
+	VDC_tmp1 = ((length>>8) & 0xff);					// Obtain number of 256 byte pages to copy
+	VDC_tmp2 = length & 0xff;							// Obtain length in last page to copy
+	VDC_tmp3 = (memBank==0)? MMU_BANK0:MMU_BANK1;		// Set proper MMU config based on bank 0 or 1
 
 	VDC_CopyVDCToMem_core();
 }
@@ -178,12 +178,12 @@ void VDC_RedefineCharset(unsigned int source, unsigned char sourcebank, unsigned
 	// Takes charset definition of 8 bytes per character as input.
 	// Destination address should be the location pointed as chararter definition address
 
-	VDC_addrh = (source>>8) & 0xff;			// Obtain high byte of destination address
-	VDC_addrl = source & 0xff;				// Obtain low byte of destination address
-	VDC_tmp2 = (sourcebank==0)? 0x3e:0x7e;	// Set proper MMU config based on bank 0 or 1
-	VDC_desth = (dest>>8) & 0xff;			// Obtain high byte of destination address
-	VDC_destl = dest & 0xff;				// Obtain low byte of destination address
-	VDC_tmp1 = lengthinchars;				// Obtain number of characters to copy
+	VDC_addrh = (source>>8) & 0xff;						// Obtain high byte of destination address
+	VDC_addrl = source & 0xff;							// Obtain low byte of destination address
+	VDC_tmp2 = (sourcebank==0)? MMU_BANK0:MMU_BANK1;	// Set proper MMU config based on bank 0 or 1
+	VDC_desth = (dest>>8) & 0xff;						// Obtain high byte of destination address
+	VDC_destl = dest & 0xff;							// Obtain low byte of destination address
+	VDC_tmp1 = lengthinchars;							// Obtain number of characters to copy
 
 	VDC_RedefineCharset_core();
 }
@@ -211,16 +211,15 @@ void VDC_Init(void)
 	unsigned int r = 0;
 
 	// Set 8Kb shared memory size
-	printf("Peek 0xD506: %2X", PEEK(0xd506));
-	cgetc();
-	POKE(0xd506,0x06);
-	printf("Peek 0xD506: %2X", PEEK(0xd506));
-	cgetc();
+	POKE(0xd506,0x06);						// Set proper bits in $D506 MMU register for 8Kb shared lower memory
 
 	// Set 2 MHz mode
-	set_c128_speed(SPEED_FAST);
-  
+	POKE(0xd011,PEEK(0xd011)&(~(1<<4)));	// Disable the 5th bit of the SCROLY register to blank VIC screen
+	POKE(0xd011,PEEK(0xd011)&(~(1<<7)));	// Disable the 8th bit of the SCROLY register to avoid accidentily setting raster interrupt to high
+	set_c128_speed(SPEED_FAST);				// Set C128 speed to FAST (2 Mhz)
+	  
     // Init screen
+	videomode(VIDEOMODE_80COL);			// Set 80 column mode
     bordercolor(COLOR_BLACK);
     bgcolor(COLOR_BLACK);
     textcolor(COLOR_YELLOW);
@@ -249,7 +248,10 @@ void VDC_Init(void)
 
 void VDC_Exit(void)
 {
-	set_c128_speed(SPEED_SLOW);         // Switch back to 1Mhz mode for safe exit
+	set_c128_speed(SPEED_SLOW);         	// Switch back to 1Mhz mode for safe exit
+	POKE(0xd011,PEEK(0xd011)|(1<<4));		// Enable the 5th bit of the SCROLY register to blank VIC screen
+	POKE(0xd011,PEEK(0xd011)&(~(1<<7)));	// Disable the 8th bit of the SCROLY register to avoid accidentily setting raster interrupt to high
+	POKE(0xd506,0x04);						// Set proper bits in $D506 MMU register for default shared memory
 	clrscr();
 }
 
