@@ -86,6 +86,7 @@ BUT WITHOUT ANY WARRANTY. USE THEM AT YOUR OWN RISK!
 #include <time.h>
 #include <joystick.h>
 #include "vdc_core.h"
+#include "sidplay.h"
 #include "defines.h"
 
 //Window data
@@ -1066,6 +1067,20 @@ void inputofnames()
     windowrestore();
 }
 
+void musicnext()
+{
+    /* Funtion to load and start next music track */
+
+    char fname[25]="ludo.mus";
+    unsigned char len = strlen(fname);
+
+    StopMusic();
+    if(++musicnumber>3) { musicnumber = 1;}
+    fname[len]=48+musicnumber;
+    fname[len+1]=0;
+    LoadMusic(fname);
+}
+
 void informationcredits()
 {
     /* Print version information and credits */
@@ -1154,25 +1169,24 @@ void turnhuman()
                 break;
 
             case 31:
-                //musicnext();
+                musicnext();
                 break;
 
             case 32:
-                //StopSong();
-                //MUTE_SOUND();
+                StopMusic();
                 musicnumber=0;
                 break;
 
             case 33:
                 if(musicnumber)
                 { 
-                    //StopSong();
+                    StopMusic();
                 }
                 else
                 {
                     musicnumber=1;
                 }
-                //StartSong(musicmem,0);
+                PlayMusic();
                 break;
 
             case 41:
@@ -1533,6 +1547,7 @@ void loadintro()
     }
 
     /* Load and start first music file */
+    LoadMusic("ludo.mus1");
 
     /* Wait for ENTER of FIRE while player can toggle music */ 
     cputsxy(65,20,"M=toggle music.");
@@ -1549,13 +1564,12 @@ void loadintro()
         case 'M':
             if(musicnumber)
             {
-                //StopSong();
-                //MUTE_SOUND();
+                StopMusic();
                 musicnumber = 0;
             }
             else{
                 musicnumber = 1;
-                //StartSong(musicmem,0);
+                PlayMusic();
             }
             break;
         
@@ -1637,7 +1651,9 @@ void main()
                 }
             } while (zv==0 && playerdata[turnofplayernr][1]==0);
         } while (endofgameflag==0);
-    } while (endofgameflag!=1); 
+    } while (endofgameflag!=1);
+
+    if(musicnumber) { StopMusic(); }
 
     VDC_Exit();
     joy_uninstall();

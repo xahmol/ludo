@@ -6,8 +6,8 @@
 #define MACOSIZE            0x0800      // Length of machine code area
 
 /* Bank 1 memory addresses mapping */
-#define SIDBASEADDRESS      0x2000      // 8 Kilobytes for SID data
-#define LOADSAVEBUFFER      0x4000      // 4 Kilobytes load and save buffer
+#define LOADSAVEBUFFER      0x2000      // 4 Kilobytes load and save buffer
+#define SIDBASEADDRESS      0x3000      // 8 Kilobytes for SID data
 #define MAINSCREENADDRESS   0x5000      // 4 Kilobytes to store main screen
 #define WINDOWBASEADDRESS   0x6000      // Base address for windows system data
 
