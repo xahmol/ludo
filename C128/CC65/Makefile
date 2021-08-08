@@ -5,13 +5,13 @@
 
 SOURCESMAIN = src/main.c src/vdc_core.c src/sidplay.c
 SOURCESLIB = src/vdc_core_assembly.s src/sidplay_assembly.s
-OBJECTS = ludo.maco.prg ludo.chr1.prg ludo.chr2.prg ludo.tscr.prg ludo.mscr.prg ludo.mus1.prg ludo.mus2.prg ludo.mus3.prg
+OBJECTS = ludo.maco.prg ludo.chr1.prg ludo.chr2.prg ludo.tscr.prg ludo.mscr.prg ludo.mus1.prg ludo.mus2.prg ludo.mus3.prg ludo.mus4.prg
 
 ZIP = LudoC128-$(shell date "+%Y%m%d-%H%M").zip
 D64 = ludoc128.d64
 
 # Hostname of Ultimate II+ target for deployment. Edit for proper IP and usb number
-ULTHOST = ftp://192.168.1.72/usb1/dev/
+ULTHOST = ftp://192.168.1.19/usb1/dev/
 ULTHOST2 = ftp://192.168.1.31/usb1/dev/
 
 MAIN = ludo.prg
@@ -51,6 +51,7 @@ $(D64):	$(MAIN) $(OBJECTS)
 	c1541 -attach $(D64) -write ludo.mus1.prg ludo.mus1
 	c1541 -attach $(D64) -write ludo.mus2.prg ludo.mus2
 	c1541 -attach $(D64) -write ludo.mus3.prg ludo.mus3
+	c1541 -attach $(D64) -write ludo.mus4.prg ludo.mus4
 
 clean:
 	$(RM) $(SOURCESMAIN:.c=.o) $(SOURCESMAIN:.c=.d) $(MAIN) $(MAIN).map
@@ -58,7 +59,7 @@ clean:
 # To deploy software to UII+ enter make deploy. Obviously C128 needs to powered on with UII+ and USB drive connected.
 deploy: $(MAIN)
 	wput -u $(MAIN) $(OBJECTS) $(D64) $(ULTHOST)
-	wput -u $(MAIN) $(OBJECTS) $(D64) $(ULTHOST2)
+#	wput -u $(MAIN) $(OBJECTS) $(D64) $(ULTHOST2)
 
 # To run software in VICE
 vice: $(D64)

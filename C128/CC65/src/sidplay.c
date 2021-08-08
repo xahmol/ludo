@@ -35,8 +35,8 @@ void LoadMusic(char* filename)
 	// Set bank
 	SetLoadSaveBank(1);
 	
-	// Load from file to memory, use $7e as offset for SID header and load address
-	cbm_k_load(0,SIDBASEADDRESS-0x7c);
+	// Load from file to memory
+	cbm_k_load(0,SIDBASEADDRESS);
 
 	// Restore I/O bank to 0
 	SetLoadSaveBank(0);

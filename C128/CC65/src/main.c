@@ -9,60 +9,54 @@ Originally written in 1992 in Commodore BASIC 7.0 for the Commodore 128
 Rewritten for Oric Atmos in BASIC in 2020
 Rewritten for Oric Atmos in C using CC65 in 2021
 Rewritten for TI-99/4a in C using TMS9900-GCC in 2021
+Rewritten for C128 in C using CC65 in 2021
 
 Code and resources from others used:
 
--   TMS9900 modification of GCC by Insomnia
-    https://atariage.com/forums/topic/164295-gcc-for-the-ti/
+-   CC65 cross compiler:
+    https://cc65.github.io/
 
--   LIBTI99 and LIBTIVGM2 libraries by Tursi aka Mike Brent
+-   C128 Programmers Reference Guide: For the basic VDC register routines and VDC code inspiration
+    http://www.zimmers.net/anonftp/pub/cbm/manuals/c128/C128_Programmers_Reference_Guide.pdf
 
-    LIBTI99: Generic library for conio, sound, file and VDP functions
-    https://github.com/tursilion/libti99
+-   Scott Hutter - VDC Core functions inspiration:
+    https://github.com/Commodore64128/vdc_gui/blob/master/src/vdc_core.c
+    (used as starting point, but channged to inline assembler for core functions, added VDC wait statements and expanded)
 
-    LIBTIVGM2: Library for VGMComp2 music functions
-    https://github.com/tursilion/vgmcomp2/tree/master/Players/libtivgm2
+-   Francesco Sblendorio - Screen Utility: used for inspiration:
+    https://github.com/xlar54/ultimateii-dos-lib/blob/master/src/samples/screen_utility.c
 
--   Jedimatt42 for:
-    - TMS9900-GCC installation script and instructions
-      https://atariage.com/forums/topic/164295-gcc-for-the-ti/page/24/?tab=comments#comment-4776745
-    - Speech library:
-      Source: https://github.com/jedimatt42/fcmd/tree/jm42/say-toy/example/gcc/say
-      See forum thread on AtariAge:
-      https://atariage.com/forums/topic/318907-doing-speech-in-c-using-tms9900-gcc/
-    - TIPI software and code examples
-      https://github.com/jedimatt42/tipi
+-   DevDef: Commodore 128 Assembly - Part 3: The 80-column (8563) chip
+    https://devdef.blogspot.com/2018/03/commodore-128-assembly-part-3-80-column.html
 
--   PeteE on Makefile code to adapt Magellan screens and random() function:
-    https://github.com/peberlein/turmoil
+-   6502.org: Practical Memory Move Routines: Starting point for memory move routines
+    http://6502.org/source/general/memory_move.html
 
--   TheCodex for Magellan tool to create screens
-    https://atariage.com/forums/topic/161356-magellan/
+-   Anthony Beaucamp - 8Bit Unity: Starting point for SID play routines
+    https://github.com/8bit-Dude/8bit-Unity/blob/main/unity/targets/c64/SID.s
 
--   PTWZ for Python Wizard to convert speech to LPC data:
-    https://github.com/ptwz/python_wizard
+-   Bart van Leeuwen: For inspiration and advice while coding.
+    Also for providing the excellent Device Manager ROM to make testing on real hardware very easy
 
 -   Original windowing system code on Commodore 128 by unknown author.
 
 -   Music credits:
-    R-Type: Game Start Music
-    https://www.smspower.org/Music/RType-SMS-PSG
-    Astro Warriot: Galaxy Zone
-    https://www.smspower.org/Music/AstroWarrior-SMS
-    Submarine Attack: Title Screen
-    https://www.smspower.org/Music/SubmarineAttack-SMS
+    John Ames - Smells Like Teen Spirit
+    https://csdb.dk/sid/?id=7763
+
+    John Ames - Castle of Zokor: Step Carefully
+    https://csdb.dk/sid/?id=7736
+
+    John Ames - Final Fantasy IV - Overworld
+    https://csdb.dk/sid/?id=7743
     
--   Documentation used:
-    AtariAge TI-99/4a community
-    https://atariage.com/forums/forum/164-ti-994a-computers/
- 
 -   Tooling to transfer original Commodore software code: "
     VICE by VICE authors
     DirMaster by The Wiz/Elwix
     CharPad Free by Subchrist software
     UltimateII+ cartridge by Gideon Zweijtzer
     
--   Tested using Classic99 emulator and original TI-99/4a with TIPI. 
+-   Tested using real hardware (C128D and C128DCR) plus VICE.
 
 The code can be used freely as long as you retain
 a notice describing original source and author.
@@ -1075,7 +1069,7 @@ void musicnext()
     unsigned char len = strlen(fname);
 
     StopMusic();
-    if(++musicnumber>3) { musicnumber = 1;}
+    if(++musicnumber>4) { musicnumber = 1;}
     fname[len]=48+musicnumber;
     fname[len+1]=0;
     LoadMusic(fname);
@@ -1523,7 +1517,10 @@ void loadintro()
 
     /* Game intro */
 
-    char validkeys[4] = {'m', 'M', C_ENTER, 0 };
+    char buffer[40];
+    char joys[4];
+    char music[4];
+    char validkeys[6] = {'j','J','m', 'M', C_ENTER, 0 };
     unsigned char key;
 
     /* Title screen */
@@ -1550,16 +1547,23 @@ void loadintro()
     LoadMusic("ludo.mus1");
 
     /* Wait for ENTER of FIRE while player can toggle music */ 
-    cputsxy(65,20,"M=toggle music.");
     printcentered("Press ENTER or FIRE to start game.",0,22,80);
+    printcentered("J=toggle joystick, M=toggle music.",0,23,80);
 
     do
     {
-        cputsxy(0,20,"Music: ");
-        if(musicnumber) { cputs("Yes "); } else { cputs("No "); }
+        if(joyinterface) { strcpy(joys,"Yes"); } else { strcpy(joys,"No "); }
+        if(musicnumber) { strcpy(music,"Yes"); } else { strcpy(music,"No "); }
+        sprintf(buffer,"Joystick: %s  Music: %s", joys,music);
+        printcentered(buffer,0,20,80);
         key = getkey(validkeys,1);
         switch (key)
         {
+        case 'j':
+        case 'J':
+            if(error == JOY_ERR_OK) { joyinterface = (joyinterface)? 0 : 1; }
+            break;
+
         case 'm':
         case 'M':
             if(musicnumber)
