@@ -793,10 +793,20 @@ void turngeneric()
                     {
                         for(y=0;y<4;y++)
                         {
-                            if(x!=y && playerpos[turnofplayernr][y][0]==1 && playerpos[turnofplayernr][y][1]<=vn && playerpos[turnofplayernr][y][1]>3)
+                            if(vr==1)
                             {
-                                gv=1;
-                                y=3;
+                                if(x!=y && playerpos[turnofplayernr][y][0]==1 && playerpos[turnofplayernr][y][1]<=vn && playerpos[turnofplayernr][y][1]>3 && playerpos[turnofplayernr][x][1] < playerpos[turnofplayernr][y][1])
+                                {
+                                    gv=1;
+                                    y=3;
+                                }
+                            }
+                            else{
+                                if(x!=y && playerpos[turnofplayernr][y][0]==1 && playerpos[turnofplayernr][y][1]<=vn && playerpos[turnofplayernr][y][1]>3)
+                                {
+                                    gv=1;
+                                    y=3;
+                                }
                             }
                         }
                     }

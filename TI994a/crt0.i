@@ -1,6 +1,6 @@
 # 1 "crt0.c"
-# 1 "<ingebouwd>"
-# 1 "<commandolijn>"
+# 1 "<built-in>"
+# 1 "<command-line>"
 # 1 "crt0.c"
 
 

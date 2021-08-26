@@ -1990,17 +1990,17 @@ getkey
 	mov  r1, @>A(r10)
 	movb r2, @>C(r10)
 L242
-	mov  @seed.1616, r1
+	mov  @seed.1617, r1
 * Begin inline assembler code
 * 255 "main.c" 1
 	srl r1,1  
 	jnc 1f    
-	xor @random_mask.1617,r1 
+	xor @random_mask.1618,r1 
 	1:        
 	
 * 0 "" 2
 * End of inline assembler code
-	mov  r1, @seed.1616
+	mov  r1, @seed.1617
 	jeq  0
 	cb  @musicnumber, @$-1
 	jne  L247
@@ -2359,7 +2359,7 @@ humanchoosepawn
 	mov  r2, r14
 	mov  r10, r1
 	ai   r1, >A
-	li   r2, C.133.2733
+	li   r2, C.133.2734
 	li   r3, >5
 	bl   @memcpy
 	li   r1, >1600
@@ -2571,40 +2571,41 @@ informationcredits
 	clr  r2
 	li   r3, >1E
 	bl   @memset
-	li   r12, >7631
-	movb r12, @>4(r10)
-	swpb r12
-	movb r12, @>5(r10)
+	li   r0, >7631
+	movb r0, @>4(r10)
+	swpb r0
+	movb r0, @>5(r10)
 	li   r1, >3900
 	movb r1, @>6(r10)
 	movb r1, @>7(r10)
 	li   r1, >2000
 	movb r1, @>8(r10)
-	li   r8, >2D20
-	movb r8, @>9(r10)
+	li   r12, >2D20
+	movb r12, @>9(r10)
+	swpb r12
+	movb r12, @>A(r10)
+	li   r8, >3230
+	movb r8, @>B(r10)
 	swpb r8
-	movb r8, @>A(r10)
-	li   r7, >3230
-	movb r7, @>B(r10)
+	movb r8, @>C(r10)
+	li   r7, >3231
+	movb r7, @>D(r10)
 	swpb r7
-	movb r7, @>C(r10)
-	li   r6, >3231
-	movb r6, @>D(r10)
+	movb r7, @>E(r10)
+	li   r6, >3038
+	movb r6, @>F(r10)
 	swpb r6
-	movb r6, @>E(r10)
-	li   r5, >3038
-	movb r5, @>F(r10)
-	swpb r5
-	movb r5, @>10(r10)
+	movb r6, @>10(r10)
 	li   r1, >3200
 	movb r1, @>11(r10)
 	movb r1, @>12(r10)
 	li   r1, >2D00
 	movb r1, @>13(r10)
-	li   r1, >3100
-	movb r1, @>14(r10)
-	movb r1, @>15(r10)
-	li   r4, >3536
+	li   r5, >3136
+	movb r5, @>14(r10)
+	swpb r5
+	movb r5, @>15(r10)
+	li   r4, >3036
 	movb r4, @>16(r10)
 	swpb r4
 	movb r4, @>17(r10)
@@ -2697,17 +2698,17 @@ dicethrow
 	movb r1, @>A(r10)
 	b    @L296
 L295
-	mov  @seed.1616, r1
+	mov  @seed.1617, r1
 * Begin inline assembler code
 * 255 "main.c" 1
 	srl r1,1  
 	jnc 1f    
-	xor @random_mask.1617,r1 
+	xor @random_mask.1618,r1 
 	1:        
 	
 * 0 "" 2
 * End of inline assembler code
-	mov  r1, @seed.1616
+	mov  r1, @seed.1617
 	mov  r1, r2
 	clr  r1
 	li   r3, >6
@@ -3235,14 +3236,14 @@ L338
 	movb r1, @zv
 	jmp  L332
 L337
-	li   r9, >9FBF
+	li   r13, >9FBF
+	movb r13, @>8400
+	swpb r13
+	movb r13, @>8400
+	li   r9, >DFFF
 	movb r9, @>8400
 	swpb r9
 	movb r9, @>8400
-	li   r0, >DFFF
-	movb r0, @>8400
-	swpb r0
-	movb r0, @>8400
 	movb @turnofplayernr, r1
 	srl  r1, 8
 	a    r1, r1
@@ -3300,7 +3301,7 @@ menumain
 	mov  r15, *r0
 	mov  r10, r1
 	ai   r1, >A
-	li   r2, C.59.2117
+	li   r2, C.59.2118
 	li   r3, >4
 	bl   @memcpy
 L360
@@ -5278,7 +5279,7 @@ loadintro
 	li   r13, memcpy
 	mov  r10, r1
 	ai   r1, >A
-	li   r2, C.150.3233
+	li   r2, C.150.3234
 	li   r3, >4
 	bl   *r13
 	li   r2, safe_read
@@ -7991,36 +7992,36 @@ joyinterface
 autosavetoggle
 	byte	1
 	pseg
-	.type	C.150.3233, @object
-	.size	C.150.3233, 4
-C.150.3233
+	.type	C.150.3234, @object
+	.size	C.150.3234, 4
+C.150.3234
 	byte	109
 	byte	77
 	byte	13
 	byte	0
-	.type	C.133.2733, @object
-	.size	C.133.2733, 5
-C.133.2733
+	.type	C.133.2734, @object
+	.size	C.133.2734, 5
+C.133.2734
 	byte	8
 	byte	9
 	byte	11
 	byte	10
 	byte	13
 	even
-	.type	random_mask.1617, @object
-	.size	random_mask.1617, 2
-random_mask.1617
+	.type	random_mask.1618, @object
+	.size	random_mask.1618, 2
+random_mask.1618
 	data	-19456
 	dseg
 	even
-	.type	seed.1616, @object
-	.size	seed.1616, 2
-seed.1616
+	.type	seed.1617, @object
+	.size	seed.1617, 2
+seed.1617
 	data	-21846
 	pseg
-	.type	C.59.2117, @object
-	.size	C.59.2117, 4
-C.59.2117
+	.type	C.59.2118, @object
+	.size	C.59.2118, 4
+C.59.2118
 	byte	8
 	byte	9
 	byte	13

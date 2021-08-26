@@ -57,7 +57,7 @@ $(GRAPHICS): $(SCREENNAME) Makefile
 $(FNAME): $(FNAME).bin
 	$(EA5SPLIT) $(FNAME).bin
 	zip $(ZIP) $(shell echo $(UCFNAME)| rev| cut -c2-| rev)?*
-	cp $(shell echo $(UCFNAME)| rev| cut -c2-| rev)?* $(CLASSIC99_DSK1)
+	#cp $(shell echo $(UCFNAME)| rev| cut -c2-| rev)?* $(CLASSIC99_DSK1)
 	scp $(shell echo $(UCFNAME)| rev| cut -c2-| rev)?* $(TIPI_HOST):/home/tipi/tipi_disk/LUDO/
 
 $(FNAME).bin: $(FNAME).elf
