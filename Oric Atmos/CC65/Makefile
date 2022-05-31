@@ -20,9 +20,9 @@ OSDK := /home/xahmol/OSDK-build/pc/tools/osdk/main/osdk-linux/bin/
 # Path tp HxC Floppy Emulator command line tool: edit for local dir
 # SVN repository: svn checkout https://svn.code.sf.net/p/hxcfloppyemu/code/ hxcfloppyemu-code
 # Build with  HxCFloppyEmulator/build/make 
-HXCFE := /home/xahmol/retro/oric/hxcfloppyemu-code/HxCFloppyEmulator/HxCFloppyEmulator_cmdline/trunk/build/
+HXCFE := /home/xahmol/hxcfloppyemu-cod/HxCFloppyEmulator/HxCFloppyEmulator_cmdline/trunk/build/
 # Emulator path: edit for location of emulator to use
-EMUL_DIR := /home/xahmol/retro/oric/oricutron/
+EMUL_DIR := /home/xahmol/oricutron/
 
 ## Project name
 PROJECT      := LUDO
@@ -68,8 +68,8 @@ TESTOBJECTS = include/libsedoric-ca65.s
 CC65_TARGET = atmos
 CC = cl65
 CFLAGS  = -t $(CC65_TARGET) --create-dep $(<:.c=.d) -Oirs -I include
-LDFLAGS = -t $(CC65_TARGET) -m $(PROJECT).map
-LDFLAGSTEST = -t $(CC65_TARGET) -m $(TESTPROG).map
+LDFLAGS = -t $(CC65_TARGET) -C ludo_oric_cc65_config.cfg -m $(PROJECT).map
+LDFLAGSTEST = -t $(CC65_TARGET) -C ludo_oric_cc65_config.cfg -m $(TESTPROG).map
 
 ########################################
 
@@ -102,7 +102,7 @@ $(DISK_DSK): $(PROGRAM) $(TESTPROG_BIN)
 	$(YM2MYM) "music/Defender of the Crown 1.ym" BUILD/Defender.tap 0x7e00 "$(PROJECT)MUS3"
 	$(OSDK)tap2dsk -iCLS:$(PROJECT)MAIN -c20:3 -n$(PROJECT) BUILD/$(PROJECT)MAIN.tap BUILD/$(TESTPROG).tap screen/$(PROJECT)TITL.tap screen/$(PROJECT)SCRM.tap BUILD/$(PROJECT)DATA.tap BUILD/R-Type.tap BUILD/Defender.tap BUILD/Wizzball.tap $(DISK_DSK)
 	$(OSDK)old2mfm $(DISK_DSK)
-	cd $(HXCFE); hxcfe -finput:"$(WORKDIR)/$(DISK_DSK)" -foutput:"$(WORKDIR)/$(DISK_HFE)" -conv:HXC_HFE
+	cd $(HXCFE); ./hxcfe -finput:"$(WORKDIR)/$(DISK_DSK)" -foutput:"$(WORKDIR)/$(DISK_HFE)" -conv:HXC_HFE
 
 # Clean old builds and objects
 clean:
