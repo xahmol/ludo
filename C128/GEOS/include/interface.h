@@ -42,6 +42,7 @@ extern unsigned char vdcsize;
 extern unsigned char modelines[4];
 extern unsigned char cardheigth[4];
 extern char appname[21];
+extern unsigned char gameflag;
 
 // Window definitions
 extern struct window *winMain;
@@ -70,8 +71,6 @@ extern struct icontab *winOK;
 extern struct icontab noicons;
 extern struct icontab vic_winOK;
 extern struct icontab vdc_winOK;
-extern struct icontab vic_mainicons;
-extern struct icontab vdc_mainicons;
 
 // Import assembly core Functions
 void SetColorModeCore();
@@ -84,24 +83,13 @@ void VDC_WriteRegister_core();
 void VDC_Poke_core();
 void VDC_Peek_core();
 void VDC_DetectVDCMemSize_core();
-void VDC_SetExtendedVDCMemSize();
-void VDC_CopyCharsetsfromROM();
-void VDC_SetCursorMode_core();
-void VDC_MemCopy_core();
 void VDC_HChar_core();
-void VDC_VChar_core();
-void VDC_CopyMemToVDC_core();
-void VDC_CopyVDCToMem_core();
-void VDC_RedefineCharset_core();
 void VDC_FillArea_core();
-void VDC_CopyViewPortToVDC_core();
-void VDC_ScrollCopy_core();
 
-void SetLoadSaveBank_core();
-void POKEB_core();
-void PEEKB_core();
-void BankMemCopy_core();
-void BankMemSet_core();
+void enableIO();
+void restoreIO();
+void primeRnd();
+void sidRndCore();
 
 // Variables in core functions
 extern unsigned char a_tmp;
@@ -139,5 +127,6 @@ void DialogueClearColor();
 void DrawBoard(unsigned char coloronly);
 
 unsigned char VDC_DetectVDCMemSize();
+unsigned int sidRnd(unsigned int limit);
 
 #endif

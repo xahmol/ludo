@@ -1,8 +1,79 @@
-     
+; GeoLudo
+; Ludo game for 8 bit computers, GEOS edition
+; Written in 2023 by Xander Mol
+;
+; Assembly extensions to the CC65 GEOSLib
+; Routines for VDC, color, IO and random numbers
+; 
+; https://github.com/xahmol/ludo
+; 
+; https://www.idreamtin8bits.com/
+; 
+; Code and resources from others used:
+; 
+; -   Scott Hutter - GeoUTerm:
+;     https://github.com/xlar54/ultimateii-dos-lib/
+;     (GeoUTerm as GEOS sample application using this)
+; 
+; -   CC65 cross compiler:
+;     https://cc65.github.io/
+; 
+; -   Daniel England (Daniel England) - GEOSBuild:
+;     https://github.com/M3wP/GEOSBuild
+;     (buildtool for GEOS disks)
+; 
+; -   David Lee - GEOS Image Editor
+;     https://www.facebook.com/groups/704637082964003/permalink/5839146806179646
+;     (editor for GEOS icons)
+; 
+; -   Subchrist Software - SpritePad Pro
+;     https://subchristsoftware.itch.io/spritepad-c64-pro
+;     (editor used for the file icons)
+; 
+; -   Hitchhikers Guide to GEOS v2020
+;     Berkeley Softworks / Paul B Murdaugh
+;     https://github.com/geos64128/HG2G2020
+; 
+; -   Sample sequential application header of GeoProgrammer
+;     Berkeley Softworks
+; 
+; -   Heureks: GEOS64 Programming Examples
+;     https://codeberg.org/heurekus/C64-Geos-Programming
+;     (sample code using C in CC65 for writing applications in GEOS)
+; 
+; -   Lyonlabs / Cenbe GEOS resources page:
+;     https://www.lyonlabs.org/commodore/onrequest/geos/index.html
+;     Including using code from:
+;     https://www.lyonlabs.org/commodore/onrequest/geos/geos-prog-tips.html
+; 
+; -   Bo Zimmerman GEOS resources page:
+;     http://www.zimmers.net/geos/
+; 
+; -   CBM Files GEOS disk images
+;     https://cbmfiles.com/geos/geos-13.php
+; 
+; -   GEOS - Wheels - GeoWorks - MegaPatch - gateWay - BreadBox Facebook Group
+;     https://www.facebook.com/groups/704637082964003/permalink/5839146806179646
+; 
+; -   Bart van Leeuwen for testing and providing the Device Manager ROM and GEOS RAM Boot
+; 
+; -   Gideon Zweijtzer for creating the Ultimate II+ cartridge and the Ultimate64, and the Ultimate Command Interface enabling this software.
+;    
+; -   Tested using real hardware (C128D, C128DCR, Ultimate 64) using GEOS128 2.0, GEOS64 2.0 and Megapatch3 128.
+; 
+; Licensed under the GNU General Public License v3.0
+; 
+; The code can be used freely as long as you retain
+; a notice describing original source and author.
+; 
+; THE PROGRAMS ARE DISTRIBUTED IN THE HOPE THAT THEY WILL BE USEFUL,
+; BUT WITHOUT ANY WARRANTY. USE THEM AT YOUR OWN RISK!
+
 ; Includes
             
     .include "jumptab.inc"              ; GEOS functions jumptable
     .include "geossym.inc"              ; GEOS symbols
+	.include "geosmac.inc"				; GEOS assembly macros
  
  ; VDC Core functions   
     
@@ -11,22 +82,8 @@
 	.export		_VDC_Poke_core
 	.export		_VDC_Peek_core
 	.export		_VDC_DetectVDCMemSize_core
-	;.export		_VDC_SetExtendedVDCMemSize
-	;.export		_VDC_CopyCharsetsfromROM
-	;.export		_VDC_MemCopy_core
 	.export		_VDC_HChar_core
-	;.export		_VDC_VChar_core
-	;.export		_VDC_CopyMemToVDC_core
-	;.export		_VDC_CopyVDCToMem_core
-	;.export		_VDC_RedefineCharset_core
 	.export		_VDC_FillArea_core
-	;.export		_VDC_CopyViewPortToVDC_core
-	;.export		_VDC_ScrollCopy_core
-	;.export		_SetLoadSaveBank_core
-	;.export		_POKEB_core
-	;.export		_PEEKB_core
-	;.export		_BankMemCopy_core
-	;.export		_BankMemSet_core
 
     .export		_VDC_regadd
 	.export		_VDC_regval
@@ -47,6 +104,12 @@
     .export     _ColorCardSetCore
     .export     _ColorCardGetCore
     .export     _ColorRectangleCore
+
+; GEOS function extensions
+	.export 	_enableIO
+    .export 	_restoreIO
+	.export		_primeRnd
+	.export		_sidRndCore
 
     .export     _a_tmp
 
@@ -95,6 +158,8 @@ _a_tmp:
 	.res	1
 scr80polartmp:
     .res    1
+ioSave:
+    .res 1
 
 ; Generic helper routines
 
@@ -367,3 +432,71 @@ _ColorRectangleCore:
     jsr ColorRectangle                  ; Jump to ColorRectangle routine
     rts                                 ; Return
 
+; GEOS extension functions
+; Code by: Cenbe / https://www.lyonlabs.org/commodore/onrequest/geos/geos-prog-tips.html
+
+; ------------------------------------------------------------------------------------------
+_enableIO:
+; Function to enable IO range under GEOS while stoppimh interrupts
+; ------------------------------------------------------------------------------------------
+
+    php
+    sei
+    lda $01
+    sta ioSave  ;save memory configuration
+    and #$f8
+    ora #$05    ;bank in I/O
+    sta $01
+    plp
+    rts
+
+; ------------------------------------------------------------------------------------------
+_restoreIO:
+; Function to restore GEOS to original state after using IO
+; ------------------------------------------------------------------------------------------
+    php
+    sei
+    lda ioSave  ;restore previous configuration
+    sta $01
+    plp
+    rts
+
+;-----------------------------------------------------------
+_primeRnd:
+; Prime SID chip to generate random numbers.
+;-----------------------------------------------------------
+	jsr _enableIO
+    lda #0
+    sta $d40e        ;voice 3 frequency low
+    lda #$80         ;frequency to $8000
+    sta $d40f        ;voice 3 frequency high
+    sta $d412        ;noise waveform, gate off 3
+    jsr _restoreIO
+    rts
+
+;-----------------------------------------------------------
+_sidRndCore:
+; Pseudo-random number generator (uses SID chip).
+; pass:      r2, high limit (1-based)
+; return:    r1, pseudo-random number (0-based)
+; destroyed: .A, .X, .Y, r1, r8, r9
+;-----------------------------------------------------------
+	LoadW r1,65535   ;r2 loaded on entry
+	ldx #r1
+	ldy #r2
+	jsr Ddiv
+	MoveW r1,r2      ;r2 = 65535 / high limit
+	jsr _enableIO
+	lda $d41b
+	sta r1L
+	ldx #7           ;delay at least 32 cycles
+sidrnd1:
+    dex
+    bne sidrnd1
+    lda $d41b
+    sta r1H
+    jsr _restoreIO
+    ldx #r1
+    ldy #r2
+    jsr Ddiv         ;r1 = r1 / r2
+    rts

@@ -44,6 +44,8 @@ Code and resources from others used:
 
 -   Lyonlabs / Cenbe GEOS resources page:
     https://www.lyonlabs.org/commodore/onrequest/geos/index.html
+    Including using code from:
+    https://www.lyonlabs.org/commodore/onrequest/geos/geos-prog-tips.html
 
 -   Bo Zimmerman GEOS resources page:
     http://www.zimmers.net/geos/
@@ -273,7 +275,7 @@ void CloseWindow() {
     DoIcons(icons);
 
     // Recover background
-    if(!monochromeflag) { DrawBoard(1); }
+    if(!monochromeflag & gameflag) { DrawBoard(1); }
     InitDrawWindow (winIntRecover);
     dispBufferOn = ST_WR_FORE + ST_WR_BACK;
     RecoverRectangle();
@@ -295,7 +297,6 @@ void ReinitScreen(char *s) {
 		winMain = &vic_winMain;
 		hdrY = 200;
 		vdc = 0;
-        mainicons = &vic_mainicons;
 	}
 	
 	if ((osType & GEOS128) == GEOS128) // c128
@@ -308,7 +309,6 @@ void ReinitScreen(char *s) {
 			winMain = &vic_winMain;
 			hdrY = 200;
 			vdc = 0;
-            mainicons = &vic_mainicons;
 		}
 		else if((graphMode & 0x80) == 0x80)
 		{
@@ -319,7 +319,6 @@ void ReinitScreen(char *s) {
 			hdrY = 400;
 			vdc = 1;
             if(vdcsize<64) { colormode=VDC_CLR0; monochromeflag=1; }
-            mainicons = &vdc_mainicons;
             color_background = VDC_LGREY;
 		}
 	}
@@ -332,7 +331,8 @@ void ReinitScreen(char *s) {
         FillRam((char*)0x8c00,(color_foreground*16)+color_background,1000);
     }
 
-    // Set icons
+    // Clear icons
+    mainicons = &noicons;
     icons = mainicons;
 	
     // Clear main screen
@@ -476,4 +476,19 @@ void DialogueClearColor() {
         ColorRectangle(color_foreground,color_background,DEF_DB_TOP,DEF_DB_BOT+8,DEF_DB_LEFT,DEF_DB_RIGHT+8);
     }
 
+}
+
+unsigned int sidRnd(unsigned int limit) {
+// Function to generate a random number between 0 and limit-1
+// Generate from SID noise if possible to get more 'random' numbers
+
+    if(osType&GEOS4) {
+        // Plus/4 has no SID, so get number from standard GetRandom
+        return GetRandom()%6;
+    } else {
+        // Get random number generated from SID noise
+        r2  =   limit;
+        sidRndCore();
+        return r1;
+    }
 }

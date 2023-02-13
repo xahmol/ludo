@@ -3,7 +3,7 @@ GeoLudo
 Ludo game for 8 bit computers, GEOS edition
 Written in 2023 by Xander Mol
 
-https://github.com/xahmol/GeoUTools
+https://github.com/xahmol/ludo
 
 https://www.idreamtin8bits.com/
 
@@ -41,6 +41,8 @@ Code and resources from others used:
 
 -   Lyonlabs / Cenbe GEOS resources page:
     https://www.lyonlabs.org/commodore/onrequest/geos/index.html
+    Including using code from:
+    https://www.lyonlabs.org/commodore/onrequest/geos/geos-prog-tips.html
 
 -   Bo Zimmerman GEOS resources page:
     http://www.zimmers.net/geos/
@@ -79,7 +81,7 @@ BUT WITHOUT ANY WARRANTY. USE THEM AT YOUR OWN RISK!
 char buffer[81];
 
 //Game variables
-unsigned char endofgameflag = 0;
+unsigned char gameflag = 0;
 unsigned char turnphase = 0;
 unsigned char turnofplayernr = 0;
 unsigned char zv = 0;
@@ -119,13 +121,13 @@ unsigned char homedestcoords[4][8][2] = {
     [players 0-3]
     [position 0: human = 0 or computer = 1
      position 1: number of pawns not at destination
-     position 2: player color
+     position 2: player pattern if monochrome
      position 3: number of pawns at home              */
 unsigned char playerdata[4][4] = {
     {0,4,1,4},
+    {0,4,10,4},
     {0,4,2,4},
-    {0,4,3,4},
-    {0,4,4,4}
+    {0,4,9,4}
 };
 
 /* Player field positions:
@@ -141,28 +143,34 @@ unsigned char playerpos[4][4][2] = {
 };
 
 /* Player names */
-unsigned char playername[4][9] = { "","","","" };
+char playername[4][9] = { "","","","" };
 
 signed char np[4] = { -1, -1, -1, -1};
 unsigned char dp[4] = { 8, 8, 8, 8 };
 
 // Bitmaos
+
+// Pawn graphics for filled and patterned monochrome
 char pawngraphics[4][] = {
+    // Filled pawn - pattern 1
     "\xA0\x01\xC0\x07\xF0\x0F\xF8\x1F"
     "\xFC\x0F\xF8\x07\xF0\x03\xE0\x07"
     "\xF0\x03\xE0\x07\xF0\x0F\xF8\x0F"
     "\xF8\x1F\xFC\x1F\xFC\x1F\xFC\x00"
     "\x00",
+    // Pattern 10
     "\xA0\x01\xC0\x07\xF0\x0E\xB8\x1A"
     "\xAC\x0E\xB8\x06\xB0\x03\xE0\x06"
     "\xB0\x03\xE0\x06\xB0\x0E\xB8\x0E"
     "\xB8\x1A\xAC\x1A\xAC\x1F\xFC\x00"
     "\x00",
+    // Pattern 2
     "\xA0\x01\xC0\x07\x70\x0D\x58\x1A"
     "\xAC\x0D\x58\x06\xB0\x03\x60\x06"
     "\xB0\x03\x60\x06\xB0\x0D\x58\x0E"
     "\xB8\x1D\x5C\x1A\xAC\x1F\xFC\x00"
     "\x00",
+    // Pattern 9
     "\xA0\x01\xC0\x07\x70\x0F\xF8\x18"
     "\x0C\x0F\xF8\x06\x30\x03\xE0\x06"
     "\x30\x03\xE0\x06\x30\x0F\xF8\x0C"
@@ -170,49 +178,62 @@ char pawngraphics[4][] = {
     "\x00"
 };
 
+// Pawn graphics for clear, filled and patterned monochrome
 char fieldgraphics[5][] = {
+    // Clear - pattern 0
     "\x04\x00\x98\x01\x80\x06\x60\x08"
     "\x10\x10\x08\x10\x08\x20\x04\x20"
     "\x04\x10\x08\x10\x08\x08\x10\x06"
     "\x60\x01\x80\x04\x00",
+    // Filled - pattern 1
     "\x04\x00\x98\x01\x80\x07\xE0\x0F"
     "\xF0\x1F\xF8\x1F\xF8\x3F\xFC\x3F"
     "\xFC\x1F\xF8\x1F\xF8\x0F\xF0\x07"
     "\xE0\x01\x80\x04\x00",
+    // Pattern 10
     "\x04\x00\x98\x01\x80\x06\xE0\x0A"
     "\xB0\x1A\xA8\x1A\xA8\x2A\xAC\x2A"
     "\xAC\x1A\xA8\x1A\xA8\x0A\xB0\x06"
     "\xE0\x01\x80\x04\x00",
+    // Pattern 2
     "\x04\x00\x98\x01\x80\x06\xE0\x0D"
     "\x50\x1A\xA8\x15\x58\x2A\xAC\x35"
     "\x54\x1A\xA8\x15\x58\x0A\xB0\x07"
     "\x60\x01\x80\x04\x00",
+    // Pattern 9
     "\x04\x00\x98\x01\x80\x07\xE0\x08"
     "\x10\x1F\xF8\x10\x08\x3F\xFC\x20"
     "\x04\x1F\xF8\x10\x08\x0F\xF0\x06"
     "\x60\x01\x80\x04\x00"
 };
 
+// Start field graphics
 char startfieldgraphics[4][] = {
+    // Player 1 - Green
     "\x04\x00\x98\x01\x80\x07\xE0\x0F"
     "\xF0\x1F\x78\x1F\x38\x38\x1C\x38"
     "\x1C\x1F\x38\x1F\x78\x0F\xF0\x07"
     "\xE0\x01\x80\x04\x00",
+    // Player 2 - Red
     "\x04\x00\x98\x01\x80\x07\xE0\x0F"
     "\xF0\x1E\x78\x1E\x78\x3E\x7C\x38"
     "\x1C\x1C\x38\x1E\x78\x0F\xF0\x07"
     "\xE0\x01\x80\x04\x00",
+    // Player 3 - Blue
     "\x04\x00\x98\x01\x80\x07\xE0\x0F"
     "\xF0\x1E\xF8\x1C\xF8\x38\x1C\x38"
     "\x1C\x1C\xF8\x1E\xF8\x0F\xF0\x07"
     "\xE0\x01\x80\x04\x00",
+    // Player 4 - Yellow
     "\x04\x00\x98\x01\x80\x07\xE0\x0F"
     "\xF0\x1E\x78\x1C\x38\x38\x1C\x3E"
     "\x7C\x1E\x78\x1E\x78\x0F\xF0\x07"
     "\xE0\x01\x80\x04\x00"
 };
 
+// Dice graphics
 char dicegraphics[6][] = {
+    // One
     "\xBF\x00\x00\x00\x07\xFF\xE0\x08"
     "\x00\x10\x10\x00\x08\x10\x00\x08"
     "\x10\x00\x08\x10\x00\x08\x10\x00"
@@ -221,6 +242,7 @@ char dicegraphics[6][] = {
     "\x10\x00\x08\x10\x00\x08\x10\x00"
     "\x08\x10\x00\x08\x08\x00\x10\x07"
     "\xFF\xE0\x00\x00\x00\x00\x00\x00",
+    // Two
     "\xBF\x00\x00\x00\x07\xFF\xE0\x08"
     "\x00\x10\x10\x00\xC8\x10\x01\xE8"
     "\x10\x01\xE8\x10\x00\xC8\x10\x00"
@@ -229,6 +251,7 @@ char dicegraphics[6][] = {
     "\x13\x00\x08\x17\x80\x08\x17\x80"
     "\x08\x13\x00\x08\x08\x00\x10\x07"
     "\xFF\xE0\x00\x00\x00\x00\x00\x00",
+    // Three
     "\xBF\x00\x00\x00\x07\xFF\xE0\x08"
     "\x00\x10\x10\x00\xC8\x10\x01\xE8"
     "\x10\x01\xE8\x10\x00\xC8\x10\x00"
@@ -237,6 +260,7 @@ char dicegraphics[6][] = {
     "\x13\x00\x08\x17\x80\x08\x17\x80"
     "\x08\x13\x00\x08\x08\x00\x10\x07"
     "\xFF\xE0\x00\x00\x00\x00\x00\x00",
+    // Four
     "\xBF\x00\x00\x00\x07\xFF\xE0\x08"
     "\x00\x10\x13\x00\xC8\x17\x81\xE8"
     "\x17\x81\xE8\x13\x00\xC8\x10\x00"
@@ -245,6 +269,7 @@ char dicegraphics[6][] = {
     "\x13\x00\xC8\x17\x81\xE8\x17\x81"
     "\xE8\x13\x00\xC8\x08\x00\x10\x07"
     "\xFF\xE0\x00\x00\x00\x00\x00\x00",
+    // Five
     "\xBF\x00\x00\x00\x07\xFF\xE0\x08"
     "\x00\x10\x13\x00\xC8\x17\x81\xE8"
     "\x17\x81\xE8\x13\x00\xC8\x10\x00"
@@ -253,6 +278,7 @@ char dicegraphics[6][] = {
     "\x13\x00\xC8\x17\x81\xE8\x17\x81"
     "\xE8\x13\x00\xC8\x08\x00\x10\x07"
     "\xFF\xE0\x00\x00\x00\x00\x00\x00",
+    // Six
     "\xBF\x00\x00\x00\x07\xFF\xE0\x08"
     "\x00\x10\x13\x00\xC8\x17\x81\xE8"
     "\x17\x81\xE8\x13\x00\xC8\x10\x00"
@@ -299,17 +325,25 @@ char fileiconp[] = {
     0x00,0x12,0x09,0x00,0x17,0x1D,0x00,0x12,0x09,0x00,0x08,0x02,0x00,0x07,0xFC,0x00
 };
 
+// Declare function prototypes for icons
+void IconclickThrow();
+void IconclickNext();
+
 // Interface icontab
-struct icontab vic_mainicons = {
+struct icontab throwicon = {
     1,
     { 0,0 },
-    { 0, 0, 0, 1, 1, 0 }
+    {
+        { iconThrow, 25 | DOUBLE_B, 150, 6, 16, (int)IconclickThrow },
+    }
 };
 
-struct icontab vdc_mainicons = {
+struct icontab nexticon = {
     1,
     { 0,0 },
-    { 0, 0, 0, 1, 1, 0 }
+    {
+        { iconNext, 25 | DOUBLE_B, 150, 6, 16, (int)IconclickNext },
+    }
 };
 
 // Declare functions prototypes that are called when menu items are 
@@ -326,48 +360,73 @@ void informationCredits();
 // Menu structures with pointers to the menu handlers above
 static struct menu menuGEOS = {
     // GEOS menu
-        { 11, 23, 0, 160 },
-        2 | HORIZONTAL,
-          {
-            { "Switch 40/80", MENU_ACTION, geosSwitch4080 },
-            { "Exit", MENU_ACTION, geosExit },
-          }
- };
+    { 11, 23, 0, 160 },
+    2 | HORIZONTAL,
+    {
+        { "Switch 40/80", MENU_ACTION, geosSwitch4080 },
+        { "Exit", MENU_ACTION, geosExit },
+    }
+};
 
 static struct menu menuGame = {
     // Game menu
-        { 11, 23, 0, 160 },
-        2 | HORIZONTAL,
-          {
-            { "Restart", MENU_ACTION, gameRestart },
-            { "Color", MENU_ACTION, gameColor },
-          }
- };
+    { 11, 23, 0, 160 },
+    2 | HORIZONTAL,
+    {
+        { "(Re)Start", MENU_ACTION, gameRestart },
+        { "Color", MENU_ACTION, gameColor },
+    }
+};
 
 static struct menu menuFile = {
     // File menu
-        { 11, 23, 0, 160 },
-        3 | HORIZONTAL,
-          {
-            { "Load", MENU_ACTION, fileLoad },
-            { "Save", MENU_ACTION, fileSave },
-            { "Autosave", MENU_ACTION, fileAutosaveToggle }
-          }
- };
+    { 11, 23, 0, 160 },
+    3 | HORIZONTAL,
+    {
+        { "Load", MENU_ACTION, fileLoad },
+        { "Save", MENU_ACTION, fileSave },
+        { "Autosave", MENU_ACTION, fileAutosaveToggle }
+    }
+};
 
 static struct menu menuMain = {
     // Main menu
-        { 0, 12, 0, 160 },
-        4 | HORIZONTAL,
-          {
-            { "GEOS", SUB_MENU, &menuGEOS},
-            { "Game", SUB_MENU, &menuGame},
-            { "File", SUB_MENU, &menuFile},
-            { "Credits", MENU_ACTION, informationCredits }
-          }
- };
+    { 0, 12, 0, 160 },
+    4 | HORIZONTAL,
+    {
+        { "GEOS", SUB_MENU, &menuGEOS},
+        { "Game", SUB_MENU, &menuGame},
+        { "File", SUB_MENU, &menuFile},
+        { "Credits", MENU_ACTION, informationCredits }
+    }
+};
 
 /* Game routines */
+
+unsigned char dicethrow()
+{
+    /* Throw the dice. Returns the dice value */
+
+    unsigned char dicethrow, x;
+    struct iconpic bitmap;
+
+    bitmap.height = 21;
+    bitmap.width = 3 | DOUBLE_B;
+    bitmap.x = 30 | DOUBLE_B;
+    bitmap.y = 100;
+
+    for(x=0;x<25;x++)
+    {
+        // Generate random number 1 to 6 for dice throw
+        dicethrow = sidRnd(6)+1;
+
+        // Draw selected dice number
+        bitmap.pic_ptr = dicegraphics[dicethrow-1];
+        BitmapUp(&bitmap);
+    }
+
+    return dicethrow;
+}
 
 void drawfield(unsigned char track, unsigned char position, unsigned char playernumber, unsigned char coloronly) {
 // Draw board fields
@@ -478,6 +537,48 @@ void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned ch
     ColorRectangle(color,color_background,ypos,ypos+15,xpos,xpos+15+(16*vdc));
 }
 
+void DrawPresentplayerinfo(unsigned char coloronly) {
+// Draw information for the player whos turn it is
+
+    unsigned char color,width;
+    unsigned int xpos;
+
+    if(!coloronly) {
+        // Clear area
+        SetPattern(0);
+        SetRectangleCoords(24,70,200 | DOUBLE_W, screen_pixel_width);
+        Rectangle();
+    
+        // Print player number
+        sprintf(buffer,"Player %d:",turnofplayernr+1);
+        PutString(buffer,29,200 | DOUBLE_W);
+    
+        // Draw pattern for player
+        SetRectangleCoords(24,31, 300 | DOUBLE_W, 315 | DOUBLE_W);
+        if(monochromeflag) {
+            SetPattern(playerdata[turnofplayernr][2]);
+            Rectangle();
+        }
+        FrameRectangle(255);
+
+        // Draw player name
+        PutString(playername[turnofplayernr],39,200 | DOUBLE_W);
+    
+        // Print computer plays if AI
+        if(playerdata[turnofplayernr][0]) {
+            PutString("Computer plays",49,200 | DOUBLE_W);
+        }
+    }
+
+    // Draw color for player
+    if(!monochromeflag) {
+        color = (vdc)?vdc_color[turnofplayernr+1]:vic_color[turnofplayernr+1];
+        xpos = (vdc)?600:300;
+        width = (vdc)?31:15;
+        ColorRectangle(color_foreground,color,24,31,xpos,xpos+width);
+    }
+}
+
 void DrawBoard(unsigned char coloronly) {
 // Draw game board
 
@@ -507,33 +608,133 @@ void DrawBoard(unsigned char coloronly) {
         }
     }
 
-    if(!coloronly)
-    {    
-        sprintf(buffer,"Colormode set: %d",screen_colormode);
-        PutString(buffer,33,200 | DOUBLE_W);
-        sprintf(buffer,"Colormode detect: %d",vdcClrMode);
-        PutString(buffer,43,200 | DOUBLE_W);
-        sprintf(buffer,"VDC: %d",vdc);
-        PutString(buffer,53,200 | DOUBLE_W);
-        sprintf(buffer,"VDC Size: %d",vdcsize);
-        PutString(buffer,63,200 | DOUBLE_W);
-        sprintf(buffer,"Monochrome: %d",monochromeflag);
-        PutString(buffer,73,200 | DOUBLE_W);
+    // Player info
+    DrawPresentplayerinfo(coloronly);
+}
+
+void ClearBoard() {
+// Clear game board area
+
+    if(!monochromeflag) {
+        ColorRectangle(color_foreground,color_background,24,screen_pixel_height-1,0,screen_pixel_width-1);
+    }
+
+    SetPattern(0);
+	SetRectangleCoords(24,screen_pixel_height-1,0,screen_pixel_height-1);
+	Rectangle();
+}
+
+unsigned char inputofnames()
+{
+    /* Enter player nanes */
+    unsigned char x,ai;
+    char numberai[2] = "0";
+    unsigned int result;
+
+    if(DlgBoxGetString(numberai,1,"Enter number of AI players (0-4)","(RETURN for 0, Camcel to abort}") != CANCEL) {
+        ai = numberai[0]-48;
+    } else { return 0; }
+
+    for(x=0;x<4;x++)
+    {
+        sprintf(buffer,"Input name for player %d (%s)",x+1,(x<4-ai)?"Human":"AI");
+        result = DlgBoxGetString(playername[x],8,buffer,"(Leave empty for default name)");
+        if(result == CANCEL || !playername[x][0])
+        {
+            sprintf(playername[x],"Player %d",x+1);
+        }
+    }
+
+    return 1;
+}
+
+void gamereset()
+{
+    /* Reset all player data */
+
+    unsigned char n;
+
+    DrawBoard(0);
+
+    gameflag = 1;
+    turnphase = 0;
+    turnofplayernr=0;
+    for(n=0;n<4;n++)
+    {
+        playerdata[n][1]=4;
+        playerdata[n][3]=4;
+        np[n]=-1;
+        dp[n]=8;
+    }
+}
+
+void startturn() {
+// Start a turn
+
+    // Human player
+    if(!playerdata[turnofplayernr][0]) 
+    {
+        mainicons = &throwicon;
+        icons = mainicons;
+        DoIcons(icons);
     }
 }
 
 // Icon handlers
+void IconclickThrow() {
+// Player clicked throw icon
+
+    // Disable throw icon
+    mainicons = &noicons;
+    icons = mainicons;
+    DoIcons(icons);
+    SetRectangleCoords(150,165,200 | DOUBLE_W, 247 | DOUBLE_W);
+    SetPattern(0);
+    Rectangle();
+
+    // Throw dice
+    dicethrow();
+
+    // Show next icon
+    mainicons = &nexticon;
+    icons = mainicons;
+    DoIcons(icons);
+}
+
+void IconclickNext() {
+// Next icon clicked
+
+    // Diaable next icon
+    mainicons = &noicons;
+    icons = mainicons;
+    DoIcons(icons);
+    SetRectangleCoords(150,165,200 | DOUBLE_W, 247 | DOUBLE_W);
+    SetPattern(0);
+    Rectangle();
+}
 
 // Mouse handler functions
 
 // Menu functions
+void appExit() {
+// Clean up video mode on exit
+
+    if(!monochromeflag) {
+        if(vdc) { SetColorMode(VDC_CLR0); }
+        else {
+            ColorRectangle(color_foreground,color_background,24,screen_pixel_height-1,0,screen_pixel_width-1);
+        }
+    }
+
+    EnterDeskTop();    
+}
 
 void geosSwitch4080() {
 // Switch between 40 and 80 column mode
 
     SetNewMode();
     ReinitScreen(appname);
-    DrawBoard(0);
+    if(gameflag) { DrawBoard(0); }
     GotoFirstMenu();
     DoMenu(&menuMain);
     DoIcons(icons);
@@ -545,21 +746,45 @@ void geosExit() {
 
     ReDoMenu();
     // Ask confirnation
-    if(!monochromeflag) { DialogueClearColor(); }
+    if(!monochromeflag & gameflag) { DialogueClearColor(); }
     if (DlgBoxOkCancel("Exit to desktop", "Are you sure?") == OK)
     {
-        EnterDeskTop();
+        appExit();
     }
     else
     {
-        if(!monochromeflag) { DrawBoard(1); }
+        if(!monochromeflag & gameflag) { DrawBoard(1); }
         return;
     }  
 }
 
 void gameRestart() {
-    ReDoMenu();
+// Start or restart game
 
+    if(gameflag) {
+        // Restart instead of initial start
+        
+        ReDoMenu();
+
+        if(!monochromeflag) { DialogueClearColor(); }
+        if (DlgBoxOkCancel("Restart game", "Are you sure?") != OK)
+        {
+            if(!monochromeflag) { DrawBoard(1); }
+            return;
+        }  
+    }
+
+    if(inputofnames()) {
+        ClearBoard();
+        gamereset();
+    } else {
+        if(gameflag) {
+            if(!monochromeflag) { DrawBoard(1); }
+        } else {
+            appExit();
+        }
+    }
+    return;
 }
 
 void gameColor() {
@@ -569,11 +794,11 @@ void gameColor() {
 
     ReDoMenu();
 
-    if(!monochromeflag) { DialogueClearColor(); }
+    if(!monochromeflag&gameflag) { DialogueClearColor(); }
     sprintf(buffer,"Present value: %s",(monochromeflag)?"Yes":"No");
     monochromeflag = (DlgBoxYesNo("Enable monochrome mode?",buffer) == YES)?1:0;
 
-    if(oldflag != monochromeflag) { 
+    if(oldflag != monochromeflag & gameflag) { 
         ReinitScreen(appname);
         DrawBoard(0);
     }
@@ -638,11 +863,18 @@ void main (void)
     // Setup video mode
     InitVideomode();
 
+    // Setup random generator and game phase flag
+    primeRnd();
+    gameflag = 0;
+
     ReinitScreen(appname);
-    DrawBoard(0);
 
     DoMenu(&menuMain);
     DoIcons(icons);
+
+    gameRestart();
+
+    startturn();
 
     // Never returns    
     MainLoop();
