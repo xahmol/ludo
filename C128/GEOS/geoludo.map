@@ -1,0 +1,948 @@
+Modules list:
+-------------
+geoludo.o:
+    DIRENTRY          Offs=000000  Size=00003A  Align=00001  Fill=0000
+    FILEINFO          Offs=000000  Size=0000CB  Align=00001  Fill=0000
+main.o:
+    CODE              Offs=000000  Size=000933  Align=00001  Fill=0000
+    RODATA            Offs=000000  Size=000202  Align=00001  Fill=0000
+    BSS               Offs=000000  Size=00012F  Align=00001  Fill=0000
+    DATA              Offs=000000  Size=00056E  Align=00001  Fill=0000
+geoscore.o:
+    CODE              Offs=000933  Size=00013F  Align=00001  Fill=0000
+interface.o:
+    CODE              Offs=000A72  Size=000702  Align=00001  Fill=0000
+    BSS               Offs=00012F  Size=000043  Align=00001  Fill=0000
+    DATA              Offs=00056E  Size=0000C3  Align=00001  Fill=0000
+geoludoHdr.o:
+    FILEHEADER        Offs=000000  Size=000100  Align=00100  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(_directerrno.o):
+    CODE              Offs=001174  Size=00000A  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(_hextab.o):
+    RODATA            Offs=000202  Size=000010  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(_longminstr.o):
+    RODATA            Offs=000212  Size=00000C  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(_oserror.o):
+    BSS               Offs=000172  Size=000001  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(_printf.o):
+    CODE              Offs=00117E  Size=0003A5  Align=00001  Fill=0000
+    BSS               Offs=000173  Size=00002B  Align=00001  Fill=0000
+    DATA              Offs=000631  Size=000003  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(_seterrno.o):
+    CODE              Offs=001523  Size=000009  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(addeqsp.o):
+    CODE              Offs=00152C  Size=000011  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(addysp.o):
+    CODE              Offs=00153D  Size=00000E  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(aslax3.o):
+    CODE              Offs=00154B  Size=00000E  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(aslax4.o):
+    CODE              Offs=001559  Size=000011  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(axlong.o):
+    CODE              Offs=00156A  Size=00000D  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(bitmapregs.o):
+    CODE              Offs=001577  Size=000011  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(bitmapup.o):
+    CODE              Offs=001588  Size=000006  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(callmain.o):
+    CODE              Offs=00158E  Size=000017  Align=00001  Fill=0000
+    DATA              Offs=000634  Size=000004  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(condes.o):
+    CODE              Offs=0015A5  Size=00000C  Align=00001  Fill=0000
+    DATA              Offs=000638  Size=000025  Align=00001  Fill=0000
+    ONCE              Offs=000000  Size=00000C  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(copystring.o):
+    CODE              Offs=0015B1  Size=000006  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(crt0.o):
+    STARTUP           Offs=000000  Size=000021  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(ctype.o):
+    RODATA            Offs=00021E  Size=00008B  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(ctypemask.o):
+    CODE              Offs=0015B7  Size=00001E  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(dbget2lines.o):
+    CODE              Offs=0015D5  Size=000024  Align=00001  Fill=0000
+    RODATA            Offs=0002A9  Size=000001  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(decax1.o):
+    CODE              Offs=0015F9  Size=000007  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(decsp1.o):
+    CODE              Offs=001600  Size=000009  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(decsp2.o):
+    CODE              Offs=001609  Size=00000D  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(decsp3.o):
+    CODE              Offs=001616  Size=00000D  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(decsp4.o):
+    CODE              Offs=001623  Size=00000D  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(decsp5.o):
+    CODE              Offs=001630  Size=00000D  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(decsp6.o):
+    CODE              Offs=00163D  Size=00000D  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(div.o):
+    CODE              Offs=00164A  Size=000015  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(dlgboxokcancel.o):
+    CODE              Offs=00165F  Size=00000A  Align=00001  Fill=0000
+    RODATA            Offs=0002AA  Size=000010  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(dlgboxyesno.o):
+    CODE              Offs=001669  Size=00000A  Align=00001  Fill=0000
+    RODATA            Offs=0002BA  Size=000010  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(dodlgbox.o):
+    CODE              Offs=001673  Size=00000C  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(doicons.o):
+    CODE              Offs=00167F  Size=000007  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(domenu.o):
+    CODE              Offs=001686  Size=000009  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(doublespop.o):
+    CODE              Offs=00168F  Size=000010  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(enterdesktop.o):
+    CODE              Offs=00169F  Size=000006  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(errno.o):
+    BSS               Offs=00019E  Size=000002  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(fillram.o):
+    CODE              Offs=0016A5  Size=00001A  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(framerectangle.o):
+/mnt/d/retro/cc65/lib/geos-cbm.lib(get_ostype.o):
+    CODE              Offs=0016BF  Size=00009A  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(getcharwidth.o):
+    CODE              Offs=001759  Size=000006  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(getintcharint.o):
+    CODE              Offs=00175F  Size=000011  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(gotofirstmenu.o):
+/mnt/d/retro/cc65/lib/geos-cbm.lib(hlineregs.o):
+    CODE              Offs=001770  Size=000011  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(horizontalline.o):
+    CODE              Offs=001781  Size=000009  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(incax1.o):
+    CODE              Offs=00178A  Size=000007  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(incaxy.o):
+    CODE              Offs=001791  Size=00000B  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(incsp1.o):
+    CODE              Offs=00179C  Size=000007  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(incsp2.o):
+    CODE              Offs=0017A3  Size=000016  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(incsp3.o):
+    CODE              Offs=0017B9  Size=000005  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(incsp5.o):
+    CODE              Offs=0017BE  Size=000005  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(incsp6.o):
+    CODE              Offs=0017C3  Size=000005  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(initdrawwindow.o):
+    CODE              Offs=0017C8  Size=000011  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(ldaxi.o):
+    CODE              Offs=0017D9  Size=00000D  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(ldaxsp.o):
+    CODE              Offs=0017E6  Size=000009  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(leaaxsp.o):
+    CODE              Offs=0017EF  Size=00000C  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(lneg.o):
+    CODE              Offs=0017FB  Size=00001E  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(lpush.o):
+    CODE              Offs=001819  Size=000021  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(ltoa.o):
+    CODE              Offs=00183A  Size=000095  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(mainloop.o):
+/mnt/d/retro/cc65/lib/geos-cbm.lib(memcpy.o):
+/mnt/d/retro/cc65/lib/geos-cbm.lib(movedata.o):
+    CODE              Offs=0018CF  Size=00001A  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(mul8.o):
+    CODE              Offs=0018E9  Size=00003A  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(negabs.o):
+    CODE              Offs=001923  Size=000012  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(popa.o):
+    CODE              Offs=001935  Size=00000C  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(popptr1.o):
+    CODE              Offs=001941  Size=00000E  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(push1.o):
+    CODE              Offs=00194F  Size=000005  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(pusha.o):
+    CODE              Offs=001954  Size=000016  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(pushax.o):
+    CODE              Offs=00196A  Size=00001A  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(pushw.o):
+    CODE              Offs=001984  Size=00000F  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(pushwsp.o):
+    CODE              Offs=001993  Size=00001C  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(putstring.o):
+    CODE              Offs=0019AF  Size=000006  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(recoverrectangle.o):
+/mnt/d/retro/cc65/lib/geos-cbm.lib(rectangle.o):
+/mnt/d/retro/cc65/lib/geos-cbm.lib(redomenu.o):
+/mnt/d/retro/cc65/lib/geos-cbm.lib(setnewmode.o):
+    CODE              Offs=0019B5  Size=000009  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(setpattern.o):
+/mnt/d/retro/cc65/lib/geos-cbm.lib(shelp.o):
+    CODE              Offs=0019BE  Size=000020  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(shrax1.o):
+    CODE              Offs=0019DE  Size=000008  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(shrax3.o):
+    CODE              Offs=0019E6  Size=00000E  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(sprintf.o):
+    CODE              Offs=0019F4  Size=00002B  Align=00001  Fill=0000
+    BSS               Offs=0001A0  Size=000001  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(staxsp.o):
+    CODE              Offs=001A1F  Size=00000B  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(strlen.o):
+    CODE              Offs=001A2A  Size=000016  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(strlower.o):
+    CODE              Offs=001A40  Size=000027  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(sub.o):
+    CODE              Offs=001A67  Size=000015  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(udiv.o):
+    CODE              Offs=001A7C  Size=00004F  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(usesystemfont.o):
+/mnt/d/retro/cc65/lib/geos-cbm.lib(vsnprintf.o):
+    CODE              Offs=001ACB  Size=0000DA  Align=00001  Fill=0000
+    DATA              Offs=00065D  Size=000008  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(vsprintf.o):
+    CODE              Offs=001BA5  Size=000012  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(zerobss.o):
+    CODE              Offs=001BB7  Size=000013  Align=00001  Fill=0000
+/mnt/d/retro/cc65/lib/geos-cbm.lib(zeropage.o):
+    ZEROPAGE          Offs=000000  Size=00001A  Align=00001  Fill=0000
+
+
+Segment list:
+-------------
+Name                   Start     End    Size  Align
+----------------------------------------------------
+DIRENTRY              000000  000039  00003A  00001
+FILEHEADER            000000  0000FF  000100  00100
+ZEROPAGE              000058  000071  00001A  00001
+FILEINFO              0000FE  0001C8  0000CB  00001
+STARTUP               000400  000420  000021  00001
+ONCE                  000421  00042C  00000C  00001
+CODE                  00042D  001FF6  001BCA  00001
+RODATA                001FF7  0022C0  0002CA  00001
+DATA                  0022C1  002925  000665  00001
+BSS                   002926  002AC6  0001A1  00001
+
+
+Exports list by name:
+---------------------
+BitmapRegs                0019A4 RLA    DB_get2lines              001A02 RLA    
+DoubleSPop                001ABC RLA    HLineRegs                 001B9D RLA    
+_BitmapUp                 0019B5 RLA    _ColorCardGetCore         000E90 RLA    
+_ColorCardSetCore         000E88 RLA    _ColorRectangle           0013BF RLA    
+_ColorRectangleCore       000E98 RLA    _CopyString               0019DE RLA    
+_CreateWindow             001067 RLA    _DialogueClearColor       001523 RLA    
+_DlgBoxOkCancel           001A8C RLA    _DlgBoxYesNo              001A96 RLA    
+_DoDlgBox                 001AA0 RLA    _DoIcons                  001AAC RLA    
+_DoMenu                   001AB3 RLA    _DrawBoard                00042D RLA    
+_EnterDeskTop             001ACC RLA    _FillRam                  001AD2 RLA    
+_FrameRectangle           00C127 REA    _GetCharWidth             001B86 RLA    
+_GotoFirstMenu            00C1BD REA    _HorizontalLine           001BAE RLA    
+_InitDrawWindow           001BF5 RLA    _InitVideomode            000E9F RLA    
+_MainLoop                 00C1C3 REA    _MoveData                 001CFC RLA    
+_PutString                001DDC RLA    _ReDoMenu                 00C193 REA    
+_RecoverRectangle         00C12D REA    _Rectangle                00C124 REA    
+_ReinitScreen             001184 RLA    _SetColorModeCore         000E81 RLA    
+_SetNewMode               001DE2 RLA    _SetPattern               00C139 REA    
+_UseSystemFont            00C14B REA    _VDC_DetectVDCMemSize_core 000DE0 RLA    
+_VDC_FillArea_core        000E67 RLA    _VDC_addrh                000D62 RLA    
+_VDC_addrl                000D63 RLA    _VDC_tmp1                 000D69 RLA    
+_VDC_tmp2                 000D6A RLA    _VDC_tmp4                 000D6C RLA    
+_VDC_value                000D68 RLA    _WinOKButton              001148 RLA    
+__BACKBUFSIZE__           002000 REA    __BSS_RUN__               002926 RLA    
+__BSS_SIZE__              0001A1 REA    __CONSTRUCTOR_COUNT__     000000 REA    
+__CONSTRUCTOR_TABLE__     00042D RLA    __DESTRUCTOR_COUNT__      000000 REA    
+__DESTRUCTOR_TABLE__      0022C1 RLA    __HIMEM__                 006000 REA    
+__OVERLAYADDR__           006000 REA    __OVERLAYSIZE__           000000 REA    
+__STACKADDR__             005C00 REA    __STACKSIZE__             000400 REA    
+__STARTUP_RUN__           000400 RLA    __STARTUP__               000001 REA    
+__VLIR0_START__           000400 RLA    __ctype                   002215 RLA    
+__ctypeidx                002220 RLA    __directerrno             0015A1 RLA    
+__errno                   002AC4 RLA    __hextab                  0021F9 RLA    
+__longminstr              002209 RLA    __oserror                 002A98 RLA    
+__printf                  00169E RLA    __seterrno                001950 RLA    
+_a_tmp                    000D72 RLA    _appname                  002A73 RLA    
+_color_background         002A72 RLA    _exit                     00041B RLA    
+_get_ostype               001AEC RLA    _icons                    002A92 RLA    
+_ltoa                     001C7F RLA    _main                     000BC5 RLA    
+_memcpy                   001CFC REA    _monochromeflag           00282F RLA    
+_screen_colormode         002830 RLA    _sprintf                  001E21 RLA    
+_strlen                   001E57 RLA    _strlower                 001E6D RLA    
+_ultoa                    001CC0 RLA    _vdc                      002834 RLA    
+_vdc_mainicons            0027D0 RLA    _vdcsize                  002835 RLA    
+_version                  002A55 RLA    _vic_mainicons            0027C4 RLA    
+_vsprintf                 001FD2 RLA    addeq0sp                  001959 RLA    
+addysp                    00196B RLA    addysp1                   00196A RLA    
+aslax3                    001978 RLA    aslax4                    001986 RLA    
+axlong                    001997 RLA    axulong                   00199D RLA    
+callmain                  0019BB RLA    ctypemaskdirect           0019E8 RLA    
+decax1                    001A26 RLA    decsp1                    001A2D RLA    
+decsp2                    001A36 RLA    decsp3                    001A43 RLA    
+decsp4                    001A50 RLA    decsp5                    001A5D RLA    
+decsp6                    001A6A RLA    donelib                   0019D2 RLA    
+getintcharint             001B8C RLA    incax1                    001BB7 RLA    
+incaxy                    001BC0 RLA    incsp1                    001BC9 RLA    
+incsp2                    001BD8 RLA    incsp3                    001BE6 RLA    
+incsp5                    001BEB RLA    incsp6                    001BF0 RLA    
+initlib                   000421 RLA    ldax0sp                   001C13 RLA    
+ldaxidx                   001C08 RLA    ldaxysp                   001C15 RLA    
+leaa0sp                   001C1C RLA    negax                     001D54 RLA    
+negeax                    001C28 RLA    popa                      001D62 RLA    
+popax                     001BD0 RLA    popptr1                   001D6E RLA    
+popsargsudiv16            001DEB RLA    ptr1                      000060 RLZ    
+ptr2                      000062 RLZ    ptr3                      000064 RLZ    
+ptr4                      000066 RLZ    push0                     001D97 RLA    
+push1                     001D7C RLA    pusha                     001D85 RLA    
+pusha0                    001D99 RLA    pushax                    001D9B RLA    
+pusheax                   001C4F RLA    pushw0sp                  001DC0 RLA    
+pushwidx                  001DB3 RLA    pushwysp                  001DC2 RLA    
+regbank                   00006C RLZ    shlax3                    001978 RLA    
+shlax4                    001986 RLA    shrax1                    001E0B RLA    
+shrax3                    001E13 RLA    sp                        000058 RLZ    
+sreg                      00005A RLZ    stax0sp                   001E4C RLA    
+staxysp                   001E4E RLA    tmp1                      000068 RLZ    
+tmp2                      000069 RLZ    tosdiva0                  001A77 RLA    
+tosmula0                  001D16 RLA    tossubax                  001E96 RLA    
+tosudiva0                 001EA9 RLA    udiv16                    001EBA RLA    
+vsnprintf                 001EFB RLA    zerobss                   001FE4 RLA    
+
+
+
+Exports list by value:
+----------------------
+__CONSTRUCTOR_COUNT__     000000 REA    __DESTRUCTOR_COUNT__      000000 REA    
+__OVERLAYSIZE__           000000 REA    __STARTUP__               000001 REA    
+sp                        000058 RLZ    sreg                      00005A RLZ    
+ptr1                      000060 RLZ    ptr2                      000062 RLZ    
+ptr3                      000064 RLZ    ptr4                      000066 RLZ    
+tmp1                      000068 RLZ    tmp2                      000069 RLZ    
+regbank                   00006C RLZ    __BSS_SIZE__              0001A1 REA    
+__STACKSIZE__             000400 REA    __STARTUP_RUN__           000400 RLA    
+__VLIR0_START__           000400 RLA    _exit                     00041B RLA    
+initlib                   000421 RLA    _DrawBoard                00042D RLA    
+__CONSTRUCTOR_TABLE__     00042D RLA    _main                     000BC5 RLA    
+_VDC_addrh                000D62 RLA    _VDC_addrl                000D63 RLA    
+_VDC_value                000D68 RLA    _VDC_tmp1                 000D69 RLA    
+_VDC_tmp2                 000D6A RLA    _VDC_tmp4                 000D6C RLA    
+_a_tmp                    000D72 RLA    _VDC_DetectVDCMemSize_core 000DE0 RLA    
+_VDC_FillArea_core        000E67 RLA    _SetColorModeCore         000E81 RLA    
+_ColorCardSetCore         000E88 RLA    _ColorCardGetCore         000E90 RLA    
+_ColorRectangleCore       000E98 RLA    _InitVideomode            000E9F RLA    
+_CreateWindow             001067 RLA    _WinOKButton              001148 RLA    
+_ReinitScreen             001184 RLA    _ColorRectangle           0013BF RLA    
+_DialogueClearColor       001523 RLA    __directerrno             0015A1 RLA    
+__printf                  00169E RLA    __seterrno                001950 RLA    
+addeq0sp                  001959 RLA    addysp1                   00196A RLA    
+addysp                    00196B RLA    aslax3                    001978 RLA    
+shlax3                    001978 RLA    aslax4                    001986 RLA    
+shlax4                    001986 RLA    axlong                    001997 RLA    
+axulong                   00199D RLA    BitmapRegs                0019A4 RLA    
+_BitmapUp                 0019B5 RLA    callmain                  0019BB RLA    
+donelib                   0019D2 RLA    _CopyString               0019DE RLA    
+ctypemaskdirect           0019E8 RLA    DB_get2lines              001A02 RLA    
+decax1                    001A26 RLA    decsp1                    001A2D RLA    
+decsp2                    001A36 RLA    decsp3                    001A43 RLA    
+decsp4                    001A50 RLA    decsp5                    001A5D RLA    
+decsp6                    001A6A RLA    tosdiva0                  001A77 RLA    
+_DlgBoxOkCancel           001A8C RLA    _DlgBoxYesNo              001A96 RLA    
+_DoDlgBox                 001AA0 RLA    _DoIcons                  001AAC RLA    
+_DoMenu                   001AB3 RLA    DoubleSPop                001ABC RLA    
+_EnterDeskTop             001ACC RLA    _FillRam                  001AD2 RLA    
+_get_ostype               001AEC RLA    _GetCharWidth             001B86 RLA    
+getintcharint             001B8C RLA    HLineRegs                 001B9D RLA    
+_HorizontalLine           001BAE RLA    incax1                    001BB7 RLA    
+incaxy                    001BC0 RLA    incsp1                    001BC9 RLA    
+popax                     001BD0 RLA    incsp2                    001BD8 RLA    
+incsp3                    001BE6 RLA    incsp5                    001BEB RLA    
+incsp6                    001BF0 RLA    _InitDrawWindow           001BF5 RLA    
+ldaxidx                   001C08 RLA    ldax0sp                   001C13 RLA    
+ldaxysp                   001C15 RLA    leaa0sp                   001C1C RLA    
+negeax                    001C28 RLA    pusheax                   001C4F RLA    
+_ltoa                     001C7F RLA    _ultoa                    001CC0 RLA    
+_MoveData                 001CFC RLA    _memcpy                   001CFC REA    
+tosmula0                  001D16 RLA    negax                     001D54 RLA    
+popa                      001D62 RLA    popptr1                   001D6E RLA    
+push1                     001D7C RLA    pusha                     001D85 RLA    
+push0                     001D97 RLA    pusha0                    001D99 RLA    
+pushax                    001D9B RLA    pushwidx                  001DB3 RLA    
+pushw0sp                  001DC0 RLA    pushwysp                  001DC2 RLA    
+_PutString                001DDC RLA    _SetNewMode               001DE2 RLA    
+popsargsudiv16            001DEB RLA    shrax1                    001E0B RLA    
+shrax3                    001E13 RLA    _sprintf                  001E21 RLA    
+stax0sp                   001E4C RLA    staxysp                   001E4E RLA    
+_strlen                   001E57 RLA    _strlower                 001E6D RLA    
+tossubax                  001E96 RLA    tosudiva0                 001EA9 RLA    
+udiv16                    001EBA RLA    vsnprintf                 001EFB RLA    
+_vsprintf                 001FD2 RLA    zerobss                   001FE4 RLA    
+__BACKBUFSIZE__           002000 REA    __hextab                  0021F9 RLA    
+__longminstr              002209 RLA    __ctype                   002215 RLA    
+__ctypeidx                002220 RLA    __DESTRUCTOR_TABLE__      0022C1 RLA    
+_vic_mainicons            0027C4 RLA    _vdc_mainicons            0027D0 RLA    
+_monochromeflag           00282F RLA    _screen_colormode         002830 RLA    
+_vdc                      002834 RLA    _vdcsize                  002835 RLA    
+__BSS_RUN__               002926 RLA    _version                  002A55 RLA    
+_color_background         002A72 RLA    _appname                  002A73 RLA    
+_icons                    002A92 RLA    __oserror                 002A98 RLA    
+__errno                   002AC4 RLA    __STACKADDR__             005C00 REA    
+__HIMEM__                 006000 REA    __OVERLAYADDR__           006000 REA    
+_Rectangle                00C124 REA    _FrameRectangle           00C127 REA    
+_RecoverRectangle         00C12D REA    _SetPattern               00C139 REA    
+_UseSystemFont            00C14B REA    _ReDoMenu                 00C193 REA    
+_GotoFirstMenu            00C1BD REA    _MainLoop                 00C1C3 REA    
+
+
+
+Imports list:
+-------------
+BitmapRegs (bitmapregs.o):
+    bitmapup.o                geos-common/graph/bitmapup.s:8
+DB_get2lines (dbget2lines.o):
+    dlgboxyesno.o             geos-common/dlgbox/dlgboxyesno.s:9
+    dlgboxokcancel.o          geos-common/dlgbox/dlgboxokcancel.s:9
+DoubleSPop (doublespop.o):
+    copystring.o              geos-common/memory/copystring.s:8
+HLineRegs (hlineregs.o):
+    horizontalline.o          geos-common/graph/horizontalline.s:9
+_BitmapUp (bitmapup.o):
+    main.o                    src/main.s:16
+_ColorCardGetCore (geoscore.o):
+    interface.o               src/interface.s:66
+_ColorCardSetCore (geoscore.o):
+    interface.o               src/interface.s:65
+_ColorRectangle (interface.o):
+    main.o                    src/main.s:42
+_ColorRectangleCore (geoscore.o):
+    interface.o               src/interface.s:67
+_CopyString (copystring.o):
+    main.o                    src/main.s:22
+_CreateWindow (interface.o):
+    main.o                    src/main.s:39
+_DialogueClearColor (interface.o):
+    main.o                    src/main.s:43
+_DlgBoxOkCancel (dlgboxokcancel.o):
+    main.o                    src/main.s:26
+_DlgBoxYesNo (dlgboxyesno.o):
+    main.o                    src/main.s:25
+_DoDlgBox (dodlgbox.o):
+    dlgboxyesno.o             geos-common/dlgbox/dlgboxyesno.s:9
+    dlgboxokcancel.o          geos-common/dlgbox/dlgboxokcancel.s:9
+_DoIcons (doicons.o):
+    interface.o               src/interface.s:23
+    main.o                    src/main.s:21
+_DoMenu (domenu.o):
+    main.o                    src/main.s:18
+_DrawBoard (main.o):
+    interface.o               src/interface.s:92
+_EnterDeskTop (enterdesktop.o):
+    main.o                    src/main.s:24
+_FillRam (fillram.o):
+    interface.o               src/interface.s:24
+_FrameRectangle (framerectangle.o):
+    interface.o               src/interface.s:18
+_GetCharWidth (getcharwidth.o):
+    interface.o               src/interface.s:21
+_GotoFirstMenu (gotofirstmenu.o):
+    main.o                    src/main.s:20
+_HorizontalLine (horizontalline.o):
+    interface.o               src/interface.s:15
+_InitDrawWindow (initdrawwindow.o):
+    interface.o               src/interface.s:16
+_InitVideomode (interface.o):
+    main.o                    src/main.s:38
+_MainLoop (mainloop.o):
+    main.o                    src/main.s:23
+_MoveData (movedata.o):
+    memcpy.o                  geos-common/common/memcpy.s:8
+_PutString (putstring.o):
+    interface.o               src/interface.s:20
+    main.o                    src/main.s:15
+_ReDoMenu (redomenu.o):
+    main.o                    src/main.s:19
+_RecoverRectangle (recoverrectangle.o):
+    interface.o               src/interface.s:19
+_Rectangle (rectangle.o):
+    interface.o               src/interface.s:17
+_ReinitScreen (interface.o):
+    main.o                    src/main.s:41
+_SetColorModeCore (geoscore.o):
+    interface.o               src/interface.s:64
+_SetNewMode (setnewmode.o):
+    main.o                    src/main.s:17
+_SetPattern (setpattern.o):
+    interface.o               src/interface.s:14
+_UseSystemFont (usesystemfont.o):
+    interface.o               src/interface.s:22
+_VDC_DetectVDCMemSize_core (geoscore.o):
+    interface.o               src/interface.s:68
+_VDC_FillArea_core (geoscore.o):
+    interface.o               src/interface.s:69
+_VDC_addrh (geoscore.o):
+    interface.o               src/interface.s:71
+_VDC_addrl (geoscore.o):
+    interface.o               src/interface.s:72
+_VDC_tmp1 (geoscore.o):
+    interface.o               src/interface.s:74
+_VDC_tmp2 (geoscore.o):
+    interface.o               src/interface.s:75
+_VDC_tmp4 (geoscore.o):
+    interface.o               src/interface.s:76
+_VDC_value (geoscore.o):
+    interface.o               src/interface.s:73
+_WinOKButton (interface.o):
+    main.o                    src/main.s:40
+__BACKBUFSIZE__ ([linker generated]):
+    crt0.o                    geos-common/system/crt0.s:10
+    [linker generated]        geoludo_cc65config.cfg:6
+__BSS_RUN__ ([linker generated]):
+    zerobss.o                 geos-common/common/zerobss.s:9
+__BSS_SIZE__ ([linker generated]):
+    zerobss.o                 geos-common/common/zerobss.s:9
+__CONSTRUCTOR_COUNT__ ([linker generated]):
+    condes.o                  runtime/condes.s:18
+__CONSTRUCTOR_TABLE__ ([linker generated]):
+    condes.o                  runtime/condes.s:18
+__DESTRUCTOR_COUNT__ ([linker generated]):
+    condes.o                  runtime/condes.s:19
+__DESTRUCTOR_TABLE__ ([linker generated]):
+    condes.o                  runtime/condes.s:19
+__HIMEM__ ([linker generated]):
+    [linker generated]        geoludo_cc65config.cfg:8
+__OVERLAYADDR__ ([linker generated]):
+    [linker generated]        geoludo_cc65config.cfg:34
+    [linker generated]        geoludo_cc65config.cfg:33
+    [linker generated]        geoludo_cc65config.cfg:32
+    [linker generated]        geoludo_cc65config.cfg:31
+    [linker generated]        geoludo_cc65config.cfg:30
+    [linker generated]        geoludo_cc65config.cfg:29
+    [linker generated]        geoludo_cc65config.cfg:28
+    [linker generated]        geoludo_cc65config.cfg:27
+    [linker generated]        geoludo_cc65config.cfg:26
+    [linker generated]        geoludo_cc65config.cfg:25
+    [linker generated]        geoludo_cc65config.cfg:24
+    [linker generated]        geoludo_cc65config.cfg:23
+    [linker generated]        geoludo_cc65config.cfg:22
+    [linker generated]        geoludo_cc65config.cfg:21
+    [linker generated]        geoludo_cc65config.cfg:20
+    [linker generated]        geoludo_cc65config.cfg:19
+    [linker generated]        geoludo_cc65config.cfg:18
+    [linker generated]        geoludo_cc65config.cfg:17
+    [linker generated]        geoludo_cc65config.cfg:16
+    [linker generated]        geoludo_cc65config.cfg:10
+__OVERLAYSIZE__ ([linker generated]):
+    [linker generated]        geoludo_cc65config.cfg:34
+    [linker generated]        geoludo_cc65config.cfg:33
+    [linker generated]        geoludo_cc65config.cfg:32
+    [linker generated]        geoludo_cc65config.cfg:31
+    [linker generated]        geoludo_cc65config.cfg:30
+    [linker generated]        geoludo_cc65config.cfg:29
+    [linker generated]        geoludo_cc65config.cfg:28
+    [linker generated]        geoludo_cc65config.cfg:27
+    [linker generated]        geoludo_cc65config.cfg:26
+    [linker generated]        geoludo_cc65config.cfg:25
+    [linker generated]        geoludo_cc65config.cfg:24
+    [linker generated]        geoludo_cc65config.cfg:23
+    [linker generated]        geoludo_cc65config.cfg:22
+    [linker generated]        geoludo_cc65config.cfg:21
+    [linker generated]        geoludo_cc65config.cfg:20
+    [linker generated]        geoludo_cc65config.cfg:19
+    [linker generated]        geoludo_cc65config.cfg:18
+    [linker generated]        geoludo_cc65config.cfg:17
+    [linker generated]        geoludo_cc65config.cfg:16
+    [linker generated]        geoludo_cc65config.cfg:8
+__STACKADDR__ ([linker generated]):
+    crt0.o                    geos-common/system/crt0.s:9
+    [linker generated]        geoludo_cc65config.cfg:15
+__STACKSIZE__ ([linker generated]):
+    crt0.o                    geos-common/system/crt0.s:9
+    [linker generated]        geoludo_cc65config.cfg:10
+__STARTUP_RUN__ ([linker generated]):
+    geoludoHdr.o              src/geoludoHdr.s:68
+    geoludo.o                 geoludo.s:25
+__STARTUP__ (crt0.o):
+    main.o                    src/main.s:13
+__VLIR0_START__ ([linker generated]):
+    geoludoHdr.o              src/geoludoHdr.s:68
+    geoludo.o                 geoludo.s:25
+__ctype (ctype.o):
+    ctypemask.o               common/ctypemask.s:23
+__ctypeidx (ctype.o):
+    ctypemask.o               common/ctypemask.s:24
+__directerrno (_directerrno.o):
+    vsnprintf.o               /mnt/d/retro/cc65/asminc/errno.inc:10
+__errno (errno.o):
+    _seterrno.o               /mnt/d/retro/cc65/asminc/errno.inc:7
+__hextab (_hextab.o):
+    ltoa.o                    common/ltoa.s:10
+__longminstr (_longminstr.o):
+    ltoa.o                    common/ltoa.s:10
+__oserror (_oserror.o):
+    _directerrno.o            /mnt/d/retro/cc65/asminc/errno.inc:7
+__printf (_printf.o):
+    vsnprintf.o               common/vsnprintf.s:10
+__seterrno (_seterrno.o):
+    _directerrno.o            /mnt/d/retro/cc65/asminc/errno.inc:9
+_a_tmp (geoscore.o):
+    interface.o               src/interface.s:70
+_appname (interface.o):
+    main.o                    src/main.s:34
+_color_background (interface.o):
+    main.o                    src/main.s:31
+_exit (crt0.o):
+    enterdesktop.o            geos-common/system/enterdesktop.s:8
+_get_ostype (get_ostype.o):
+    interface.o               src/interface.s:25
+_icons (interface.o):
+    main.o                    src/main.s:35
+_ltoa (ltoa.o):
+    _printf.o                 common/_printf.s:12
+_main (main.o):
+    callmain.o                runtime/callmain.s:11
+_memcpy (memcpy.o):
+    vsnprintf.o               common/vsnprintf.s:10
+_monochromeflag (interface.o):
+    main.o                    src/main.s:29
+_screen_colormode (interface.o):
+    main.o                    src/main.s:30
+_sprintf (sprintf.o):
+    main.o                    src/main.s:14
+_strlen (strlen.o):
+    _printf.o                 common/_printf.s:13
+    interface.o               src/interface.s:13
+_strlower (strlower.o):
+    _printf.o                 common/_printf.s:13
+_ultoa (ltoa.o):
+    _printf.o                 common/_printf.s:12
+_vdc (interface.o):
+    main.o                    src/main.s:32
+_vdc_mainicons (main.o):
+    interface.o               src/interface.s:63
+_vdcsize (interface.o):
+    main.o                    src/main.s:33
+_version (interface.o):
+    main.o                    src/main.s:28
+_vic_mainicons (main.o):
+    interface.o               src/interface.s:62
+_vsprintf (vsprintf.o):
+    sprintf.o                 common/sprintf.s:8
+addeq0sp (addeqsp.o):
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+addysp (addysp.o):
+    sprintf.o                 common/sprintf.s:8
+    incsp6.o                  runtime/incsp6.s:8
+    incsp5.o                  runtime/incsp5.s:8
+    incsp3.o                  runtime/incsp3.s:8
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+addysp1 (addysp.o):
+    sub.o                     runtime/sub.s:8
+aslax3 (aslax3.o):
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+aslax4 (aslax4.o):
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+axlong (axlong.o):
+    _printf.o                 common/_printf.s:11
+axulong (axlong.o):
+    _printf.o                 common/_printf.s:11
+callmain (callmain.o):
+    crt0.o                    geos-common/system/crt0.s:12
+ctypemaskdirect (ctypemask.o):
+    strlower.o                common/strlower.s:14
+decax1 (decax1.o):
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+decsp1 (decsp1.o):
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    main.o                    src/main.s:1882
+decsp2 (decsp2.o):
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    main.o                    src/main.s:1882
+decsp3 (decsp3.o):
+    main.o                    src/main.s:1882
+decsp4 (decsp4.o):
+    lpush.o                   runtime/lpush.s:12
+    sprintf.o                 common/sprintf.s:8
+decsp5 (decsp5.o):
+    main.o                    src/main.s:1882
+decsp6 (decsp6.o):
+    _printf.o                 common/_printf.s:11
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+donelib (condes.o):
+    crt0.o                    geos-common/system/crt0.s:11
+getintcharint (getintcharint.o):
+    putstring.o               geos-common/graph/putstring.s:9
+incax1 (incax1.o):
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+incaxy (incaxy.o):
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+incsp1 (incsp1.o):
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+incsp2 (incsp2.o):
+    vsnprintf.o               common/vsnprintf.s:9
+    popptr1.o                 runtime/popptr1.s:8
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    main.o                    src/main.s:1882
+incsp3 (incsp3.o):
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    main.o                    src/main.s:1882
+incsp5 (incsp5.o):
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+incsp6 (incsp6.o):
+    vsnprintf.o               common/vsnprintf.s:9
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+initlib (condes.o):
+    crt0.o                    geos-common/system/crt0.s:11
+ldax0sp (ldaxsp.o):
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+ldaxidx (ldaxi.o):
+    interface.o               src/interface.s:1309
+ldaxysp (ldaxsp.o):
+    vsnprintf.o               common/vsnprintf.s:9
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+leaa0sp (leaaxsp.o):
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+negax (negabs.o):
+    shelp.o                   runtime/shelp.s:11
+    div.o                     runtime/div.s:11
+negeax (lneg.o):
+    ltoa.o                    common/ltoa.s:9
+popa (popa.o):
+    hlineregs.o               geos-common/graph/hlineregs.s:7
+    getintcharint.o           geos-common/graph/getintcharint.s:6
+    horizontalline.o          geos-common/graph/horizontalline.s:8
+    fillram.o                 geos-common/memory/fillram.s:8
+popax (incsp2.o):
+    movedata.o                geos-common/memory/movedata.s:8
+    ltoa.o                    common/ltoa.s:9
+    _printf.o                 common/_printf.s:11
+    vsnprintf.o               common/vsnprintf.s:9
+    hlineregs.o               geos-common/graph/hlineregs.s:7
+    getintcharint.o           geos-common/graph/getintcharint.s:6
+    dbget2lines.o             geos-common/dlgbox/dbget2lines.s:8
+    shelp.o                   runtime/shelp.s:11
+    fillram.o                 geos-common/memory/fillram.s:8
+    doublespop.o              geos-common/memory/doublespop.s:6
+popptr1 (popptr1.o):
+    ltoa.o                    common/ltoa.s:9
+    udiv.o                    runtime/udiv.s:9
+    mul8.o                    runtime/mul8.s:9
+popsargsudiv16 (shelp.o):
+    div.o                     runtime/div.s:11
+ptr1 (zeropage.o):
+    strlower.o                common/strlower.s:13
+    ltoa.o                    common/ltoa.s:11
+    _printf.o                 /mnt/d/retro/cc65/asminc/zeropage.inc:12
+    vsnprintf.o               common/vsnprintf.s:11
+    udiv.o                    runtime/udiv.s:10
+    sprintf.o                 common/sprintf.s:9
+    shelp.o                   runtime/shelp.s:12
+    pushw.o                   runtime/pushw.s:9
+    popptr1.o                 runtime/popptr1.s:9
+    mul8.o                    runtime/mul8.s:10
+    ldaxi.o                   runtime/ldaxi.s:8
+    div.o                     runtime/div.s:12
+    interface.o               src/interface.s:11
+    main.o                    src/main.s:11
+ptr2 (zeropage.o):
+    strlower.o                common/strlower.s:13
+    ltoa.o                    common/ltoa.s:11
+    _printf.o                 /mnt/d/retro/cc65/asminc/zeropage.inc:12
+    strlen.o                  common/strlen.s:12
+ptr3 (zeropage.o):
+    ltoa.o                    common/ltoa.s:11
+    dbget2lines.o             geos-common/dlgbox/dbget2lines.s:7
+    doublespop.o              geos-common/memory/doublespop.s:7
+    dlgboxyesno.o             geos-common/dlgbox/dlgboxyesno.s:10
+    dlgboxokcancel.o          geos-common/dlgbox/dlgboxokcancel.s:10
+ptr4 (zeropage.o):
+    dbget2lines.o             geos-common/dlgbox/dbget2lines.s:7
+    bitmapregs.o              geos-common/graph/bitmapregs.s:6
+    udiv.o                    runtime/udiv.s:10
+    shelp.o                   runtime/shelp.s:12
+    mul8.o                    runtime/mul8.s:10
+    initdrawwindow.o          geos-common/graph/initdrawwindow.s:9
+    doublespop.o              geos-common/memory/doublespop.s:7
+    dlgboxyesno.o             geos-common/dlgbox/dlgboxyesno.s:10
+    dlgboxokcancel.o          geos-common/dlgbox/dlgboxokcancel.s:10
+push0 (pushax.o):
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    main.o                    src/main.s:1882
+push1 (push1.o):
+    _printf.o                 common/_printf.s:11
+pusha (pusha.o):
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+pusha0 (pushax.o):
+    push1.o                   runtime/push1.s:8
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+pushax (pushax.o):
+    _printf.o                 common/_printf.s:11
+    callmain.o                runtime/callmain.s:11
+    pushw.o                   runtime/pushw.s:8
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+pusheax (lpush.o):
+    _printf.o                 common/_printf.s:11
+pushw0sp (pushwsp.o):
+    vsprintf.o                common/vsprintf.s:8
+pushwidx (pushw.o):
+    interface.o               src/interface.s:1309
+pushwysp (pushwsp.o):
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+regbank (zeropage.o):
+    _printf.o                 /mnt/d/retro/cc65/asminc/zeropage.inc:14
+shlax3 (aslax3.o):
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+shlax4 (aslax4.o):
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+shrax1 (shrax1.o):
+    interface.o               src/interface.s:1309
+shrax3 (shrax3.o):
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+sp (zeropage.o):
+    lpush.o                   runtime/lpush.s:13
+    _printf.o                 /mnt/d/retro/cc65/asminc/zeropage.inc:11
+    vsnprintf.o               common/vsnprintf.s:11
+    decsp4.o                  runtime/decsp4.s:8
+    sub.o                     runtime/sub.s:9
+    staxsp.o                  runtime/staxsp.s:8
+    sprintf.o                 common/sprintf.s:9
+    pushwsp.o                 runtime/pushwsp.s:8
+    pushax.o                  runtime/pushax.s:8
+    pusha.o                   runtime/pusha.s:8
+    popptr1.o                 runtime/popptr1.s:9
+    popa.o                    runtime/popa.s:8
+    leaaxsp.o                 runtime/leaaxsp.s:8
+    ldaxsp.o                  runtime/ldaxsp.s:8
+    incsp2.o                  runtime/incsp2.s:8
+    incsp1.o                  runtime/incsp1.s:8
+    decsp6.o                  runtime/decsp6.s:8
+    decsp5.o                  runtime/decsp5.s:8
+    decsp3.o                  runtime/decsp3.s:8
+    decsp2.o                  runtime/decsp2.s:8
+    decsp1.o                  runtime/decsp1.s:8
+    crt0.o                    geos-common/system/crt0.s:14
+    addysp.o                  runtime/addysp.s:8
+    addeqsp.o                 runtime/addeqsp.s:8
+    interface.o               src/interface.s:10
+    main.o                    src/main.s:10
+sreg (zeropage.o):
+    lneg.o                    runtime/lneg.s:11
+    ltoa.o                    common/ltoa.s:11
+    lpush.o                   runtime/lpush.s:13
+    axlong.o                  runtime/axlong.s:9
+    _printf.o                 /mnt/d/retro/cc65/asminc/zeropage.inc:11
+    udiv.o                    runtime/udiv.s:10
+stax0sp (staxsp.o):
+    interface.o               src/interface.s:1309
+    interface.o               src/interface.s:1309
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+staxysp (staxsp.o):
+    vsprintf.o                common/vsprintf.s:8
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+tmp1 (zeropage.o):
+    ltoa.o                    common/ltoa.s:11
+    _printf.o                 /mnt/d/retro/cc65/asminc/zeropage.inc:13
+    shrax3.o                  runtime/shrax3.s:8
+    shrax1.o                  runtime/shrax1.s:8
+    shelp.o                   runtime/shelp.s:12
+    incaxy.o                  runtime/incaxy.s:8
+    get_ostype.o              geos-cbm/system/get_ostype.s:15
+    div.o                     runtime/div.s:12
+    aslax4.o                  runtime/aslax4.s:8
+    aslax3.o                  runtime/aslax3.s:8
+    interface.o               src/interface.s:11
+tmp2 (zeropage.o):
+    shelp.o                   runtime/shelp.s:12
+    div.o                     runtime/div.s:12
+tosdiva0 (div.o):
+    interface.o               src/interface.s:1309
+tosmula0 (mul8.o):
+    interface.o               src/interface.s:1309
+    main.o                    src/main.s:1882
+    main.o                    src/main.s:1882
+tossubax (sub.o):
+    interface.o               src/interface.s:1309
+tosudiva0 (udiv.o):
+    interface.o               src/interface.s:1309
+    main.o                    src/main.s:1882
+udiv16 (udiv.o):
+    shelp.o                   runtime/shelp.s:11
+vsnprintf (vsnprintf.o):
+    vsprintf.o                common/vsprintf.s:9
+zerobss (zerobss.o):
+    crt0.o                    geos-common/system/crt0.s:13
+

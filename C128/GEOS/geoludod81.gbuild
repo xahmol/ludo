@@ -1,0 +1,6 @@
+[build]
+Disk="GeoLudo.d81"
+Header="geoludoHdr.bin"
+
+[Sequential]
+Data="geoludo.bin"

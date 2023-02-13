@@ -1,0 +1,10 @@
+
+; this is the resource file for test.c, a GEOS application example
+
+HEADER APPLICATION "GeoLudo" "GeoLudo" "V0.1" {
+dostype SEQ
+author  "Xander Mol"
+info    "Ludo game for 8 bit computers, GEOS edition."
+mode    any
+icon    "ludoicon.bin"
+}
