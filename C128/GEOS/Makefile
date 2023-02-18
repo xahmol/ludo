@@ -83,20 +83,33 @@ ULTHOST = ftp://192.168.1.19/usb1/11/
 ULTHOST2 = ftp://192.168.1.31/usb1/11/
 ULTHOST3 = ftp://192.168.1.55/usb0/Geos/
 
+# Data for ZIP file
+ZIP = GeoLudo-v01-$(shell date "+%Y%m%d-%H%M").zip
+ZIPLIST = $(MAIN).d64 $(MAIN).d81
+
 ########################################
 
 .SUFFIXES:
 .PHONY: all clean deploy vice
-all: $(MAIN).bin $(MAIN).d81
+all: $(MAIN).bin $(MAIN).d81 $(MAIN).d64 $(ZIP)
 
 # Building GeoUMAIN
 $(MAIN).bin: $(MAIN).grc $(MAINSRC) $(MAINHDR)
 	$(CL) $(CFLAGS) $(MAINFLG) -o $(MAIN).bin $(MAIN).grc $(MAINSRC) $(MAINHDR)
 
-# Creating MAIN disk image
+# Creating MAIN disk image for 1581
 $(MAIN).d81:		$(MAIN).bin $(MAIN)Hdr.bin $(MAIN)d81.gbuild
 	$(DEL) $(MAIN).d81 2>$(NULLDEV)
 	$(GBUILD) $(MAIN)d81.gbuild
+
+# Creating MAIN disk image for 1581
+$(MAIN).d64:		$(MAIN).bin $(MAIN)Hdr.bin $(MAIN)d64.gbuild
+	$(DEL) $(MAIN).d64 2>$(NULLDEV)
+	$(GBUILD) $(MAIN)d64.gbuild
+
+# Creating ZIP file for distribution
+$(ZIP): $(ZIPLIST)
+	zip $@ $^
 
 clean:
 	$(DEL) $(MAIN)*.bin $(MAIN).map 2>$(NULLDEV)

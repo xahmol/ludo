@@ -82,12 +82,15 @@ char buffer[81];
 
 //Game variables
 unsigned char gameflag = 0;
-unsigned char turnphase = 0;
+unsigned char dicethrows = 0;
+unsigned char iconflag = 0;
 unsigned char turnofplayernr = 0;
 unsigned char zv = 0;
 unsigned char ns = 0;
 unsigned char throw;
 unsigned char autosavetoggle = 1;
+unsigned char pawnpossible[4];
+unsigned char pawnchosen;
 
 //Save game and config file memory allocation and variables
 unsigned char saveslots[85];
@@ -334,7 +337,7 @@ struct icontab throwicon = {
     1,
     { 0,0 },
     {
-        { iconThrow, 25 | DOUBLE_B, 150, 6, 16, (int)IconclickThrow },
+        { iconThrow, 25, 150, 6, 16, (int)IconclickThrow },
     }
 };
 
@@ -342,7 +345,7 @@ struct icontab nexticon = {
     1,
     { 0,0 },
     {
-        { iconNext, 25 | DOUBLE_B, 150, 6, 16, (int)IconclickNext },
+        { iconNext, 25, 150, 6, 16, (int)IconclickNext },
     }
 };
 
@@ -411,8 +414,8 @@ unsigned char dicethrow()
     struct iconpic bitmap;
 
     bitmap.height = 21;
-    bitmap.width = 3 | DOUBLE_B;
-    bitmap.x = 30 | DOUBLE_B;
+    bitmap.width = 3 | screen_doubleb;
+    bitmap.x = 25 | screen_doubleb;
     bitmap.y = 100;
 
     for(x=0;x<25;x++)
@@ -428,6 +431,49 @@ unsigned char dicethrow()
     return dicethrow;
 }
 
+void drawicon() {
+// Redraw active icon
+
+    if(iconflag == 1 ) {
+        // Show throw icon
+        throwicon.tab->x = 25 + screen_doubleb;
+        mainicons = &throwicon;
+        icons = mainicons;
+        DoIcons(icons);
+    }
+    if(iconflag == 2 ) {
+        // Show next icon
+        nexticon.tab->x = 25 + screen_doubleb;
+        mainicons = &nexticon;
+        icons = mainicons;
+        DoIcons(icons);
+    }
+}
+
+void eraseicon() {
+// Erase icon
+
+    if(iconflag == 1 ) {
+        // Disable throw icon
+        mainicons = &noicons;
+        icons = mainicons;
+        DoIcons(icons);
+        SetRectangleCoords(150,165,200 | screen_doublew, 247 | screen_doublew);
+        SetPattern(0);
+        Rectangle();
+    }
+
+    if(iconflag == 2 ) {
+        // Diaable next icon
+        mainicons = &noicons;
+        icons = mainicons;
+        DoIcons(icons);
+        SetRectangleCoords(150,165,200 | screen_doublew, 247 | screen_doublew);
+        SetPattern(0);
+        Rectangle();
+    }
+}
+
 void drawfield(unsigned char track, unsigned char position, unsigned char playernumber, unsigned char coloronly) {
 // Draw board fields
 
@@ -436,7 +482,7 @@ void drawfield(unsigned char track, unsigned char position, unsigned char player
     unsigned char ypos;
     unsigned int xpos;
     bitmap.height = 16;
-    bitmap.width = 2 | DOUBLE_B;
+    bitmap.width = 2 | screen_doubleb;
 
     if(!track)
     {
@@ -461,7 +507,7 @@ void drawfield(unsigned char track, unsigned char position, unsigned char player
         // Draw home and destination fields
         xpos = homedestcoords[playernumber][position][0];
         ypos = homedestcoords[playernumber][position][1]*8;
-        bitmap.width = 2 | DOUBLE_B;
+        bitmap.width = 2 | screen_doubleb;
         bitmap.pic_ptr = fieldgraphics[playernumber+1];
         if(!monochromeflag) {
             color = (vdc)?vdc_color[playernumber+1]:vic_color[playernumber+1];
@@ -479,8 +525,10 @@ void drawfield(unsigned char track, unsigned char position, unsigned char player
     }
 
     // Color field
-    xpos = xpos * 8;
-    ColorRectangle(color,color_background,ypos,ypos+15,xpos,xpos+15+(16*vdc));
+    if(!monochromeflag) {
+        xpos = xpos * 8;
+        ColorRectangle(color,color_background,ypos,ypos+15,xpos,xpos+15+(16*vdc));
+    }
 }
 
 void pawnerase(unsigned char playernumber, unsigned char pawnnumber)
@@ -501,7 +549,7 @@ void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned ch
     unsigned char track, position,ypos;
     unsigned int xpos;
     bitmap.height = 16;
-    bitmap.width = 2 | DOUBLE_B;
+    bitmap.width = 2 | screen_doubleb;
 
 
     track = playerpos[playernumber][pawnnumber][0];
@@ -533,8 +581,10 @@ void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned ch
     }
 
     // Color field
-    xpos = xpos * 8;
-    ColorRectangle(color,color_background,ypos,ypos+15,xpos,xpos+15+(16*vdc));
+    if(!monochromeflag) {
+        xpos = xpos * 8;
+        ColorRectangle(color,color_background,ypos,ypos+15,xpos,xpos+15+(16*vdc));
+    }
 }
 
 void DrawPresentplayerinfo(unsigned char coloronly) {
@@ -546,15 +596,15 @@ void DrawPresentplayerinfo(unsigned char coloronly) {
     if(!coloronly) {
         // Clear area
         SetPattern(0);
-        SetRectangleCoords(24,70,200 | DOUBLE_W, screen_pixel_width);
+        SetRectangleCoords(24,70,200 | screen_doublew, screen_pixel_width);
         Rectangle();
     
         // Print player number
         sprintf(buffer,"Player %d:",turnofplayernr+1);
-        PutString(buffer,29,200 | DOUBLE_W);
+        PutString(buffer,29,200 | screen_doublew);
     
         // Draw pattern for player
-        SetRectangleCoords(24,31, 300 | DOUBLE_W, 315 | DOUBLE_W);
+        SetRectangleCoords(24,31, 280 | screen_doublew, 295 | screen_doublew);
         if(monochromeflag) {
             SetPattern(playerdata[turnofplayernr][2]);
             Rectangle();
@@ -562,18 +612,23 @@ void DrawPresentplayerinfo(unsigned char coloronly) {
         FrameRectangle(255);
 
         // Draw player name
-        PutString(playername[turnofplayernr],39,200 | DOUBLE_W);
+        PutString(playername[turnofplayernr],39,200 | screen_doublew);
     
         // Print computer plays if AI
         if(playerdata[turnofplayernr][0]) {
-            PutString("Computer plays",49,200 | DOUBLE_W);
+            PutString("Computer plays",49,200 | screen_doublew);
+        }
+
+        // Print if player may throw three times.
+        if(dicethrows==3) { 
+            PutString("Player may throw 3 times.",59,200 | screen_doublew);
         }
     }
 
     // Draw color for player
     if(!monochromeflag) {
         color = (vdc)?vdc_color[turnofplayernr+1]:vic_color[turnofplayernr+1];
-        xpos = (vdc)?600:300;
+        xpos = (vdc)?560:280;
         width = (vdc)?31:15;
         ColorRectangle(color_foreground,color,24,31,xpos,xpos+width);
     }
@@ -619,6 +674,7 @@ void ClearBoard() {
         ColorRectangle(color_foreground,color_background,24,screen_pixel_height-1,0,screen_pixel_width-1);
     }
 
+    eraseicon();
     SetPattern(0);
 	SetRectangleCoords(24,screen_pixel_height-1,0,screen_pixel_height-1);
 	Rectangle();
@@ -631,7 +687,7 @@ unsigned char inputofnames()
     char numberai[2] = "0";
     unsigned int result;
 
-    if(DlgBoxGetString(numberai,1,"Enter number of AI players (0-4)","(RETURN for 0, Camcel to abort}") != CANCEL) {
+    if(DlgBoxGetString(numberai,1,"Enter number of AI players (0-4)","(RETURN for 0, Cancel to abort}") != CANCEL) {
         ai = numberai[0]-48;
     } else { return 0; }
 
@@ -657,7 +713,8 @@ void gamereset()
     DrawBoard(0);
 
     gameflag = 1;
-    turnphase = 0;
+    dicethrows = 0;
+    iconflag = 0;
     turnofplayernr=0;
     for(n=0;n<4;n++)
     {
@@ -671,46 +728,378 @@ void gamereset()
 void startturn() {
 // Start a turn
 
-    // Human player
-    if(!playerdata[turnofplayernr][0]) 
+    unsigned char x;
+
+    // Decide how many times player may throw dice
+    if(playerdata[turnofplayernr][3]==playerdata[turnofplayernr][1])
     {
-        mainicons = &throwicon;
-        icons = mainicons;
-        DoIcons(icons);
+        dicethrows = 3;
+        for(x=0;x<4;x++)
+        {
+            if(playerpos[turnofplayernr][x][0]==0)
+            {
+                dicethrows = 0;
+            }
+            if(playerpos[turnofplayernr][x][0]==1 && playerpos[turnofplayernr][x][1]<playerdata[turnofplayernr][1]+4 && playerpos[turnofplayernr][x][1]<playerdata[turnofplayernr][1]>3)
+            {
+                dicethrows = 0;
+            }
+        }
     }
+
+    DrawPresentplayerinfo(0);
+
+    iconflag = 1;
+    drawicon();
+    return;
+}
+
+void humanchoosepawnstart() {
+/* Human has to choose a pawn, returns pawnnumber chosen */
+
+    pawnchosen = 0;
+    PutString("Choose pawn.",49,200 | screen_doublew);
+}
+
+void playerwins() {
+// A player has won the game, choose to continue or stop the game
+
+    sprintf(buffer, "%s has won!", playername[turnofplayernr]);
+
+    if(!monochromeflag) { DialogueClearColor(); }
+    if(DlgBoxYesNo(buffer,"Continue playing?") == NO) {
+        gameflag = 0; ClearBoard(); return;
+    }
+    if(!monochromeflag & gameflag) { DrawBoard(1); }
+}
+
+void computerchoosepawn() {
+/* Computer has to choose a pawn, returns pawnnumber chosen */
+
+    signed int pawnscore[4] = { 0,0,0,0 };
+    signed int minimumpawnscore;
+    unsigned char vr, vn, nn, no, nr, x,y,z ;
+
+    pawnchosen = 0;
+
+    for(x=0;x<4;x++)
+    {
+        if(pawnpossible[x]==0)
+        {
+            pawnscore[x]=-10000;
+        }
+        else{
+            vr=playerpos[turnofplayernr][x][0];
+            vn=playerpos[turnofplayernr][x][1];
+            nn=vn+throw;
+            no=nn;
+            nr=vr;
+            if(vr==0)
+            {
+                if(turnofplayernr==0 && nn>39 && vn<40) { nn-=36; nr=1; }
+                if(turnofplayernr==1 && nn> 9 && vn<10) { nn-= 6; nr=1; }
+                if(turnofplayernr==2 && nn>19 && vn<20) { nn-=16; nr=1; }
+                if(turnofplayernr==3 && nn>29 && vn<30) { nn-=26; nr=1; }
+            }
+            if(nr==0 && nn>39) { nn-=40; }
+            if(nr==1 && nn>3 && playerdata[turnofplayernr][1]==1) { pawnscore[x]=10000; x=3; }
+            else
+            {
+                if(nr==1 && nn>3) { pawnscore[x]+=6000; }
+                for(y=0;y<4;y++)
+                {
+                    for(z=0;z<4;z++)
+                    {
+                        if(turnofplayernr==y && playerpos[y][z][0]==nr && playerpos[y][z][1]==nn) { pawnscore[x]-=8000; }
+                        if(turnofplayernr!=y && playerpos[y][z][0]==nr && playerpos[y][z][1]==nn)
+                        {
+                            pawnscore[x]+=4000;
+                            if(playerpos[y][z][0]==0)
+                            {
+                                if(y==0 && playerpos[y][z][1]>33) { pawnscore[x]+=3000; }
+                                if(y==1 && playerpos[y][z][1]> 3) { pawnscore[x]+=3000; }
+                                if(y==2 && playerpos[y][z][1]>13) { pawnscore[x]+=3000; }
+                                if(y==3 && playerpos[y][z][1]>23) { pawnscore[x]+=3000; }
+                            }
+                        }
+                        if(playerpos[y][z][0]==0 && nr==0 && turnofplayernr!=y)
+                        {
+                            if((vn-playerpos[y][z][1])<6 && vn-playerpos[y][z][1]>0) { pawnscore[x]+=400; }
+                            if((no-playerpos[y][z][1])<6 && no-playerpos[y][z][1]>0) { pawnscore[x]-=200; }
+                            if((playerpos[y][z][1]-nn)<6 && (playerpos[y][z][1]-nn)>0) { pawnscore[x]+=100; }
+                        }
+                    }
+                }
+                if(nr==0 && (nn==0 || nn==10 || nn==20 || nn==30)) { pawnscore[x]-=4000; }
+                if(vr==0 && (vn==0 || vn==10 || vn==20 || vn==30)) { pawnscore[x]+=2000; }
+                if(turnofplayernr==0) { pawnscore[x]+=nn; }
+                if(turnofplayernr==1) { pawnscore[x]+=no-10; }
+                if(turnofplayernr==2) { pawnscore[x]+=no-20; }
+                if(turnofplayernr==3) { pawnscore[x]+=no-30; }
+            }
+        }
+    }
+    minimumpawnscore=-20000;
+    for(x=0;x<4;x++)
+    {
+        if(pawnscore[x]>minimumpawnscore && pawnpossible[x]==1) { minimumpawnscore=pawnscore[x]; pawnchosen=x; }
+    }
+}
+
+
+void endturn() {
+// End of turn sequence
+
+    // Next player, or same if 6 is thrown
+    do
+    {
+        if(zv==1)
+        {
+            zv=0;
+        }
+        else
+        {
+            np[turnofplayernr]=-1;
+            turnofplayernr++;
+            if(turnofplayernr>3) { turnofplayernr=0; }
+        }
+    } while (zv==0 && playerdata[turnofplayernr][1]==0);
+
+    // Enable next icon
+    iconflag = 2;
+    drawicon();
+}
+
+void pawnselect() {
+// Pllace pawn
+
+    unsigned char ap;
+    signed char as;
+    unsigned char ov, ro, x,y;
+
+    // Erase pawn at present position
+    pawnerase(turnofplayernr,pawnchosen);
+
+    // Calculate new position
+    ov=playerpos[turnofplayernr][pawnchosen][1];
+    ro=playerpos[turnofplayernr][pawnchosen][0];
+    if(ro==1 && ov<4)
+    {
+        playerpos[turnofplayernr][pawnchosen][0]=0;
+        playerpos[turnofplayernr][pawnchosen][1]=turnofplayernr*10;
+        playerdata[turnofplayernr][3]--;
+    }
+    else { playerpos[turnofplayernr][pawnchosen][1]+=throw; }
+    if(turnofplayernr==0 && playerpos[turnofplayernr][pawnchosen][1]>39 && ov<40 && ro==0)
+        { playerpos[turnofplayernr][pawnchosen][0]=1; playerpos[turnofplayernr][pawnchosen][1]-=36; }
+    if(turnofplayernr==1 && playerpos[turnofplayernr][pawnchosen][1]> 9 && ov<10 && ro==0)
+        { playerpos[turnofplayernr][pawnchosen][0]=1; playerpos[turnofplayernr][pawnchosen][1]-= 6; }
+    if(turnofplayernr==2 && playerpos[turnofplayernr][pawnchosen][1]>19 && ov<20 && ro==0)
+        { playerpos[turnofplayernr][pawnchosen][0]=1; playerpos[turnofplayernr][pawnchosen][1]-=16; }
+    if(turnofplayernr==3 && playerpos[turnofplayernr][pawnchosen][1]>29 && ov<30 && ro==0)
+        { playerpos[turnofplayernr][pawnchosen][0]=1; playerpos[turnofplayernr][pawnchosen][1]-=26; }
+    if(playerpos[turnofplayernr][pawnchosen][0]==1 && playerpos[turnofplayernr][pawnchosen][1]>3)
+        { dp[turnofplayernr]=playerpos[turnofplayernr][pawnchosen][1]; }
+    if(playerpos[turnofplayernr][pawnchosen][1]==playerdata[turnofplayernr][1]+3 && playerpos[turnofplayernr][pawnchosen][0]==1)
+        { playerdata[turnofplayernr][1]--; }
+    if(playerpos[turnofplayernr][pawnchosen][1]>39) { playerpos[turnofplayernr][pawnchosen][1]-=40; }
+    ap=0;
+    as=-1;
+
+    // Check is player of other player is presemt at destination
+    for(x=0;x<4;x++)
+    {
+        for(y=0;y<4;y++)
+        {
+            if(y!=pawnchosen || x!=turnofplayernr)
+            {
+                if(playerpos[x][y][0]==0 && playerpos[turnofplayernr][pawnchosen][0]==0)
+                {
+                    if(playerpos[x][y][1]==playerpos[turnofplayernr][pawnchosen][1])
+                    {
+                        ap=y;
+                        as=x;
+                        y=3;
+                        x=3;
+                    }
+                }
+            }
+        }
+    }
+
+    // Move other player pawn to home if needed
+    if(as!=-1)
+    {
+        pawnerase(as,ap);
+        playerpos[as][ap][0]=1;
+        playerpos[as][ap][1]=ap;
+        playerdata[as][3]++;
+        pawnplace(as,ap,0);
+    }
+
+    // Place pawn at new position
+    pawnplace(turnofplayernr,pawnchosen,0);
+
+    // Autosave if enabled
+    if(playerdata[turnofplayernr][0]==0 && autosavetoggle==1)
+    {
+        //savegame(1); /* Autosave on end human turn */
+    }
+
+    // Did player win?
+    if(playerdata[turnofplayernr][1]==0) { playerwins(); return; }
+
+    endturn();
+}
+
+void turngeneric()
+{
+    /* Generic turn sequence */
+    unsigned char noturnpossible = 0;
+    unsigned char pawnchosen = 0;
+    unsigned char mp = 0;
+    signed char pawnnumber = -1;
+    unsigned char ap = 0;
+    unsigned char vr, vl, vn, nr, gv, x,y;
+
+    throw = dicethrow();
+
+    // Reduce throw counter and return if multiple dicethrows left and no six is thrown
+    if(dicethrows>1)
+    {
+        if(throw !=6 ) { dicethrows--; return; }
+        else { dicethrows=1; }
+    }
+
+    // Disable throw icon if enabled
+    if(iconflag == 1) { eraseicon(); }
+
+    if(dicethrows == 1) {
+        // Erase throw 3 times line
+        SetRectangleCoords(50,60,200 | screen_doublew,screen_pixel_width-1);
+        SetPattern(0);
+        Rectangle();
+
+        // If all at home and no 6
+        if(playerdata[turnofplayernr][3]==playerdata[turnofplayernr][1] && throw!=6) { noturnpossible=1; }
+    }
+
+    // Check for valid moves
+    if(np[turnofplayernr]>=0)
+    {
+        if(playerdata[turnofplayernr][3]>0)
+        {
+            pawnnumber=np[turnofplayernr];
+        }
+        np[turnofplayernr]=-1;
+    }
+    if(noturnpossible==0 && pawnnumber==-1)
+    {
+        for(x=0;x<4;x++)
+        {
+            vr=playerpos[turnofplayernr][x][0];
+            vl=playerpos[turnofplayernr][x][1];
+            gv=0;
+            if(vr==1 && vl<4)
+            {
+                gv=1;
+                if(throw==6)
+                {
+                    pawnnumber=x;
+                    np[turnofplayernr]=x;
+                    x=3;
+                }
+            }
+            if(gv==0)
+            {
+                vn=vl+throw;
+                nr=vr;
+                if(vr==0)
+                {
+                    if(turnofplayernr==0 && vn>39 && vl<40) { vn-=36; nr=1; }
+                    if(turnofplayernr==1 && vn> 9 && vl<10) { vn-= 6; nr=1; }
+                    if(turnofplayernr==2 && vn>19 && vl<20) { vn-=16; nr=1; }
+                    if(turnofplayernr==3 && vn>29 && vl<30) { vn-=26; nr=1; }
+                }
+                if(nr==1)
+                {
+                    if(vn>7) { gv=1; }
+                    else
+                    {
+                        for(y=0;y<4;y++)
+                        {
+                            if(vr==1)
+                            {
+                                if(x!=y && playerpos[turnofplayernr][y][0]==1 && playerpos[turnofplayernr][y][1]<=vn && playerpos[turnofplayernr][y][1]>3 && playerpos[turnofplayernr][x][1] < playerpos[turnofplayernr][y][1])
+                                {
+                                    gv=1;
+                                    y=3;
+                                }
+                            }
+                            else{
+                                if(x!=y && playerpos[turnofplayernr][y][0]==1 && playerpos[turnofplayernr][y][1]<=vn && playerpos[turnofplayernr][y][1]>3)
+                                {
+                                    gv=1;
+                                    y=3;
+                                }
+                            }
+                        }
+                    }
+                }
+                if(gv==0) { pawnpossible[x]=1; }
+            }
+        }
+    }
+    if(pawnnumber==-1)
+    {
+        for(x=0;x<4;x++)
+        {
+            if(pawnpossible[x]==1) { ap++; pawnnumber=x; }
+        }
+    }
+    else { ap=1; }
+
+    // If 6 is thrown, another turn for same player
+    if(throw==6) { zv=1; }
+
+    // No turn possible
+    if(ap==0 || noturnpossible==1)
+    {
+        PutString("No turn possible.",59,200 | screen_doublew);
+        endturn();
+        return;
+    }
+
+    // Set chosen pawn
+    pawnchosen = pawnnumber;
+
+    // More than one pawn possible, so choose
+    if(ap>1)
+    {
+        if(playerdata[turnofplayernr][0]==0) { humanchoosepawnstart(); return; }
+        else { computerchoosepawn(); }
+    }
+
+    pawnselect();
 }
 
 // Icon handlers
 void IconclickThrow() {
 // Player clicked throw icon
 
-    // Disable throw icon
-    mainicons = &noicons;
-    icons = mainicons;
-    DoIcons(icons);
-    SetRectangleCoords(150,165,200 | DOUBLE_W, 247 | DOUBLE_W);
-    SetPattern(0);
-    Rectangle();
-
-    // Throw dice
-    dicethrow();
-
-    // Show next icon
-    mainicons = &nexticon;
-    icons = mainicons;
-    DoIcons(icons);
+    turngeneric();
 }
 
 void IconclickNext() {
 // Next icon clicked
 
     // Diaable next icon
-    mainicons = &noicons;
-    icons = mainicons;
-    DoIcons(icons);
-    SetRectangleCoords(150,165,200 | DOUBLE_W, 247 | DOUBLE_W);
-    SetPattern(0);
-    Rectangle();
+    iconflag = 2;
+    eraseicon();
+    iconflag = 0;
+
+    // Start next turn
+    startturn();
 }
 
 // Mouse handler functions
@@ -737,6 +1126,7 @@ void geosSwitch4080() {
     if(gameflag) { DrawBoard(0); }
     GotoFirstMenu();
     DoMenu(&menuMain);
+    drawicon();
     DoIcons(icons);
     return;
 }
@@ -745,6 +1135,7 @@ void geosExit() {
 // Exit to desktop
 
     ReDoMenu();
+
     // Ask confirnation
     if(!monochromeflag & gameflag) { DialogueClearColor(); }
     if (DlgBoxOkCancel("Exit to desktop", "Are you sure?") == OK)
@@ -761,11 +1152,10 @@ void geosExit() {
 void gameRestart() {
 // Start or restart game
 
+    ReDoMenu();
+
     if(gameflag) {
         // Restart instead of initial start
-        
-        ReDoMenu();
-
         if(!monochromeflag) { DialogueClearColor(); }
         if (DlgBoxOkCancel("Restart game", "Are you sure?") != OK)
         {
@@ -777,6 +1167,7 @@ void gameRestart() {
     if(inputofnames()) {
         ClearBoard();
         gamereset();
+        startturn();
     } else {
         if(gameflag) {
             if(!monochromeflag) { DrawBoard(1); }
@@ -799,9 +1190,21 @@ void gameColor() {
     monochromeflag = (DlgBoxYesNo("Enable monochrome mode?",buffer) == YES)?1:0;
 
     if(oldflag != monochromeflag & gameflag) { 
+        
+        mainicons = &noicons;
+        icons = mainicons;
+        DoIcons(icons);
+
         ReinitScreen(appname);
         DrawBoard(0);
+        GotoFirstMenu();
+        DoMenu(&menuMain);
+        drawicon();
+        DoIcons(icons);
+    } else {
+        if(!monochromeflag) { DrawBoard(1); }
     }
+
     return;
 }
 
@@ -849,6 +1252,9 @@ void informationCredits (void) {
 
 void main (void)
 {
+    // Set at exit hook
+    atexit(&appExit);
+
     // Set appname
     CopyString(appname,"   GeoLudo   ");
 
@@ -871,11 +1277,7 @@ void main (void)
 
     DoMenu(&menuMain);
     DoIcons(icons);
-
-    gameRestart();
-
-    startturn();
-
+    
     // Never returns    
     MainLoop();
 }

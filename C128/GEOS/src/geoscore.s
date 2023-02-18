@@ -84,6 +84,8 @@
 	.export		_VDC_DetectVDCMemSize_core
 	.export		_VDC_HChar_core
 	.export		_VDC_FillArea_core
+	.export		_VIC_HChar_core
+	.export		_VIC_FillArea_core
 
     .export		_VDC_regadd
 	.export		_VDC_regval
@@ -431,6 +433,50 @@ _ColorRectangleCore:
     lda _a_tmp                          ; Load color in A via a_tmp variable
     jsr ColorRectangle                  ; Jump to ColorRectangle routine
     rts                                 ; Return
+
+; Fill routine for VIC and TED
+
+; ------------------------------------------------------------------------------------------
+_VIC_HChar_core:
+; Function to draw horizontal line with given character (draws from left to right)
+; Input:	r1 			= start address
+;			VDC_tmp1	= character value
+;			VDC_tmp2	= length value
+; ------------------------------------------------------------------------------------------
+
+	; Initialise copy
+	ldy _VDC_tmp2						; Set Y counter at number of chars
+	dey									; Decrease counter
+	lda _VDC_tmp1						; Set value
+
+	; Copy loop
+loophchar1:
+	sta (r1),Y							; Store character at indexed address
+	dey									; Decrease counter
+	cpy #$ff							; Check for last char
+	bne loophchar1						; Loop until last char
+    rts
+
+; ------------------------------------------------------------------------------------------
+_VIC_FillArea_core:
+; Function to draw area with given character (draws from topleft to bottomright)
+; Input:	VDC_addrh = high byte of start address
+;			VDC_addrl = low byte of start address
+;			VDC_tmp1 = value
+;			VDC_tmp2 = length value
+;			VDC_tmp4 = number of lines
+; ------------------------------------------------------------------------------------------
+
+loopdrawlinevic:
+	jsr _VIC_HChar_core					; Draw line
+
+	; Increase start address with 40 for next line
+	AddVW $28,r1
+
+	; Decrease line counter and loop until zero
+	dec _VDC_tmp4						; Decrease line counter
+	bne loopdrawlinevic					; Continue until counter is zero
+	rts
 
 ; GEOS extension functions
 ; Code by: Cenbe / https://www.lyonlabs.org/commodore/onrequest/geos/geos-prog-tips.html

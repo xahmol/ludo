@@ -85,6 +85,8 @@ unsigned char monochromeflag = 0;
 unsigned char screen_colormode = VDC_CLR2;
 unsigned int screen_pixel_width;
 unsigned char screen_pixel_height;
+unsigned char screen_doubleb;
+unsigned int screen_doublew;
 unsigned char color_foreground;
 unsigned char color_background;
 unsigned short hdrY = 0;
@@ -94,6 +96,28 @@ unsigned char vdcsize = 0;
 unsigned char modelines[4] = {22,25,50,100};
 unsigned char cardheigth[4] = {8,8,4,2};
 char appname[21];
+
+// VIC to Plus/4 TED color and luminance conversion
+unsigned char ted_color[16][2] = {
+    { TED_BLACK,        0 },    //  0 Black
+    { TED_WHITE,        7 },    //  1 White
+    { TED_RED,          3 },    //  2 Red
+    { TED_CYAN,         7 },    //  3 Cyan
+    { TED_VIOLET,       0 },    //  4 Purple
+    { TED_GREEN,        5 },    //  5 Green
+    { TED_BLUE,         2 },    //  6 Blue
+    { TED_YELLOW,       7 },    //  7 Yellow
+    { TED_ORANGE,       7 },    //  8 Orange
+    { TED_BROWN,        7 },    //  9 Brown
+    { TED_RED,          7 },    // 10 Lightred
+    { TED_WHITE,        1 },    // 11 Dark grey
+    { TED_WHITE,        3 },    // 12 Grey
+    { TED_LIGHTGREEN,   7 },    // 13 Light green
+    { TED_LIGHTBLUE,    7 },    // 14 Light blue
+    { TED_WHITE,        6 }     // 15 Light grey
+};
+
+unsigned char ted_lum[16] = { 0,7,4,7,7,0,7,7,7,7,7,1,3,7,7,5 };
 
 // Window definitions
 struct window *winMain;
@@ -159,7 +183,7 @@ void InitVideomode() {
 
     // Get default color
     color_foreground = BLACK;
-    color_background = WHITE;
+    color_background = LTGREY;
 
     // Get host OS type
     osType = get_ostype();
@@ -290,17 +314,22 @@ void ReinitScreen(char *s) {
     screen_pixel_height = 200;
 
     // Set co-ordinates based on which screen mode (40/80) is used
-	if ((osType & GEOS64) == GEOS64) // c64
+	if ((osType & GEOS64) == GEOS64 || osType & GEOS4) // c64 or Plus/4
 	{
 		screen_pixel_width = SC_PIX_WIDTH;
 		winHeader = &vic_winHdr;
 		winMain = &vic_winMain;
 		hdrY = 200;
 		vdc = 0;
+        screen_doubleb = 0;
+        screen_doublew = 0;
 	}
-	
+
 	if ((osType & GEOS128) == GEOS128) // c128
 	{
+
+        screen_doubleb = DOUBLE_B;
+        screen_doublew = DOUBLE_W;
 		if((graphMode & 0x80) == 0x00)
 		{
 			// 40 col mode
@@ -328,7 +357,14 @@ void ReinitScreen(char *s) {
     if(vdc) { 
         SetColorMode(colormode);
     } else {
-        FillRam((char*)0x8c00,(color_foreground*16)+color_background,1000);
+        if(osType & GEOS4) {
+            // Fill luminance
+            FillRam((void*)ColorAddress(0,0),(ted_color[color_background][1]*16)+ted_color[color_foreground][1],1000);
+            // Fill color
+            FillRam((void*)(ColorAddress(0,0)+1024),(ted_color[color_foreground][0]*16)+ted_color[color_background][0],1000);
+        } else {
+            FillRam((void*)ColorAddress(0,0),(color_foreground*16)+color_background,1000);
+        }
     }
 
     // Clear icons
@@ -383,6 +419,20 @@ void VDC_FillArea(unsigned int startaddress, unsigned char character, unsigned c
 	VDC_FillArea_core();
 }
 
+void VIC_FillArea(unsigned int startaddress, unsigned char character, unsigned char length, unsigned char height)
+{
+	// Function to draw area with given value (draws from topleft to bottomright)
+	// Input: startaddress of start position (topleft), value to draw line with,
+	//		  length and height in number of character positions
+
+	r1          = startaddress;                 // Load start address
+	VDC_tmp1    = character;					// Obtain character value
+	VDC_tmp2    = length;  					    // Obtain length value
+	VDC_tmp4    = height;						// Obtain number of lines
+
+	VIC_FillArea_core();
+}
+
 unsigned int ColorAddress(unsigned int xcoord, unsigned char ycoord) {
 // Function to get color address for given card coordinate
 
@@ -394,18 +444,25 @@ unsigned int ColorAddress(unsigned int xcoord, unsigned char ycoord) {
     // Get base address of color matrix based on video mode
     if(vdc)
     {
+        // C128 VDC mode
         address = (screen_colormode>VDC_CLR1)?0x4000:0x3880;
         address += (ycoord / cardheigth[screen_colormode-1])*80;
     }
     else {
-        address = 0x8c00 + ((ycoord/8)*40);
+        if(osType & GEOS4) {
+            // Plus/4
+            address = 0x9800;
+        } else {
+            // C64 and C128 VIC-II mode
+            address = 0x8c00;
+        }
+        address += ((ycoord/8)*40);
     }
 
     address += xcoord / 8;
 
     return address;
 }
-
 
 void ColorRectangle(unsigned char foreground, unsigned char background, unsigned char top, unsigned char bottom, unsigned int left, unsigned int right) {
 // C function calling the GEOS v2 ColorRectangle function that is not included in GEOSLib for CC65
@@ -415,16 +472,28 @@ void ColorRectangle(unsigned char foreground, unsigned char background, unsigned
 
     width = ((right-left)/8)+1;
 
-    if(vdc && width>1 ) {
-        height = ((bottom-top)/cardheigth[screen_colormode-1])+1;
-        VDC_FillArea(ColorAddress(left,top),background + (foreground*16),width,height);
+    if(osType & GEOS128 ) {
+        if(vdc && width>1 ) {
+            height = ((bottom-top)/cardheigth[screen_colormode-1])+1;
+            VDC_FillArea(ColorAddress(left,top),background + (foreground*16),width,height);
+        } else {
+            r2L     = top;
+            r2H     = bottom;
+            r3      = left;
+            r4      = right;
+            a_tmp   = background + (foreground*16);
+            ColorRectangleCore();
+        }
     } else {
-        r2L     = top;
-        r2H     = bottom;
-        r3      = left;
-        r4      = right;
-        a_tmp   = background + (foreground*16);
-        ColorRectangleCore();
+        height = ((bottom-top)/8)+1;
+        if(osType & GEOS4) {
+            // Fill luminance
+            VIC_FillArea(ColorAddress(left,top),ted_color[foreground][1] + (ted_color[background][1]*16),width,height);
+            // Fill color
+            VIC_FillArea(ColorAddress(left,top)+1024,ted_color[background][0] + (ted_color[foreground][0]*16),width,height);
+        } else {
+            VIC_FillArea(ColorAddress(left,top),background + (foreground*16),width,height);
+        }
     }
 }
 
@@ -470,10 +539,13 @@ unsigned char ColorCardGet(unsigned int xcoord, unsigned char ycoord) {
 void DialogueClearColor() {
 // Function to wipe color for dialogue box
 
+    unsigned int left = DEF_DB_LEFT;
+    if(osType & GEOS4) { left-=16; }
+
     if(vdc) {
-        ColorRectangle(color_foreground,color_background,DEF_DB_TOP,DEF_DB_BOT+8,DEF_DB_LEFT*2,DEF_DB_RIGHT*2+16);
+        ColorRectangle(color_foreground,color_background,DEF_DB_TOP,DEF_DB_BOT+8,left*2,DEF_DB_RIGHT*2+16);
     } else {
-        ColorRectangle(color_foreground,color_background,DEF_DB_TOP,DEF_DB_BOT+8,DEF_DB_LEFT,DEF_DB_RIGHT+8);
+        ColorRectangle(color_foreground,color_background,DEF_DB_TOP,DEF_DB_BOT+8,left,DEF_DB_RIGHT+8);
     }
 
 }
