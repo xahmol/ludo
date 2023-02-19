@@ -85,16 +85,19 @@ unsigned char gameflag = 0;
 unsigned char dicethrows = 0;
 unsigned char iconflag = 0;
 unsigned char turnofplayernr = 0;
+unsigned char noturnpossible = 0;
 unsigned char zv = 0;
 unsigned char ns = 0;
 unsigned char throw;
 unsigned char autosavetoggle = 1;
 unsigned char pawnpossible[4];
-unsigned char pawnchosen;
+signed char pawnchosen;
+signed char as;
+unsigned char mp,ap, vr, vl, vn, nr, gv, ov, ro;
 
 //Save game and config file memory allocation and variables
-unsigned char saveslots[85];
-unsigned char savegamemem[136];
+char savegamemem[136];
+char filename[16];
 
 // Colors for field
 unsigned char vic_color[5] = { BLACK, GREEN, RED, BLUE, YELLOW };
@@ -328,6 +331,29 @@ char fileiconp[] = {
     0x00,0x12,0x09,0x00,0x17,0x1D,0x00,0x12,0x09,0x00,0x08,0x02,0x00,0x07,0xFC,0x00
 };
 
+// Declare config file header
+struct fileheader savefileHdr = {
+    {0,0},
+    {3, 21, 63 | 0x80 },
+    {
+        0x00,0x00,0x00,0x0E,0x00,0x00,0x1F,0x00,0x00,0x3F,0x80,0x00,0x7F,0xC0,0x00,0x7F,
+        0xC0,0x00,0x3F,0x80,0x00,0x1F,0x00,0x00,0x0E,0x07,0xFC,0x1F,0x08,0x02,0x3F,0x92,
+        0x09,0x3F,0x97,0x1D,0x7F,0xD2,0x09,0x7F,0xD0,0x41,0x7F,0xD0,0xE1,0x00,0x10,0x41,
+        0x00,0x12,0x09,0x00,0x17,0x1D,0x00,0x12,0x09,0x00,0x08,0x02,0x00,0x07,0xFC
+    },
+    SEQ,
+    APPL_DATA,
+    SEQUENTIAL,
+    0,
+    0,
+    0,
+    {'G','e','o','L','u','d','o',' ',' ',' ',' ',' ','V','0','.','1',0},
+    0x40,
+    {'X','a','n','d','e','r',' ','M','o','l',0,0,0,0,0,0,0,0,0,0,
+     'G','e','o','L','u','d','o',' ',' ',' ',' ',' ','V','0','.','1',0,0,0,0},
+    {"GeoLudo save file."}
+};
+
 // Declare function prototypes for icons
 void IconclickThrow();
 void IconclickNext();
@@ -546,6 +572,7 @@ void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned ch
 
     struct iconpic bitmap;
     unsigned char color = 0;
+    unsigned char backcolor = color_background;
     unsigned char track, position,ypos;
     unsigned int xpos;
     bitmap.height = 16;
@@ -582,8 +609,17 @@ void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned ch
 
     // Color field
     if(!monochromeflag) {
+        if(gameflag == 2) {
+            backcolor = (vdc)?VDC_DGREY:DKGREY; 
+        }
         xpos = xpos * 8;
-        ColorRectangle(color,color_background,ypos,ypos+15,xpos,xpos+15+(16*vdc));
+        ColorRectangle(color,backcolor,ypos,ypos+15,xpos,xpos+15+(16*vdc));
+    }
+
+    // Select highlight if relevant
+    if(coloronly == 2) {
+        SetRectangleCoords(ypos,ypos+15,xpos,xpos+15+(16*vdc));
+        FrameRectangle(255);
     }
 }
 
@@ -680,33 +716,188 @@ void ClearBoard() {
 	Rectangle();
 }
 
-unsigned char inputofnames()
-{
-    /* Enter player nanes */
-    unsigned char x,ai;
+void savegame(unsigned char autosave) {
+// Save game to a gameslot
+// Input: autosave is 1 for autosave, else 0
+
+    unsigned char error,x,y;
+
+    if(autosave==1)
+    {
+        CopyString(filename,"Ludo Autosave");
+        DeleteFile(filename);
+    }
+    else
+    {
+        // Ask for filename
+        if(!monochromeflag) { DialogueClearColor(); }
+        if(DlgBoxGetString(filename,15,"Enter name for save game.","(Cancel to abort)") == CANCEL) {
+            if(!monochromeflag & gameflag) { DrawBoard(1); }
+            return;
+        }
+        if(!filename[0]) {
+            CopyString(filename,"Ludo Savegame");
+        }
+
+        // Check if file is already existing
+        if(!FindFile(filename) == FILE_NOT_FOUND) {
+            if(DlgBoxYesNo("File exists.","Are you sure?") == YES) {
+                DeleteFile(filename);
+            } else {
+                if(!monochromeflag & gameflag) { DrawBoard(1); }
+                return;
+            }
+        }
+    }
+
+    // Clear save game memory
+    memset(savegamemem,0,136);
+
+    // Store game data to save game memory
+    savegamemem[0]=turnofplayernr;
+    for(x=0;x<4;x++)
+    {
+        savegamemem[x+1] = np[x];
+    }
+    for(x=0;x<4;x++)
+    {
+        for(y=0;y<4;y++)
+        {
+            savegamemem[5+(x*4)+y]=playerdata[x][y];
+        }
+    }
+    for(x=0;x<4;x++)
+    {
+        for(y=0;y<4;y++)
+        {
+            savegamemem[21+(x*8)+(y*2)]=playerpos[x][y][0];
+            savegamemem[22+(x*8)+(y*2)]=playerpos[x][y][1];
+        }
+    }
+    for(x=0;x<4;x++)
+    {
+        for(y=0;y<21;y++)
+        {
+            savegamemem[53+(x*21)+y]=playername[x][y];
+        }
+    }
+
+    // Set fileheader
+    POKEW((int)&savefileHdr.n_block,(int)&filename);
+    savefileHdr.load_address = (int)savegamemem;
+    savefileHdr.end_address= (int)savegamemem + 136;
+
+    // Save file to disk
+    error = SaveFile(0,&savefileHdr);
+
+    if(error) {
+        sprintf(buffer,"Error: %d",error);
+        DlgBoxOk("Error saving file.",buffer);
+    }
+
+    if(!monochromeflag & gameflag) { DrawBoard(1); };
+}
+
+void loadgame() {
+// Load game
+    
+    unsigned char error,x,y;
+    
+    // Select file
+    if(!monochromeflag) { DialogueClearColor(); }
+    error = DlgBoxFileSelect("GeoLudo",APPL_DATA,filename);
+    if (error!= OPEN ) {
+        if(error!=CANCEL) {
+            sprintf(buffer,"Error: %d",error);
+            DlgBoxOk("Error reading directory.",buffer);
+        }
+        if(!monochromeflag & gameflag) { DrawBoard(1); };
+        return;
+    }
+
+    // Load game data
+    error = GetFile(1,filename,savegamemem,NULL,NULL);
+
+    // Error handling
+    if(error) {
+        sprintf(buffer,"Error: %d",error);
+        DlgBoxOk("Error loading file.",buffer);
+        if(!monochromeflag & gameflag) { DrawBoard(1); };
+        return;
+    }
+
+    // Clear board if ongoing game
+    if(gameflag) { ClearBoard(); }
+
+    // Retrievibg game data
+    turnofplayernr=savegamemem[0];
+    for(x=0;x<4;x++)
+    {
+        np[x]=savegamemem[1+x];
+    }
+    for(x=0;x<4;x++)
+    {
+        for(y=0;y<4;y++)
+        {
+            playerdata[x][y]=savegamemem[5+(x*4)+y];
+        }
+    }
+    for(x=0;x<4;x++)
+    {
+        for(y=0;y<4;y++)
+        {
+            pawnerase(x,y);
+            playerpos[x][y][0]=savegamemem[21+(x*8)+(y*2)];
+            playerpos[x][y][1]=savegamemem[22+(x*8)+(y*2)];
+            pawnplace(x,y,0);
+        }
+    }
+    for(x=0;x<4;x++)
+    {
+        for(y=0;y<21;y++)
+        {
+            playername[x][y]=savegamemem[53+(x*21)+y];
+        }
+    }
+    gameflag = 1;
+
+    DrawBoard(0);    
+}
+
+unsigned char inputofnames() {
+// Enter player nanes
+
+    unsigned char x,ainumber;
     char numberai[2] = "0";
     unsigned int result;
+    char aitext[6];
 
     if(DlgBoxGetString(numberai,1,"Enter number of AI players (0-4)","(RETURN for 0, Cancel to abort}") != CANCEL) {
-        ai = numberai[0]-48;
+        ainumber = numberai[0]-48;
     } else { return 0; }
 
     for(x=0;x<4;x++)
     {
-        sprintf(buffer,"Input name for player %d (%s)",x+1,(x<4-ai)?"Human":"AI");
+        if(x < (4-ainumber)) {
+            playerdata[x][0] = 0;
+            CopyString(aitext,"Human");
+        } else {
+            playerdata[x][0] = 1;
+            CopyString(aitext,"AI");
+        }
+        sprintf(buffer,"Input name for player %d (%s)",x+1,aitext);
         result = DlgBoxGetString(playername[x],8,buffer,"(Leave empty for default name)");
         if(result == CANCEL || !playername[x][0])
         {
-            sprintf(playername[x],"Player %d",x+1);
+            sprintf(playername[x],"%s %d",aitext,x+1);
         }
     }
 
     return 1;
 }
 
-void gamereset()
-{
-    /* Reset all player data */
+void gamereset() {
+// Reset all player data
 
     unsigned char n;
 
@@ -755,10 +946,18 @@ void startturn() {
 }
 
 void humanchoosepawnstart() {
-/* Human has to choose a pawn, returns pawnnumber chosen */
+// Human has to choose a pawn, returns pawnnumber chosen
 
-    pawnchosen = 0;
+    unsigned char x;
+
     PutString("Choose pawn.",49,200 | screen_doublew);
+
+    for(x=0;x<4;x++) {
+        if(pawnpossible[x]) { pawnplace(turnofplayernr,x,2); }
+    }
+
+    // Set pawn choose mode for mouse handler
+    gameflag = 2;
 }
 
 void playerwins() {
@@ -873,9 +1072,7 @@ void endturn() {
 void pawnselect() {
 // Pllace pawn
 
-    unsigned char ap;
-    signed char as;
-    unsigned char ov, ro, x,y;
+    unsigned char x,y;
 
     // Erase pawn at present position
     pawnerase(turnofplayernr,pawnchosen);
@@ -943,7 +1140,7 @@ void pawnselect() {
     // Autosave if enabled
     if(playerdata[turnofplayernr][0]==0 && autosavetoggle==1)
     {
-        //savegame(1); /* Autosave on end human turn */
+        savegame(1); /* Autosave on end human turn */
     }
 
     // Did player win?
@@ -952,16 +1149,18 @@ void pawnselect() {
     endturn();
 }
 
-void turngeneric()
-{
-    /* Generic turn sequence */
-    unsigned char noturnpossible = 0;
-    unsigned char pawnchosen = 0;
-    unsigned char mp = 0;
-    signed char pawnnumber = -1;
-    unsigned char ap = 0;
-    unsigned char vr, vl, vn, nr, gv, x,y;
+void turngeneric() {
+// Generic turn sequence
 
+    unsigned char x,y;
+
+    // Reset variables
+    noturnpossible = 0;
+    mp = 0;
+    pawnchosen = -1;
+    ap = 0;
+
+    // Throw dice
     throw = dicethrow();
 
     // Reduce throw counter and return if multiple dicethrows left and no six is thrown
@@ -989,11 +1188,11 @@ void turngeneric()
     {
         if(playerdata[turnofplayernr][3]>0)
         {
-            pawnnumber=np[turnofplayernr];
+            pawnchosen=np[turnofplayernr];
         }
         np[turnofplayernr]=-1;
     }
-    if(noturnpossible==0 && pawnnumber==-1)
+    if(noturnpossible==0 && pawnchosen==-1)
     {
         for(x=0;x<4;x++)
         {
@@ -1005,7 +1204,7 @@ void turngeneric()
                 gv=1;
                 if(throw==6)
                 {
-                    pawnnumber=x;
+                    pawnchosen=x;
                     np[turnofplayernr]=x;
                     x=3;
                 }
@@ -1050,11 +1249,11 @@ void turngeneric()
             }
         }
     }
-    if(pawnnumber==-1)
+    if(pawnchosen==-1)
     {
         for(x=0;x<4;x++)
         {
-            if(pawnpossible[x]==1) { ap++; pawnnumber=x; }
+            if(pawnpossible[x]==1) { ap++; pawnchosen=x; }
         }
     }
     else { ap=1; }
@@ -1070,13 +1269,10 @@ void turngeneric()
         return;
     }
 
-    // Set chosen pawn
-    pawnchosen = pawnnumber;
-
     // More than one pawn possible, so choose
     if(ap>1)
     {
-        if(playerdata[turnofplayernr][0]==0) { humanchoosepawnstart(); return; }
+        if(!playerdata[turnofplayernr][0]) { humanchoosepawnstart(); return; }
         else { computerchoosepawn(); }
     }
 
@@ -1104,6 +1300,74 @@ void IconclickNext() {
 
 // Mouse handler functions
 
+void OtherMousePress() {
+// Handler for mouse clicks on other areas than the icons
+
+    unsigned int xmouse = mouseXPos;
+    unsigned int ymouse = mouseYPos;
+    unsigned char valid = 0;
+    unsigned char x, track, position,ypos;
+    unsigned int xpos;
+    unsigned char width = 16;
+
+    // Don't act on mouse button release
+    if ((mouseData & MOUSE_BTN_DOWN) != 0) return;
+
+    // Return if not in pawn choose mode
+    if(gameflag != 2) { return; }
+
+    // Check if clicked on valid pawn
+    for(x=0;x<4;x++) {
+        if(pawnpossible[x]) {
+            track = playerpos[turnofplayernr][x][0];
+            position = playerpos[turnofplayernr][x][1];
+
+            if(!track)
+            {
+                xpos = fieldcoords[position][0]*8;
+                ypos = fieldcoords[position][1]*8;
+            } else {
+                xpos = homedestcoords[turnofplayernr][position][0]*8;
+                ypos = homedestcoords[turnofplayernr][position][1]*8;
+            }
+
+            if(vdc) { xpos += xpos; width = 32; }
+
+            if(xpos<xmouse && xmouse<xpos+width && ypos<ymouse && ymouse<ypos+16) {
+                valid = x+1;
+            }
+        }
+    }
+
+    // Return if not clicked on valid pawn
+    if(!valid) { return; }
+
+    // Select clcked pawn
+    pawnchosen = valid-1;
+    gameflag = 1;
+
+    // Give visual clue of click
+    SetRectangleCoords(ypos,ypos+15,xpos,xpos+width-1);
+    InvertRectangle();
+    InvertRectangle();
+
+    // Disable highlights
+    for(x=0;x<4;x++)
+    {
+        if(pawnpossible[x]) {
+            pawnplace(turnofplayernr,x,0);
+        }
+    }
+
+    // Erase text
+    SetRectangleCoords(40,50,200 | screen_doublew,screen_pixel_width-1);
+    SetPattern(0);
+    Rectangle();
+
+    // Continue with oawn placement
+    pawnselect();
+}
+
 // Menu functions
 void appExit() {
 // Clean up video mode on exit
@@ -1124,6 +1388,7 @@ void geosSwitch4080() {
     SetNewMode();
     ReinitScreen(appname);
     if(gameflag) { DrawBoard(0); }
+    if(gameflag==2) { humanchoosepawnstart(); }
     GotoFirstMenu();
     DoMenu(&menuMain);
     drawicon();
@@ -1197,6 +1462,7 @@ void gameColor() {
 
         ReinitScreen(appname);
         DrawBoard(0);
+        if(gameflag==2) { humanchoosepawnstart(); }
         GotoFirstMenu();
         DoMenu(&menuMain);
         drawicon();
@@ -1209,18 +1475,32 @@ void gameColor() {
 }
 
 void fileLoad() {
-    ReDoMenu();
+// Select load file from menu
 
+    ReDoMenu();
+    loadgame();
+    return;
 }
 
 void fileSave() {
-    ReDoMenu();
+// Select save file from menu
 
+    ReDoMenu();
+    if(!gameflag) { return; }
+    savegame(0);
+    return;
 }
 
 void fileAutosaveToggle() {
+// Select autosave toogle from menu
+
     ReDoMenu();
 
+    if(!monochromeflag&gameflag) { DialogueClearColor(); }
+    sprintf(buffer,"Present value: %s",(autosavetoggle)?"Yes":"No");
+    autosavetoggle = (DlgBoxYesNo("Enable autosave?",buffer) == YES)?1:0;
+    if(!monochromeflag&gameflag) { DrawBoard(1); }
+    return;
 }
 
 void informationCredits (void) {
@@ -1277,6 +1557,9 @@ void main (void)
 
     DoMenu(&menuMain);
     DoIcons(icons);
+
+    // Set mouse handler vector
+    otherPressVec = OtherMousePress;
     
     // Never returns    
     MainLoop();
