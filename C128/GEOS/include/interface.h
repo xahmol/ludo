@@ -132,7 +132,6 @@ extern unsigned char VDC_tmp3;
 extern unsigned char VDC_tmp4;
 
 // Function prototypes
-void InitVideomode();
 unsigned int ColorAddress(unsigned int xcoord, unsigned char ycoord);
 void SetRectangleCoords(unsigned char top, unsigned char bottom, unsigned int left, unsigned int right);
 int StringLength (char* inputstring);
@@ -141,15 +140,12 @@ void PutStringRight(char* inputstring, unsigned char bottom, unsigned int left, 
 int CreateWindow(void);
 void WinOKButton(void);
 void CloseWindow (void);
-void ReinitScreen(char *s);
 void ColorRectangle(unsigned char foreground, unsigned char background, unsigned char top, unsigned char bottom, unsigned int left, unsigned int right);
 void SetColorMode(unsigned char colormode);
 void ColorCardSet(unsigned int xcoord, unsigned char ycoord, unsigned char foreground, unsigned char background );
 unsigned char ColorCardGet(unsigned int xcoord, unsigned char ycoord);
 void DialogueClearColor();
 void DrawBoard(unsigned char coloronly);
-
-unsigned char VDC_DetectVDCMemSize();
 unsigned int sidRnd(unsigned int limit);
 
 #endif

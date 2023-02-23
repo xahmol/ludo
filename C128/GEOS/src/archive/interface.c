@@ -177,6 +177,21 @@ struct icontab vdc_winOK = {
 
 // Screen functions
 
+void InitVideomode() {
+// Initialise videomode based on OS, screenmode and VDC size detected
+
+
+    // Get default color
+    color_foreground = BLACK;
+    color_background = LTGREY;
+
+    // Get host OS type
+    osType = get_ostype();
+    if ((osType & GEOS128) == GEOS128)  {
+        vdcsize = VDC_DetectVDCMemSize();
+    }
+}
+
 void SetRectangleCoords(unsigned char top, unsigned char bottom, unsigned int left, unsigned int right) {
 // Set the co-ordinates to use for rectangle functions
 
@@ -288,6 +303,105 @@ void CloseWindow() {
     InitDrawWindow (winIntRecover);
     dispBufferOn = ST_WR_FORE + ST_WR_BACK;
     RecoverRectangle();
+}
+
+void ReinitScreen(char *s) {
+// Initialise main screen
+// Input:   App name as string s
+
+    unsigned char colormode = (monochromeflag)?VDC_CLR0:VDC_CLR2;
+
+    screen_pixel_height = 200;
+
+    // Set co-ordinates based on which screen mode (40/80) is used
+	if ((osType & GEOS64) == GEOS64 || osType & GEOS4) // c64 or Plus/4
+	{
+		screen_pixel_width = SC_PIX_WIDTH;
+		winHeader = &vic_winHdr;
+		winMain = &vic_winMain;
+		hdrY = 200;
+		vdc = 0;
+        screen_doubleb = 0;
+        screen_doublew = 0;
+	}
+
+	if ((osType & GEOS128) == GEOS128) // c128
+	{
+
+        screen_doubleb = DOUBLE_B;
+        screen_doublew = DOUBLE_W;
+		if((graphMode & 0x80) == 0x00)
+		{
+			// 40 col mode
+			screen_pixel_width = SC_PIX_WIDTH;
+			winHeader = &vic_winHdr;
+			winMain = &vic_winMain;
+			hdrY = 200;
+			vdc = 0;
+		}
+		else if((graphMode & 0x80) == 0x80)
+		{
+			// == 0x80 - 80 col mode
+			screen_pixel_width = SCREENPIXELWIDTH;
+			winHeader = &vdc_winHdr;
+			winMain = &vdc_winMain;
+			hdrY = 400;
+			vdc = 1;
+            if(vdcsize<64) { colormode=VDC_CLR0; monochromeflag=1; }
+            color_background = VDC_LGREY;
+		}
+	}
+
+    // Set colormode
+    screen_colormode = colormode;
+    if(vdc) { 
+        SetColorMode(colormode);
+    } else {
+        if(osType & GEOS4) {
+            // Fill luminance
+            FillRam((void*)ColorAddress(0,0),(ted_color[color_background][1]*16)+ted_color[color_foreground][1],1000);
+            // Fill color
+            FillRam((void*)(ColorAddress(0,0)+1024),(ted_color[color_foreground][0]*16)+ted_color[color_background][0],1000);
+        } else {
+            FillRam((void*)ColorAddress(0,0),(color_foreground*16)+color_background,1000);
+        }
+    }
+
+    // Clear icons
+    mainicons = &noicons;
+    icons = mainicons;
+	
+    // Clear main screen
+    SetPattern(2);
+    SetRectangleCoords(0,screen_pixel_height-1,0,screen_pixel_width-1);
+    Rectangle();
+	SetPattern(0);
+	InitDrawWindow (winMain);
+	Rectangle();
+
+    // Draw header
+	SetPattern(0);
+	InitDrawWindow (winHeader);
+	Rectangle();
+	HorizontalLine(255, 0, hdrY, screen_pixel_width-1);
+	HorizontalLine(255, 3, hdrY, screen_pixel_width-1);
+	HorizontalLine(255, 5, hdrY, screen_pixel_width-1);
+	HorizontalLine(255, 7, hdrY, screen_pixel_width-1);
+	HorizontalLine(255, 10, hdrY, screen_pixel_width-1);
+    HorizontalLine(255, 12, 0, screen_pixel_width-1);
+	
+    // Draw application name
+	UseSystemFont();
+	PutStringCentered (s, 9, hdrY,screen_pixel_width-1);
+}
+
+unsigned char VDC_DetectVDCMemSize()
+{
+	// Function to detect the VDC memory size
+	// Output: memorysize 16 or 64
+
+	VDC_DetectVDCMemSize_core();
+	return VDC_value;
 }
 
 void VDC_FillArea(unsigned int startaddress, unsigned char character, unsigned char length, unsigned char height)

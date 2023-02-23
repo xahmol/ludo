@@ -76,13 +76,9 @@ BUT WITHOUT ANY WARRANTY. USE THEM AT YOUR OWN RISK!
 //#include <conio.h>
 #include "defines.h"
 #include "interface.h"
-#include "menus.h"
-#include "gamelogic.h"
 
 // Global variables
-char applicationfilename[21];
 char buffer[81];
-unsigned char overlay_active = 0;
 
 //Game variables
 unsigned char gameflag = 0;
@@ -93,11 +89,15 @@ unsigned char noturnpossible = 0;
 unsigned char zv = 0;
 unsigned char ns = 0;
 unsigned char throw;
-unsigned char autosavetoggle = 0;
+unsigned char autosavetoggle = 1;
 unsigned char pawnpossible[4];
 signed char pawnchosen;
 signed char as;
 unsigned char mp,ap, vr, vl, vn, nr, gv, ov, ro;
+
+//Save game and config file memory allocation and variables
+char savegamemem[136];
+char filename[16];
 
 // Colors for field
 unsigned char vic_color[5] = { BLACK, GREEN, RED, BLUE, YELLOW };
@@ -331,6 +331,29 @@ char fileiconp[] = {
     0x00,0x12,0x09,0x00,0x17,0x1D,0x00,0x12,0x09,0x00,0x08,0x02,0x00,0x07,0xFC,0x00
 };
 
+// Declare config file header
+struct fileheader savefileHdr = {
+    {0,0},
+    {3, 21, 63 | 0x80 },
+    {
+        0x00,0x00,0x00,0x0E,0x00,0x00,0x1F,0x00,0x00,0x3F,0x80,0x00,0x7F,0xC0,0x00,0x7F,
+        0xC0,0x00,0x3F,0x80,0x00,0x1F,0x00,0x00,0x0E,0x07,0xFC,0x1F,0x08,0x02,0x3F,0x92,
+        0x09,0x3F,0x97,0x1D,0x7F,0xD2,0x09,0x7F,0xD0,0x41,0x7F,0xD0,0xE1,0x00,0x10,0x41,
+        0x00,0x12,0x09,0x00,0x17,0x1D,0x00,0x12,0x09,0x00,0x08,0x02,0x00,0x07,0xFC
+    },
+    SEQ,
+    APPL_DATA,
+    SEQUENTIAL,
+    0,
+    0,
+    0,
+    {'G','e','o','L','u','d','o',' ',' ',' ',' ',' ','V','0','.','1',0},
+    0x40,
+    {'X','a','n','d','e','r',' ','M','o','l',0,0,0,0,0,0,0,0,0,0,
+     'G','e','o','L','u','d','o',' ',' ',' ',' ',' ','V','0','.','1',0,0,0,0},
+    {"GeoLudo save file."}
+};
+
 // Declare function prototypes for icons
 void IconclickThrow();
 void IconclickNext();
@@ -354,10 +377,17 @@ struct icontab nexticon = {
 
 // Declare functions prototypes that are called when menu items are 
 // clicked on and are used in the structs that defines the menus below.
+void geosSwitch4080();
 void geosExit();
+void gameRestart();
+void gameColor();
+void fileLoad();
+void fileSave();
+void fileAutosaveToggle();
+void informationCredits();
 
 // Menu structures with pointers to the menu handlers above
-struct menu menuGEOS = {
+static struct menu menuGEOS = {
     // GEOS menu
     { 11, 23, 0, 160 },
     2 | HORIZONTAL,
@@ -367,7 +397,7 @@ struct menu menuGEOS = {
     }
 };
 
-struct menu menuGame = {
+static struct menu menuGame = {
     // Game menu
     { 11, 23, 0, 160 },
     2 | HORIZONTAL,
@@ -377,7 +407,7 @@ struct menu menuGame = {
     }
 };
 
-struct menu menuFile = {
+static struct menu menuFile = {
     // File menu
     { 11, 23, 0, 160 },
     3 | HORIZONTAL,
@@ -388,7 +418,7 @@ struct menu menuFile = {
     }
 };
 
-struct menu menuMain = {
+static struct menu menuMain = {
     // Main menu
     { 0, 12, 0, 160 },
     4 | HORIZONTAL,
@@ -399,62 +429,6 @@ struct menu menuMain = {
         { "Credits", MENU_ACTION, informationCredits }
     }
 };
-
-// Overlay routine
-void overlayerror(unsigned char tyoe,unsigned char overlay) {
-// Overlay file loading error message
-
-    char typestring[4][] = {
-        "Opening VLIR file",
-        "Pointing at record",
-        "Reading record",
-        "Closing VLIR file"
-    };
-
-    sprintf(buffer,"%s %d",typestring[tyoe],overlay);
-    if(!monochromeflag & gameflag) { DialogueClearColor(); }
-    DlgBoxOk("VLIR file error",buffer);
-}
-
-void openVLIR() {
-// Opem VLIR records
-
-    if (OpenRecordFile(applicationfilename)) {
-        overlayerror(0,0);
-        appExit();
-    }
-}
-
-void closeVLIR() {
-// Close VLIR records
-
-    if (CloseRecordFile()) {
-        overlayerror(3,0);
-        appExit();
-    }
-}
-
-void loadoverlay(unsigned char overlay_select) {
-// Load memory overlay with given number
-
-    // Returns if overlay already active
-    if(overlay_select != overlay_active)
-    {
-        // Point at VLIR RECORD
-        if (PointRecord(overlay_select)) {
-            overlayerror(1,overlay_select);
-            appExit();
-        }
-
-        // Read VLIR record
-        if (ReadRecord(OVERLAY_ADDR, OVERLAY_SIZE)) {
-            overlayerror(2,overlay_select);
-            appExit();
-        }
-
-        overlay_active = overlay_select;
-    }
-}
 
 /* Game routines */
 
@@ -633,13 +607,12 @@ void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned ch
         BitmapUp(&bitmap);
     }
 
-    xpos = xpos * 8;
-
     // Color field
     if(!monochromeflag) {
-        if(coloronly == 2) {
+        if(gameflag == 2) {
             backcolor = (vdc)?VDC_DGREY:DKGREY; 
         }
+        xpos = xpos * 8;
         ColorRectangle(color,backcolor,ypos,ypos+15,xpos,xpos+15+(16*vdc));
     }
 
@@ -743,90 +716,152 @@ void ClearBoard() {
 	Rectangle();
 }
 
-void humanchoosepawnstart() {
-// Human has to choose a pawn, returns pawnnumber chosen
+void savegame(unsigned char autosave) {
+// Save game to a gameslot
+// Input: autosave is 1 for autosave, else 0
 
-    unsigned char x;
+    unsigned char error,x,y;
 
-    PutString("Choose pawn.",49,200 | screen_doublew);
+    if(autosave==1)
+    {
+        CopyString(filename,"Ludo Autosave");
+        DeleteFile(filename);
+    }
+    else
+    {
+        // Ask for filename
+        if(!monochromeflag) { DialogueClearColor(); }
+        if(DlgBoxGetString(filename,15,"Enter name for save game.","(Cancel to abort)") == CANCEL) {
+            if(!monochromeflag & gameflag) { DrawBoard(1); }
+            return;
+        }
+        if(!filename[0]) {
+            CopyString(filename,"Ludo Savegame");
+        }
 
-    for(x=0;x<4;x++) {
-        if(pawnpossible[x]) { pawnplace(turnofplayernr,x,2); }
+        // Check if file is already existing
+        if(!FindFile(filename) == FILE_NOT_FOUND) {
+            if(DlgBoxYesNo("File exists.","Are you sure?") == YES) {
+                DeleteFile(filename);
+            } else {
+                if(!monochromeflag & gameflag) { DrawBoard(1); }
+                return;
+            }
+        }
     }
 
-    // Set pawn choose mode for mouse handler
-    gameflag = 2;
+    // Clear save game memory
+    memset(savegamemem,0,136);
+
+    // Store game data to save game memory
+    savegamemem[0]=turnofplayernr;
+    for(x=0;x<4;x++)
+    {
+        savegamemem[x+1] = np[x];
+    }
+    for(x=0;x<4;x++)
+    {
+        for(y=0;y<4;y++)
+        {
+            savegamemem[5+(x*4)+y]=playerdata[x][y];
+        }
+    }
+    for(x=0;x<4;x++)
+    {
+        for(y=0;y<4;y++)
+        {
+            savegamemem[21+(x*8)+(y*2)]=playerpos[x][y][0];
+            savegamemem[22+(x*8)+(y*2)]=playerpos[x][y][1];
+        }
+    }
+    for(x=0;x<4;x++)
+    {
+        for(y=0;y<21;y++)
+        {
+            savegamemem[53+(x*21)+y]=playername[x][y];
+        }
+    }
+
+    // Set fileheader
+    POKEW((int)&savefileHdr.n_block,(int)&filename);
+    savefileHdr.load_address = (int)savegamemem;
+    savefileHdr.end_address= (int)savegamemem + 136;
+
+    // Save file to disk
+    error = SaveFile(0,&savefileHdr);
+
+    if(error) {
+        sprintf(buffer,"Error: %d",error);
+        DlgBoxOk("Error saving file.",buffer);
+    }
+
+    if(!monochromeflag & gameflag) { DrawBoard(1); };
 }
 
-void computerchoosepawn() {
-/* Computer has to choose a pawn, returns pawnnumber chosen */
+void loadgame() {
+// Load game
+    
+    unsigned char error,x,y;
+    
+    // Select file
+    if(!monochromeflag) { DialogueClearColor(); }
+    error = DlgBoxFileSelect("GeoLudo",APPL_DATA,filename);
+    if (error!= OPEN ) {
+        if(error!=CANCEL) {
+            sprintf(buffer,"Error: %d",error);
+            DlgBoxOk("Error reading directory.",buffer);
+        }
+        if(!monochromeflag & gameflag) { DrawBoard(1); };
+        return;
+    }
 
-    signed int pawnscore[4] = { 0,0,0,0 };
-    signed int minimumpawnscore;
-    unsigned char nn, no, x,y,z ;
+    // Load game data
+    error = GetFile(1,filename,savegamemem,NULL,NULL);
 
+    // Error handling
+    if(error) {
+        sprintf(buffer,"Error: %d",error);
+        DlgBoxOk("Error loading file.",buffer);
+        if(!monochromeflag & gameflag) { DrawBoard(1); };
+        return;
+    }
+
+    // Clear board if ongoing game
+    if(gameflag) { ClearBoard(); }
+
+    // Retrievibg game data
+    turnofplayernr=savegamemem[0];
     for(x=0;x<4;x++)
     {
-        if(pawnpossible[x]==0)
+        np[x]=savegamemem[1+x];
+    }
+    for(x=0;x<4;x++)
+    {
+        for(y=0;y<4;y++)
         {
-            pawnscore[x]=-10000;
-        }
-        else{
-            vr=playerpos[turnofplayernr][x][0];
-            vn=playerpos[turnofplayernr][x][1];
-            nn=vn+throw;
-            no=nn;
-            nr=vr;
-            if(vr==0)
-            {
-                if(turnofplayernr==0 && nn>39 && vn<40) { nn-=36; nr=1; }
-                if(turnofplayernr==1 && nn> 9 && vn<10) { nn-= 6; nr=1; }
-                if(turnofplayernr==2 && nn>19 && vn<20) { nn-=16; nr=1; }
-                if(turnofplayernr==3 && nn>29 && vn<30) { nn-=26; nr=1; }
-            }
-            if(nr==0 && nn>39) { nn-=40; }
-            if(nr==1 && nn>3 && playerdata[turnofplayernr][1]==1) { pawnscore[x]=10000; x=3; }
-            else
-            {
-                if(nr==1 && nn>3) { pawnscore[x]+=6000; }
-                for(y=0;y<4;y++)
-                {
-                    for(z=0;z<4;z++)
-                    {
-                        if(turnofplayernr==y && playerpos[y][z][0]==nr && playerpos[y][z][1]==nn) { pawnscore[x]-=8000; }
-                        if(turnofplayernr!=y && playerpos[y][z][0]==nr && playerpos[y][z][1]==nn)
-                        {
-                            pawnscore[x]+=4000;
-                            if(playerpos[y][z][0]==0)
-                            {
-                                if(y==0 && playerpos[y][z][1]>33) { pawnscore[x]+=3000; }
-                                if(y==1 && playerpos[y][z][1]> 3) { pawnscore[x]+=3000; }
-                                if(y==2 && playerpos[y][z][1]>13) { pawnscore[x]+=3000; }
-                                if(y==3 && playerpos[y][z][1]>23) { pawnscore[x]+=3000; }
-                            }
-                        }
-                        if(playerpos[y][z][0]==0 && nr==0 && turnofplayernr!=y)
-                        {
-                            if((vn-playerpos[y][z][1])<6 && vn-playerpos[y][z][1]>0) { pawnscore[x]+=400; }
-                            if((no-playerpos[y][z][1])<6 && no-playerpos[y][z][1]>0) { pawnscore[x]-=200; }
-                            if((playerpos[y][z][1]-nn)<6 && (playerpos[y][z][1]-nn)>0) { pawnscore[x]+=100; }
-                        }
-                    }
-                }
-                if(nr==0 && (nn==0 || nn==10 || nn==20 || nn==30)) { pawnscore[x]-=4000; }
-                if(vr==0 && (vn==0 || vn==10 || vn==20 || vn==30)) { pawnscore[x]+=2000; }
-                if(turnofplayernr==0) { pawnscore[x]+=nn; }
-                if(turnofplayernr==1) { pawnscore[x]+=no-10; }
-                if(turnofplayernr==2) { pawnscore[x]+=no-20; }
-                if(turnofplayernr==3) { pawnscore[x]+=no-30; }
-            }
+            playerdata[x][y]=savegamemem[5+(x*4)+y];
         }
     }
-    minimumpawnscore=-20000;
     for(x=0;x<4;x++)
     {
-        if(pawnscore[x]>minimumpawnscore && pawnpossible[x]==1) { minimumpawnscore=pawnscore[x]; pawnchosen=x; }
+        for(y=0;y<4;y++)
+        {
+            pawnerase(x,y);
+            playerpos[x][y][0]=savegamemem[21+(x*8)+(y*2)];
+            playerpos[x][y][1]=savegamemem[22+(x*8)+(y*2)];
+            pawnplace(x,y,0);
+        }
     }
+    for(x=0;x<4;x++)
+    {
+        for(y=0;y<21;y++)
+        {
+            playername[x][y]=savegamemem[53+(x*21)+y];
+        }
+    }
+    gameflag = 1;
+
+    DrawBoard(0);    
 }
 
 unsigned char inputofnames() {
@@ -910,11 +945,342 @@ void startturn() {
     return;
 }
 
+void humanchoosepawnstart() {
+// Human has to choose a pawn, returns pawnnumber chosen
+
+    unsigned char x;
+
+    PutString("Choose pawn.",49,200 | screen_doublew);
+
+    for(x=0;x<4;x++) {
+        if(pawnpossible[x]) { pawnplace(turnofplayernr,x,2); }
+    }
+
+    // Set pawn choose mode for mouse handler
+    gameflag = 2;
+}
+
+void playerwins() {
+// A player has won the game, choose to continue or stop the game
+
+    sprintf(buffer, "%s has won!", playername[turnofplayernr]);
+
+    if(!monochromeflag) { DialogueClearColor(); }
+    if(DlgBoxYesNo(buffer,"Continue playing?") == NO) {
+        gameflag = 0; ClearBoard(); return;
+    }
+    if(!monochromeflag & gameflag) { DrawBoard(1); }
+}
+
+void computerchoosepawn() {
+/* Computer has to choose a pawn, returns pawnnumber chosen */
+
+    signed int pawnscore[4] = { 0,0,0,0 };
+    signed int minimumpawnscore;
+    unsigned char nn, no, x,y,z ;
+
+    for(x=0;x<4;x++)
+    {
+        if(pawnpossible[x]==0)
+        {
+            pawnscore[x]=-10000;
+        }
+        else{
+            vr=playerpos[turnofplayernr][x][0];
+            vn=playerpos[turnofplayernr][x][1];
+            nn=vn+throw;
+            no=nn;
+            nr=vr;
+            if(vr==0)
+            {
+                if(turnofplayernr==0 && nn>39 && vn<40) { nn-=36; nr=1; }
+                if(turnofplayernr==1 && nn> 9 && vn<10) { nn-= 6; nr=1; }
+                if(turnofplayernr==2 && nn>19 && vn<20) { nn-=16; nr=1; }
+                if(turnofplayernr==3 && nn>29 && vn<30) { nn-=26; nr=1; }
+            }
+            if(nr==0 && nn>39) { nn-=40; }
+            if(nr==1 && nn>3 && playerdata[turnofplayernr][1]==1) { pawnscore[x]=10000; x=3; }
+            else
+            {
+                if(nr==1 && nn>3) { pawnscore[x]+=6000; }
+                for(y=0;y<4;y++)
+                {
+                    for(z=0;z<4;z++)
+                    {
+                        if(turnofplayernr==y && playerpos[y][z][0]==nr && playerpos[y][z][1]==nn) { pawnscore[x]-=8000; }
+                        if(turnofplayernr!=y && playerpos[y][z][0]==nr && playerpos[y][z][1]==nn)
+                        {
+                            pawnscore[x]+=4000;
+                            if(playerpos[y][z][0]==0)
+                            {
+                                if(y==0 && playerpos[y][z][1]>33) { pawnscore[x]+=3000; }
+                                if(y==1 && playerpos[y][z][1]> 3) { pawnscore[x]+=3000; }
+                                if(y==2 && playerpos[y][z][1]>13) { pawnscore[x]+=3000; }
+                                if(y==3 && playerpos[y][z][1]>23) { pawnscore[x]+=3000; }
+                            }
+                        }
+                        if(playerpos[y][z][0]==0 && nr==0 && turnofplayernr!=y)
+                        {
+                            if((vn-playerpos[y][z][1])<6 && vn-playerpos[y][z][1]>0) { pawnscore[x]+=400; }
+                            if((no-playerpos[y][z][1])<6 && no-playerpos[y][z][1]>0) { pawnscore[x]-=200; }
+                            if((playerpos[y][z][1]-nn)<6 && (playerpos[y][z][1]-nn)>0) { pawnscore[x]+=100; }
+                        }
+                    }
+                }
+                if(nr==0 && (nn==0 || nn==10 || nn==20 || nn==30)) { pawnscore[x]-=4000; }
+                if(vr==0 && (vn==0 || vn==10 || vn==20 || vn==30)) { pawnscore[x]+=2000; }
+                if(turnofplayernr==0) { pawnscore[x]+=nn; }
+                if(turnofplayernr==1) { pawnscore[x]+=no-10; }
+                if(turnofplayernr==2) { pawnscore[x]+=no-20; }
+                if(turnofplayernr==3) { pawnscore[x]+=no-30; }
+            }
+        }
+    }
+    minimumpawnscore=-20000;
+    for(x=0;x<4;x++)
+    {
+        if(pawnscore[x]>minimumpawnscore && pawnpossible[x]==1) { minimumpawnscore=pawnscore[x]; pawnchosen=x; }
+    }
+}
+
+
+void endturn() {
+// End of turn sequence
+
+    // Next player, or same if 6 is thrown
+    do
+    {
+        if(zv==1)
+        {
+            zv=0;
+        }
+        else
+        {
+            np[turnofplayernr]=-1;
+            turnofplayernr++;
+            if(turnofplayernr>3) { turnofplayernr=0; }
+        }
+    } while (zv==0 && playerdata[turnofplayernr][1]==0);
+
+    // Enable next icon
+    iconflag = 2;
+    drawicon();
+}
+
+void pawnselect() {
+// Pllace pawn
+
+    unsigned char x,y;
+
+    // Erase pawn at present position
+    pawnerase(turnofplayernr,pawnchosen);
+
+    // Calculate new position
+    ov=playerpos[turnofplayernr][pawnchosen][1];
+    ro=playerpos[turnofplayernr][pawnchosen][0];
+    if(ro==1 && ov<4)
+    {
+        playerpos[turnofplayernr][pawnchosen][0]=0;
+        playerpos[turnofplayernr][pawnchosen][1]=turnofplayernr*10;
+        playerdata[turnofplayernr][3]--;
+    }
+    else { playerpos[turnofplayernr][pawnchosen][1]+=throw; }
+    if(turnofplayernr==0 && playerpos[turnofplayernr][pawnchosen][1]>39 && ov<40 && ro==0)
+        { playerpos[turnofplayernr][pawnchosen][0]=1; playerpos[turnofplayernr][pawnchosen][1]-=36; }
+    if(turnofplayernr==1 && playerpos[turnofplayernr][pawnchosen][1]> 9 && ov<10 && ro==0)
+        { playerpos[turnofplayernr][pawnchosen][0]=1; playerpos[turnofplayernr][pawnchosen][1]-= 6; }
+    if(turnofplayernr==2 && playerpos[turnofplayernr][pawnchosen][1]>19 && ov<20 && ro==0)
+        { playerpos[turnofplayernr][pawnchosen][0]=1; playerpos[turnofplayernr][pawnchosen][1]-=16; }
+    if(turnofplayernr==3 && playerpos[turnofplayernr][pawnchosen][1]>29 && ov<30 && ro==0)
+        { playerpos[turnofplayernr][pawnchosen][0]=1; playerpos[turnofplayernr][pawnchosen][1]-=26; }
+    if(playerpos[turnofplayernr][pawnchosen][0]==1 && playerpos[turnofplayernr][pawnchosen][1]>3)
+        { dp[turnofplayernr]=playerpos[turnofplayernr][pawnchosen][1]; }
+    if(playerpos[turnofplayernr][pawnchosen][1]==playerdata[turnofplayernr][1]+3 && playerpos[turnofplayernr][pawnchosen][0]==1)
+        { playerdata[turnofplayernr][1]--; }
+    if(playerpos[turnofplayernr][pawnchosen][1]>39) { playerpos[turnofplayernr][pawnchosen][1]-=40; }
+    ap=0;
+    as=-1;
+
+    // Check is player of other player is presemt at destination
+    for(x=0;x<4;x++)
+    {
+        for(y=0;y<4;y++)
+        {
+            if(y!=pawnchosen || x!=turnofplayernr)
+            {
+                if(playerpos[x][y][0]==0 && playerpos[turnofplayernr][pawnchosen][0]==0)
+                {
+                    if(playerpos[x][y][1]==playerpos[turnofplayernr][pawnchosen][1])
+                    {
+                        ap=y;
+                        as=x;
+                        y=3;
+                        x=3;
+                    }
+                }
+            }
+        }
+    }
+
+    // Move other player pawn to home if needed
+    if(as!=-1)
+    {
+        pawnerase(as,ap);
+        playerpos[as][ap][0]=1;
+        playerpos[as][ap][1]=ap;
+        playerdata[as][3]++;
+        pawnplace(as,ap,0);
+    }
+
+    // Place pawn at new position
+    pawnplace(turnofplayernr,pawnchosen,0);
+
+    // Autosave if enabled
+    if(playerdata[turnofplayernr][0]==0 && autosavetoggle==1)
+    {
+        savegame(1); /* Autosave on end human turn */
+    }
+
+    // Did player win?
+    if(playerdata[turnofplayernr][1]==0) { playerwins(); return; }
+
+    endturn();
+}
+
+void turngeneric() {
+// Generic turn sequence
+
+    unsigned char x,y;
+
+    // Reset variables
+    noturnpossible = 0;
+    mp = 0;
+    pawnchosen = -1;
+    ap = 0;
+
+    // Throw dice
+    throw = dicethrow();
+
+    // Reduce throw counter and return if multiple dicethrows left and no six is thrown
+    if(dicethrows>1)
+    {
+        if(throw !=6 ) { dicethrows--; return; }
+        else { dicethrows=1; }
+    }
+
+    // Disable throw icon if enabled
+    if(iconflag == 1) { eraseicon(); }
+
+    if(dicethrows == 1) {
+        // Erase throw 3 times line
+        SetRectangleCoords(50,60,200 | screen_doublew,screen_pixel_width-1);
+        SetPattern(0);
+        Rectangle();
+
+        // If all at home and no 6
+        if(playerdata[turnofplayernr][3]==playerdata[turnofplayernr][1] && throw!=6) { noturnpossible=1; }
+    }
+
+    // Check for valid moves
+    if(np[turnofplayernr]>=0)
+    {
+        if(playerdata[turnofplayernr][3]>0)
+        {
+            pawnchosen=np[turnofplayernr];
+        }
+        np[turnofplayernr]=-1;
+    }
+    if(noturnpossible==0 && pawnchosen==-1)
+    {
+        for(x=0;x<4;x++)
+        {
+            vr=playerpos[turnofplayernr][x][0];
+            vl=playerpos[turnofplayernr][x][1];
+            gv=0;
+            if(vr==1 && vl<4)
+            {
+                gv=1;
+                if(throw==6)
+                {
+                    pawnchosen=x;
+                    np[turnofplayernr]=x;
+                    x=3;
+                }
+            }
+            if(gv==0)
+            {
+                vn=vl+throw;
+                nr=vr;
+                if(vr==0)
+                {
+                    if(turnofplayernr==0 && vn>39 && vl<40) { vn-=36; nr=1; }
+                    if(turnofplayernr==1 && vn> 9 && vl<10) { vn-= 6; nr=1; }
+                    if(turnofplayernr==2 && vn>19 && vl<20) { vn-=16; nr=1; }
+                    if(turnofplayernr==3 && vn>29 && vl<30) { vn-=26; nr=1; }
+                }
+                if(nr==1)
+                {
+                    if(vn>7) { gv=1; }
+                    else
+                    {
+                        for(y=0;y<4;y++)
+                        {
+                            if(vr==1)
+                            {
+                                if(x!=y && playerpos[turnofplayernr][y][0]==1 && playerpos[turnofplayernr][y][1]<=vn && playerpos[turnofplayernr][y][1]>3 && playerpos[turnofplayernr][x][1] < playerpos[turnofplayernr][y][1])
+                                {
+                                    gv=1;
+                                    y=3;
+                                }
+                            }
+                            else{
+                                if(x!=y && playerpos[turnofplayernr][y][0]==1 && playerpos[turnofplayernr][y][1]<=vn && playerpos[turnofplayernr][y][1]>3)
+                                {
+                                    gv=1;
+                                    y=3;
+                                }
+                            }
+                        }
+                    }
+                }
+                if(gv==0) { pawnpossible[x]=1; }
+            }
+        }
+    }
+    if(pawnchosen==-1)
+    {
+        for(x=0;x<4;x++)
+        {
+            if(pawnpossible[x]==1) { ap++; pawnchosen=x; }
+        }
+    }
+    else { ap=1; }
+
+    // If 6 is thrown, another turn for same player
+    if(throw==6) { zv=1; }
+
+    // No turn possible
+    if(ap==0 || noturnpossible==1)
+    {
+        PutString("No turn possible.",59,200 | screen_doublew);
+        endturn();
+        return;
+    }
+
+    // More than one pawn possible, so choose
+    if(ap>1)
+    {
+        if(!playerdata[turnofplayernr][0]) { humanchoosepawnstart(); return; }
+        else { computerchoosepawn(); }
+    }
+
+    pawnselect();
+}
+
 // Icon handlers
 void IconclickThrow() {
 // Player clicked throw icon
 
-    loadoverlay(1);
     turngeneric();
 }
 
@@ -997,7 +1363,6 @@ void OtherMousePress() {
     Rectangle();
 
     // Continue with oawn placement
-    loadoverlay(1);
     pawnselect();
 }
 
@@ -1012,16 +1377,20 @@ void appExit() {
         }
     }
 
-    closeVLIR();
-
     EnterDeskTop();    
 }
 
 void geosSwitch4080() {
-// Switch 40/80 selected from menu
+// Switch between 40 and 80 column mode
 
-    loadoverlay(2);
-    Switch4080();
+    SetNewMode();
+    ReinitScreen(appname);
+    if(gameflag) { DrawBoard(0); }
+    if(gameflag==2) { humanchoosepawnstart(); }
+    GotoFirstMenu();
+    DoMenu(&menuMain);
+    drawicon();
+    DoIcons(icons);
     return;
 }
 
@@ -1073,11 +1442,32 @@ void gameRestart() {
 }
 
 void gameColor() {
-// Color option selected from menu
+// Set monochrome flag or not
+
+    unsigned char oldflag = monochromeflag;
 
     ReDoMenu();
-    loadoverlay(2);
-    MonochromeToggle();
+
+    if(!monochromeflag&gameflag) { DialogueClearColor(); }
+    sprintf(buffer,"Present value: %s",(monochromeflag)?"Yes":"No");
+    monochromeflag = (DlgBoxYesNo("Enable monochrome mode?",buffer) == YES)?1:0;
+
+    if(oldflag != monochromeflag & gameflag) { 
+        
+        mainicons = &noicons;
+        icons = mainicons;
+        DoIcons(icons);
+
+        ReinitScreen(appname);
+        DrawBoard(0);
+        if(gameflag==2) { humanchoosepawnstart(); }
+        GotoFirstMenu();
+        DoMenu(&menuMain);
+        drawicon();
+        DoIcons(icons);
+    } else {
+        if(!monochromeflag) { DrawBoard(1); }
+    }
 
     return;
 }
@@ -1086,7 +1476,6 @@ void fileLoad() {
 // Select load file from menu
 
     ReDoMenu();
-    loadoverlay(2);
     loadgame();
     return;
 }
@@ -1096,7 +1485,6 @@ void fileSave() {
 
     ReDoMenu();
     if(!gameflag) { return; }
-    loadoverlay(2);
     savegame(0);
     return;
 }
@@ -1105,31 +1493,43 @@ void fileAutosaveToggle() {
 // Select autosave toogle from menu
 
     ReDoMenu();
-    loadoverlay(2);
-    AutosaveToggle();
 
+    if(!monochromeflag&gameflag) { DialogueClearColor(); }
+    sprintf(buffer,"Present value: %s",(autosavetoggle)?"Yes":"No");
+    autosavetoggle = (DlgBoxYesNo("Enable autosave?",buffer) == YES)?1:0;
+    if(!monochromeflag&gameflag) { DrawBoard(1); }
     return;
 }
 
 void informationCredits (void) {
-// Select show credits from menu
+// Show credits
     
-    ReDoMenu();
-    loadoverlay(2);
-    ShowCredits();
+    unsigned char xcoord;
 
+    ReDoMenu();
+
+    // Create dialogue window
+    xcoord = CreateWindow();
+
+    // Print credits
+    PutString(CBOLDON "GeoLudo" CPLAINTEXT,69,xcoord);
+    PutString("Ludo game for 8 bit computers, GEOS edition",79,xcoord);
+    sprintf(buffer,"Version: %s",version);
+    PutString(buffer,99,xcoord);
+    PutString("Written by Xander Mol, 2023",109,xcoord);
+    PutString("For documentation, source, license and credits, see",119,xcoord);
+    PutString("https://github.com/xahmol/GeoUTools",129,xcoord);
+    PutString("https://www.idreamtin8bits.com/",139,xcoord);
+
+    // Show OK icon
+    WinOKButton();
     return;
 }
 
 // Main
 
-void main(int /*argc*/, char *argv[])
+void main (void)
 {
-    CopyString(applicationfilename,argv[0]);
-
-    // Open VLIR at record 0
-    openVLIR();
-
     // Set at exit hook
     atexit(&appExit);
 
@@ -1145,13 +1545,13 @@ void main(int /*argc*/, char *argv[])
             BUILD_HOUR_CH0, BUILD_HOUR_CH1, BUILD_MIN_CH0, BUILD_MIN_CH1);
 
     // Setup video mode
-    loadoverlay(2);
     InitVideomode();
-    ReinitScreen(appname);
 
     // Setup random generator and game phase flag
     primeRnd();
     gameflag = 0;
+
+    ReinitScreen(appname);
 
     DoMenu(&menuMain);
     DoIcons(icons);

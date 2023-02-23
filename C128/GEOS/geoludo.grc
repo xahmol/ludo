@@ -2,9 +2,16 @@
 ; this is the resource file for test.c, a GEOS application example
 
 HEADER APPLICATION "GeoLudo" "GeoLudo" "V0.1" {
-dostype SEQ
-author  "Xander Mol"
-info    "Ludo game for 8 bit computers, GEOS edition."
-mode    any
-icon    "ludoicon.bin"
+structure   VLIR
+dostype     USR
+author      "Xander Mol"
+info        "Ludo game for 8 bit computers, GEOS edition."
+mode        any
+icon        "ludoicon.bin"
+}
+
+MEMORY {
+stacksize   0x0800
+overlaysize 0x1000
+overlaynums 0 1 2
 }

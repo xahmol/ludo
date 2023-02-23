@@ -91,25 +91,25 @@ ZIPLIST = $(MAIN).d64 $(MAIN).d81
 
 .SUFFIXES:
 .PHONY: all clean deploy vice
-all: $(MAIN).bin $(MAIN).d81 $(MAIN).d64 $(ZIP)
+all: $(MAIN).cvt
 
 # Building GeoUMAIN
-$(MAIN).bin: $(MAIN).grc $(MAINSRC) $(MAINHDR)
-	$(CL) $(CFLAGS) $(MAINFLG) -o $(MAIN).bin $(MAIN).grc $(MAINSRC) $(MAINHDR)
+$(MAIN).cvt: $(MAIN).grc $(MAINSRC) $(MAINHDR)
+	$(CL) $(CFLAGS) $(MAINFLG) -o $(MAIN).cvt $(MAIN).grc $(MAINSRC)
 
 # Creating MAIN disk image for 1581
-$(MAIN).d81:		$(MAIN).bin $(MAIN)Hdr.bin $(MAIN)d81.gbuild
-	$(DEL) $(MAIN).d81 2>$(NULLDEV)
-	$(GBUILD) $(MAIN)d81.gbuild
+#$(MAIN).d81:		$(MAIN).bin $(MAIN)Hdr.bin $(MAIN)d81.gbuild
+#	$(DEL) $(MAIN).d81 2>$(NULLDEV)
+#	$(GBUILD) $(MAIN)d81.gbuild
 
 # Creating MAIN disk image for 1581
-$(MAIN).d64:		$(MAIN).bin $(MAIN)Hdr.bin $(MAIN)d64.gbuild
-	$(DEL) $(MAIN).d64 2>$(NULLDEV)
-	$(GBUILD) $(MAIN)d64.gbuild
+#$(MAIN).d64:		$(MAIN).bin $(MAIN)Hdr.bin $(MAIN)d64.gbuild
+#	$(DEL) $(MAIN).d64 2>$(NULLDEV)
+#	$(GBUILD) $(MAIN)d64.gbuild
 
 # Creating ZIP file for distribution
-$(ZIP): $(ZIPLIST)
-	zip $@ $^
+#$(ZIP): $(ZIPLIST)
+#	zip $@ $^
 
 clean:
 	$(DEL) $(MAIN)*.bin $(MAIN).map 2>$(NULLDEV)

@@ -66,7 +66,7 @@
 
     .segment "FILEHEADER"
     .import __VLIR0_START__, __STARTUP_RUN__ , __BACKBUFSIZE__ , __STACKADDR__ , __STACKSIZE__,__HIMEM__
-    
+
 ; Defines
 
 ; GEOS filetypes
@@ -120,9 +120,9 @@ CF_128          = $C0
     ; Icon data: 63 bytes
     .incbin "ludoicon.bin", 0, 63
 
-	.byte	$80 | SEQ			        ;Commodore file type, with bit 7 set.
+	.byte	$80 | USR			        ;Commodore file type, with bit 7 set.
 	.byte	APPLICATION		    	    ;Geos file type
-	.byte	SEQUENTIAL		    	    ;Geos file structure type
+	.byte	VLIR    		    	    ;Geos file structure type
 
 	.word	__VLIR0_START__	    	    ;start address of program (where to load to)
 	.word	 __VLIR0_START__ - 1        ;usually end address, but only needed for

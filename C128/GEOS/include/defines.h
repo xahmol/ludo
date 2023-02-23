@@ -1,6 +1,13 @@
 #ifndef __DEFINES_H_
 #define __DEFINES_H_
 
+// Linker defines
+extern void _OVERLAYADDR__[];
+extern void _OVERLAYSIZE__[];
+
+#define OVERLAY_ADDR (char*)   _OVERLAYADDR__
+#define OVERLAY_SIZE (unsigned)_OVERLAYSIZE__
+
 // Defines
 // Memory locations not present in geos.h
 #define mouseXPos           (*(unsigned*)0x003a)
@@ -10,6 +17,50 @@
 
 // Global variables
 extern char buffer[81];
+extern char applicationfilename[21];
+extern unsigned char overlay_active;
+extern struct menu menuMain;
+
+//Game variables
+extern unsigned char gameflag;
+extern unsigned char dicethrows;
+extern unsigned char iconflag;
+extern unsigned char turnofplayernr;
+extern unsigned char noturnpossible;
+extern unsigned char zv;
+extern unsigned char ns;
+extern unsigned char throw;
+extern unsigned char autosavetoggle;
+extern unsigned char pawnpossible[4];
+extern signed char pawnchosen;
+extern signed char as;
+extern unsigned char mp,ap, vr, vl, vn, nr, gv, ov, ro;
+extern unsigned char vic_color[5];
+extern unsigned char vdc_color[5];
+extern unsigned char fieldcoords[40][2];
+extern unsigned char homedestcoords[4][8][2];
+extern unsigned char playerdata[4][4];
+extern unsigned char playerpos[4][4][2];
+extern char playername[4][9];
+extern signed char np[4];
+extern unsigned char dp[4];
+
+// Function prototypes
+void appExit();
+void openVLIR();
+void closeVLIR();
+void loadoverlay(unsigned char overlay_select);
+unsigned char dicethrow();
+void drawicon();
+void eraseicon();
+void drawfield(unsigned char track, unsigned char position, unsigned char playernumber, unsigned char coloronly);
+void pawnerase(unsigned char playernumber, unsigned char pawnnumber);
+void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned char coloronly);
+void DrawPresentplayerinfo(unsigned char coloronly);
+void DrawBoard(unsigned char coloronly);
+void ClearBoard();
+void humanchoosepawnstart();
+void computerchoosepawn();
 
 /* Defines for versioning */
 /* Version number */

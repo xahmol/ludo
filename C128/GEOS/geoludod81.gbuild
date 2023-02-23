@@ -2,5 +2,8 @@
 Disk="GeoLudo.d81"
 Header="geoludoHdr.bin"
 
-[Sequential]
-Data="geoludo.bin"
+[VLIR]
+0=geoludo_vlir0.bin
+1=geoludo_vlir1.bin
+2=geoludo_vlir2.bin
+3=__VLIR_END
