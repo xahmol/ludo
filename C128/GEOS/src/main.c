@@ -78,6 +78,7 @@ BUT WITHOUT ANY WARRANTY. USE THEM AT YOUR OWN RISK!
 #include "interface.h"
 #include "menus.h"
 #include "gamelogic.h"
+#include "sidplay.h"
 
 // Global variables
 char applicationfilename[21];
@@ -86,6 +87,7 @@ unsigned char overlay_active = 0;
 
 //Game variables
 unsigned char gameflag = 0;
+unsigned char musicflag = 0;
 unsigned char dicethrows = 0;
 unsigned char iconflag = 0;
 unsigned char turnofplayernr = 0;
@@ -331,6 +333,10 @@ char fileiconp[] = {
     0x00,0x12,0x09,0x00,0x17,0x1D,0x00,0x12,0x09,0x00,0x08,0x02,0x00,0x07,0xFC,0x00
 };
 
+//Save game and config file memory allocation and variables
+char savegamemem[160];
+char filename[17];
+
 // Declare function prototypes for icons
 void IconclickThrow();
 void IconclickNext();
@@ -355,6 +361,10 @@ struct icontab nexticon = {
 // Declare functions prototypes that are called when menu items are 
 // clicked on and are used in the structs that defines the menus below.
 void geosExit();
+void geosSwitch4080();
+void fileAutosaveToggle();
+void gameRestart();
+void MonochromeToggle();
 
 // Menu structures with pointers to the menu handlers above
 struct menu menuGEOS = {
@@ -591,31 +601,14 @@ void pawnerase(unsigned char playernumber, unsigned char pawnnumber)
     drawfield(playerpos[playernumber][pawnnumber][0],playerpos[playernumber][pawnnumber][1],playernumber,0);
 }
 
-void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned char coloronly)
-{
-    /* Place a pawn on the field
-       Input playernumber and pawnnumber */
+void pawnprint(unsigned char playernumber, unsigned int xpos, unsigned char ypos, unsigned char backcolor, unsigned char coloronly) {
+// Print pawn of player at given position
 
     struct iconpic bitmap;
     unsigned char color = 0;
-    unsigned char backcolor = color_background;
-    unsigned char track, position,ypos;
-    unsigned int xpos;
+
     bitmap.height = 16;
     bitmap.width = 2 | screen_doubleb;
-
-
-    track = playerpos[playernumber][pawnnumber][0];
-    position = playerpos[playernumber][pawnnumber][1];
-    
-    if(!track)
-    {
-        xpos = fieldcoords[position][0];
-        ypos = fieldcoords[position][1]*8;
-    } else {
-        xpos = homedestcoords[playernumber][position][0];
-        ypos = homedestcoords[playernumber][position][1]*8;
-    }
 
     if(monochromeflag) {
         bitmap.pic_ptr = pawngraphics[playernumber];
@@ -623,8 +616,6 @@ void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned ch
         bitmap.pic_ptr = pawngraphics[0];
         color = (vdc)?vdc_color[playernumber+1]:vic_color[playernumber+1];
     }
-
-    if(vdc) { xpos += xpos; }
 
     if(!coloronly) {
         // Place bitmap
@@ -648,6 +639,30 @@ void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned ch
         SetRectangleCoords(ypos,ypos+15,xpos,xpos+15+(16*vdc));
         FrameRectangle(255);
     }
+}
+
+void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned char coloronly) {
+// Place a pawn on the field
+// Input playernumber and pawnnumber
+
+    unsigned char track, position,ypos;
+    unsigned int xpos;
+
+    track = playerpos[playernumber][pawnnumber][0];
+    position = playerpos[playernumber][pawnnumber][1];
+    
+    if(!track)
+    {
+        xpos = fieldcoords[position][0];
+        ypos = fieldcoords[position][1]*8;
+    } else {
+        xpos = homedestcoords[playernumber][position][0];
+        ypos = homedestcoords[playernumber][position][1]*8;
+    }
+
+    if(vdc) { xpos += xpos; }
+
+    pawnprint(playernumber,xpos,ypos,color_background,coloronly);
 }
 
 void DrawPresentplayerinfo(unsigned char coloronly) {
@@ -738,9 +753,9 @@ void ClearBoard() {
     }
 
     eraseicon();
+    SetRectangleCoords(24,screen_pixel_height-1,0,screen_pixel_width-1);
     SetPattern(0);
-	SetRectangleCoords(24,screen_pixel_height-1,0,screen_pixel_height-1);
-	Rectangle();
+    Rectangle();
 }
 
 void humanchoosepawnstart() {
@@ -864,21 +879,28 @@ unsigned char inputofnames() {
 void gamereset() {
 // Reset all player data
 
-    unsigned char n;
-
-    DrawBoard(0);
+    unsigned char player,pawn;
 
     gameflag = 1;
     dicethrows = 0;
     iconflag = 0;
     turnofplayernr=0;
-    for(n=0;n<4;n++)
-    {
-        playerdata[n][1]=4;
-        playerdata[n][3]=4;
-        np[n]=-1;
-        dp[n]=8;
+    for(player=0;player<4;player++) {
+        playerdata[player][1]=4;
+        playerdata[player][3]=4;
+        np[player]=-1;
+        dp[player]=8;
+        for(pawn=0;pawn<4;pawn++) {
+            playerpos[player][pawn][0] = 1;
+            playerpos[player][pawn][1] = pawn;
+        }
     }
+
+    // Setup random generator and game phase flag
+    primeRnd();
+
+    // Draw board
+    DrawBoard(0);
 }
 
 void startturn() {
@@ -921,6 +943,13 @@ void IconclickThrow() {
 void IconclickNext() {
 // Next icon clicked
 
+    // Autosave if enabled
+    if(playerdata[turnofplayernr][0]==0 && autosavetoggle==1)
+    {
+        loadoverlay(2);
+        savegame(1); /* Autosave on end human turn */
+    }
+    
     // Diaable next icon
     iconflag = 2;
     eraseicon();
@@ -1020,8 +1049,17 @@ void appExit() {
 void geosSwitch4080() {
 // Switch 40/80 selected from menu
 
+    if(musicflag) { StopMusic(); }
     loadoverlay(2);
-    Switch4080();
+    SetNewMode();
+    ReinitScreen(appname);
+    if(gameflag) { DrawBoard(0); } else { ShowCredits(1); }
+    if(gameflag==2) { humanchoosepawnstart(); }
+    GotoFirstMenu();
+    DoMenu(&menuMain);
+    drawicon();
+    DoIcons(icons);
+    if(musicflag) { loadoverlay(3); PlayMusic(); }
     return;
 }
 
@@ -1030,15 +1068,23 @@ void geosExit() {
 
     ReDoMenu();
 
+    if(musicflag) { StopMusic(); }    
+
     // Ask confirnation
-    if(!monochromeflag & gameflag) { DialogueClearColor(); }
+    if(!monochromeflag) { DialogueClearColor(); }
     if (DlgBoxOkCancel("Exit to desktop", "Are you sure?") == OK)
     {
         appExit();
     }
     else
     {
-        if(!monochromeflag & gameflag) { DrawBoard(1); }
+        if(!monochromeflag) {
+            if(gameflag) { DrawBoard(1); } else {
+                loadoverlay(2);
+                ShowCredits(2);
+            }
+        }
+        if(musicflag) { loadoverlay(3); PlayMusic(); }
         return;
     }  
 }
@@ -1047,10 +1093,11 @@ void gameRestart() {
 // Start or restart game
 
     ReDoMenu();
+    if(musicflag) { StopMusic(); }
+    if(!monochromeflag) { DialogueClearColor(); }
 
     if(gameflag) {
         // Restart instead of initial start
-        if(!monochromeflag) { DialogueClearColor(); }
         if (DlgBoxOkCancel("Restart game", "Are you sure?") != OK)
         {
             if(!monochromeflag) { DrawBoard(1); }
@@ -1075,10 +1122,38 @@ void gameRestart() {
 void gameColor() {
 // Color option selected from menu
 
-    ReDoMenu();
-    loadoverlay(2);
-    MonochromeToggle();
+    unsigned char oldflag = monochromeflag;
 
+    ReDoMenu();
+
+    if(musicflag) { StopMusic(); }
+    if(!monochromeflag) { DialogueClearColor(); }
+    sprintf(buffer,"Present value: %s",(monochromeflag)?"Yes":"No");
+    monochromeflag = (DlgBoxYesNo("Enable monochrome mode?",buffer) == YES)?1:0;
+
+    if(oldflag != monochromeflag) { 
+        
+        mainicons = &noicons;
+        icons = mainicons;
+        DoIcons(icons);
+        loadoverlay(2);
+        ReinitScreen(appname);
+        if(gameflag) { DrawBoard(0); } else { ShowCredits(1); }
+        if(gameflag==2) { humanchoosepawnstart(); }
+        GotoFirstMenu();
+        DoMenu(&menuMain);
+        drawicon();
+        DoIcons(icons);
+    } else {
+        if(!monochromeflag) {
+            if(gameflag) { DrawBoard(1); } else {
+                loadoverlay(2);
+                ShowCredits(2);
+            }
+        }
+    }
+
+    if(musicflag) { loadoverlay(3); PlayMusic(); }
     return;
 }
 
@@ -1086,6 +1161,7 @@ void fileLoad() {
 // Select load file from menu
 
     ReDoMenu();
+    if(musicflag) { StopMusic(); }
     loadoverlay(2);
     loadgame();
     return;
@@ -1105,9 +1181,18 @@ void fileAutosaveToggle() {
 // Select autosave toogle from menu
 
     ReDoMenu();
-    loadoverlay(2);
-    AutosaveToggle();
-
+    
+    if(musicflag) { StopMusic(); }
+    if(!monochromeflag) { DialogueClearColor(); }
+    sprintf(buffer,"Present value: %s",(autosavetoggle)?"Yes":"No");
+    autosavetoggle = (DlgBoxYesNo("Enable autosave?",buffer) == YES)?1:0;
+    if(!monochromeflag) {
+        if(gameflag) { DrawBoard(1); } else {
+            loadoverlay(2);
+            ShowCredits(2);
+        }
+    }
+    if(musicflag) { loadoverlay(3); PlayMusic(); }
     return;
 }
 
@@ -1115,9 +1200,9 @@ void informationCredits (void) {
 // Select show credits from menu
     
     ReDoMenu();
+    if(musicflag) { StopMusic(); }
     loadoverlay(2);
-    ShowCredits();
-
+    ShowCredits(0);
     return;
 }
 
@@ -1149,9 +1234,20 @@ void main(int /*argc*/, char *argv[])
     InitVideomode();
     ReinitScreen(appname);
 
-    // Setup random generator and game phase flag
-    primeRnd();
+    // Set game flag'
     gameflag = 0;
+
+    // Shpw splashscreen
+    ShowCredits(1);
+
+    // Start music
+    if(!(osType&GEOS4)) {
+        musicflag = 1;
+        loadoverlay(3);
+        PlayMusic();
+    } else {
+        musicflag = 0;
+    }
 
     DoMenu(&menuMain);
     DoIcons(icons);

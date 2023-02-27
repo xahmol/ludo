@@ -89,7 +89,9 @@ void playerwins() {
 
     if(!monochromeflag) { DialogueClearColor(); }
     if(DlgBoxYesNo(buffer,"Continue playing?") == NO) {
-        gameflag = 0; ClearBoard(); return;
+        gameflag = 0;
+        gamereset();
+        ClearBoard(); return;
     }
     if(!monochromeflag & gameflag) { DrawBoard(1); }
 }
@@ -186,13 +188,6 @@ void pawnselect() {
 
     // Place pawn at new position
     pawnplace(turnofplayernr,pawnchosen,0);
-
-    // Autosave if enabled
-    if(playerdata[turnofplayernr][0]==0 && autosavetoggle==1)
-    {
-        loadoverlay(2);
-        savegame(1); /* Autosave on end human turn */
-    }
 
     // Did player win?
     if(playerdata[turnofplayernr][1]==0) {

@@ -78,6 +78,7 @@ BUT WITHOUT ANY WARRANTY. USE THEM AT YOUR OWN RISK!
 #include <conio.h>
 #include "defines.h"
 #include "interface.h"
+#include "menus.h"
 
 // Global variables
 char version[25];
@@ -176,7 +177,6 @@ struct icontab vdc_winOK = {
 };
 
 // Screen functions
-
 void SetRectangleCoords(unsigned char top, unsigned char bottom, unsigned int left, unsigned int right) {
 // Set the co-ordinates to use for rectangle functions
 
@@ -284,7 +284,12 @@ void CloseWindow() {
     DoIcons(icons);
 
     // Recover background
-    if(!monochromeflag & gameflag) { DrawBoard(1); }
+    if(!monochromeflag) {
+        if(gameflag) { DrawBoard(1); } else {
+            loadoverlay(2);
+            ShowCredits(2);
+        }
+    }
     InitDrawWindow (winIntRecover);
     dispBufferOn = ST_WR_FORE + ST_WR_BACK;
     RecoverRectangle();
@@ -442,11 +447,16 @@ unsigned int sidRnd(unsigned int limit) {
 
     if(osType&GEOS4) {
         // Plus/4 has no SID, so get number from standard GetRandom
-        return GetRandom()%6;
+        return GetRandom()%limit;
     } else {
         // Get random number generated from SID noise
-        r2  =   limit;
-        sidRndCore();
+        do
+        {
+            r2  =   limit;
+            sidRndCore();
+        } while (r1+1>limit);
+        
+
         return r1;
     }
 }

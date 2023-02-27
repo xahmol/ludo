@@ -74,7 +74,7 @@ MAIN = geoludo
 CFLAGS  = -t $(SYS)  -Os -I include
 
 # Sources and config for GeoUMAIN
-MAINSRC = src/main.c src/gamelogic.c src/menus.c src/geoscore.s src/interface.c
+MAINSRC = src/main.c src/gamelogic.c src/menus.c src/geoscore.s src/sidplay_assembly.s src/interface.c
 MAINHDR = src/$(MAIN)Hdr.s
 MAINFLG = -C $(MAIN)_cc65config.cfg -m $(MAIN).map
 

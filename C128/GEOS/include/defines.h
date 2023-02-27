@@ -21,6 +21,10 @@ extern char applicationfilename[21];
 extern unsigned char overlay_active;
 extern struct menu menuMain;
 
+//Save game and config file memory allocation and variables
+extern char savegamemem[160];
+extern char filename[17];
+
 //Game variables
 extern unsigned char gameflag;
 extern unsigned char dicethrows;
@@ -55,10 +59,12 @@ void drawicon();
 void eraseicon();
 void drawfield(unsigned char track, unsigned char position, unsigned char playernumber, unsigned char coloronly);
 void pawnerase(unsigned char playernumber, unsigned char pawnnumber);
+void pawnprint(unsigned char playernumber, unsigned int xpos, unsigned char ypos, unsigned char backcolor, unsigned char coloronly);
 void pawnplace(unsigned char playernumber, unsigned char pawnnumber, unsigned char coloronly);
 void DrawPresentplayerinfo(unsigned char coloronly);
 void DrawBoard(unsigned char coloronly);
 void ClearBoard();
+void gamereset();
 void humanchoosepawnstart();
 void computerchoosepawn();
 

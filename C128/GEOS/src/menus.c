@@ -107,10 +107,6 @@ struct fileheader savefileHdr = {
     {"GeoLudo save file."}
 };
 
-//Save game and config file memory allocation and variables
-char savegamemem[136];
-char filename[16];
-
 // Functions
 unsigned char VDC_DetectVDCMemSize()
 {
@@ -231,19 +227,19 @@ void savegame(unsigned char autosave) {
 // Input: autosave is 1 for autosave, else 0
 
     unsigned char error,x,y;
-    char fname[] = "Ludo Savegame  ";
+    char fname[17] = "Ludo Savegame   ";
     unsigned int address = (int)&fname;
 
     if(autosave==1)
     {
-        CopyString(filename,"Ludo Autosave");
-        DeleteFile(filename);
+        CopyFString(13,fname,"Ludo Autosave");
+        DeleteFile(fname);
     }
     else
     {
         // Ask for filename
         if(!monochromeflag) { DialogueClearColor(); }
-        if(DlgBoxGetString(filename,15,"Enter name for save game.","(Cancel to abort)") == CANCEL) {
+        if(DlgBoxGetString(filename,16,"Enter name for save game.","(Cancel to abort)") == CANCEL) {
             if(!monochromeflag & gameflag) { DrawBoard(1); }
             return;
         }
@@ -251,10 +247,12 @@ void savegame(unsigned char autosave) {
             CopyString(filename,"Ludo Savegame");
         }
 
+        CopyFString(strlen(filename),fname,filename);
+
         // Check if file is already existing
-        if(!FindFile(filename) == FILE_NOT_FOUND) {
+        if(FindFile(fname) != FILE_NOT_FOUND) {
             if(DlgBoxYesNo("File exists.","Are you sure?") == YES) {
-                DeleteFile(filename);
+                DeleteFile(fname);
             } else {
                 if(!monochromeflag & gameflag) { DrawBoard(1); }
                 return;
@@ -262,7 +260,8 @@ void savegame(unsigned char autosave) {
         }
     }
 
-    CopyString(fname,filename);
+    // Clear save game memory
+    memset(savegamemem,0,155);
 
     // Store game data to save game memory
     savegamemem[0]=turnofplayernr;
@@ -292,6 +291,19 @@ void savegame(unsigned char autosave) {
             savegamemem[53+(x*21)+y]=playername[x][y];
         }
     }
+    savegamemem[137] = gameflag;
+    savegamemem[138] = dicethrows;
+    savegamemem[139] = iconflag;
+    savegamemem[140] = noturnpossible;
+    savegamemem[141] = mp;
+    savegamemem[142] = pawnchosen;
+    savegamemem[143] = ap;
+    for(x=0;x<4;x++)
+    {
+        savegamemem[144+(x*3)] = pawnpossible[x];
+        savegamemem[145+(x*3)] = np[x];
+        savegamemem[146+(x*3)] = dp[x];
+    }
 
     closeVLIR();
     
@@ -299,7 +311,7 @@ void savegame(unsigned char autosave) {
     savefileHdr.n_block.track = (address) & 0xff;
     savefileHdr.n_block.sector = (address>>8) & 0xff;
     savefileHdr.load_address = (int)savegamemem;
-    savefileHdr.end_address= (int)savegamemem + 135;
+    savefileHdr.end_address= (int)savegamemem + 155;
 
     // Save file to disk
     error = SaveFile(0,&savefileHdr);
@@ -346,8 +358,9 @@ void loadgame() {
 
     openVLIR();
 
-    // Clear board if ongoing game
-    if(gameflag) { ClearBoard(); }
+    // Clear board
+    ClearBoard();
+    eraseicon();
 
     // Retrievibg game data
     turnofplayernr=savegamemem[0];
@@ -379,78 +392,81 @@ void loadgame() {
             playername[x][y]=savegamemem[53+(x*21)+y];
         }
     }
-    gameflag = 1;
+    gameflag =              savegamemem[137];
+    dicethrows =            savegamemem[138];
+    iconflag =              savegamemem[139];
+    noturnpossible =        savegamemem[140];
+    mp =                    savegamemem[141];
+    pawnchosen =            savegamemem[142];
+    ap =                    savegamemem[143];
+    for(x=0;x<4;x++)
+    {
+        pawnpossible[x] =   savegamemem[144+(x*3)];
+        np[x] =             savegamemem[145+(x*3)];
+        dp[x] =             savegamemem[146+(x*3)];
+    }
 
-    DrawBoard(0);    
-}
-
-void Switch4080() {
-// Switch between 40 and 80 column mode
-
-    SetNewMode();
-    ReinitScreen(appname);
-    if(gameflag) { DrawBoard(0); }
-    if(gameflag==2) { humanchoosepawnstart(); }
-    GotoFirstMenu();
-    DoMenu(&menuMain);
+    DrawBoard(0);
     drawicon();
     DoIcons(icons);
 }
 
-void MonochromeToggle() {
-// Set monochrome flag or not
+void ShowCredits(unsigned char splash) {
+// Show credits or splash screen
 
-    unsigned char oldflag = monochromeflag;
-
-    if(!monochromeflag&gameflag) { DialogueClearColor(); }
-    sprintf(buffer,"Present value: %s",(monochromeflag)?"Yes":"No");
-    monochromeflag = (DlgBoxYesNo("Enable monochrome mode?",buffer) == YES)?1:0;
-
-    if(oldflag != monochromeflag & gameflag) { 
-        
-        mainicons = &noicons;
-        icons = mainicons;
-        DoIcons(icons);
-
-        ReinitScreen(appname);
-        DrawBoard(0);
-        if(gameflag==2) { humanchoosepawnstart(); }
-        GotoFirstMenu();
-        DoMenu(&menuMain);
-        drawicon();
-        DoIcons(icons);
-    } else {
-        if(!monochromeflag) { DrawBoard(1); }
-    }
-}
-
-void AutosaveToggle() {
-// Auto save toggle
-
-    if(!monochromeflag&gameflag) { DialogueClearColor(); }
-    sprintf(buffer,"Present value: %s",(autosavetoggle)?"Yes":"No");
-    autosavetoggle = (DlgBoxYesNo("Enable autosave?",buffer) == YES)?1:0;
-    if(!monochromeflag&gameflag) { DrawBoard(1); }
-}
-
-void ShowCredits() {
-// Show credits
-
-    unsigned char xcoord;
+    unsigned int xcoord,xend;
+    unsigned char color,pawnx,x;
 
     // Create dialogue window
-    xcoord = CreateWindow();
+    if(!splash) {
+        xcoord = CreateWindow();
+    } else {
+        xcoord = (vdc)?130:20;
+    }
 
-    // Print credits
-    PutString(CBOLDON "GeoLudo" CPLAINTEXT,69,xcoord);
-    PutString("Ludo game for 8 bit computers, GEOS edition",79,xcoord);
-    sprintf(buffer,"Version: %s",version);
-    PutString(buffer,99,xcoord);
-    PutString("Written by Xander Mol, 2023",109,xcoord);
-    PutString("For documentation, source, license and credits, see",119,xcoord);
-    PutString("https://github.com/xahmol/GeoUTools",129,xcoord);
-    PutString("https://www.idreamtin8bits.com/",139,xcoord);
+    if(splash != 2) {
+        // Print credits
+        PutString(CBOLDON "GeoLudo" CPLAINTEXT,69,xcoord);
+        PutString("Ludo game for 8 bit computers, GEOS edition",79,xcoord);
+        sprintf(buffer,"Version: %s",version);
+        PutString(buffer,99,xcoord);
+        PutString("Written by Xander Mol, 2023",109,xcoord);
 
-    // Show OK icon
-    WinOKButton();
+        if(!splash) {
+            PutString("For documentation, source, license and credits, see",119,xcoord);
+            PutString("https://github.com/xahmol/ludo",129,xcoord);
+        } else {
+            PutString("Choose Game>Start or File>Load to start game.",159,xcoord);
+        }
+
+        PutString("https://www.idreamtin8bits.com/",139,xcoord);
+    }
+
+    // Show OK icon on credit window
+    if(!splash) { WinOKButton(); } else {
+    // Finish splash
+
+        if(vdc) {
+            xcoord=120;
+            xend=519;
+            pawnx=60;
+            color=VDC_WHITE;
+        } else {
+            xcoord=8;
+            xend=311;
+            pawnx=35;
+            color=WHITE;
+        }
+
+        if(splash != 2) {
+            SetRectangleCoords(48,175,xcoord,xend);
+            FrameRectangle(255);
+        }
+
+        if(!monochromeflag) { ColorRectangle(color_foreground,color,48,175,xcoord,xend); }
+        
+        for(x=0;x<4;x++) {
+            pawnprint(x,pawnx,64+(x*24),color,splash-1);
+        }
+    }
 }
