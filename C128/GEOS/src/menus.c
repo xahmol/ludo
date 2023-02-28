@@ -227,7 +227,7 @@ void savegame(unsigned char autosave) {
 // Input: autosave is 1 for autosave, else 0
 
     unsigned char error,x,y;
-    char fname[17] = "Ludo Savegame   ";
+    char fname[17] = "                ";
     unsigned int address = (int)&fname;
 
     if(autosave==1)
@@ -321,7 +321,7 @@ void savegame(unsigned char autosave) {
         DlgBoxOk("Error saving file.",buffer);
     }
 
-    if(!monochromeflag & gameflag) { DrawBoard(1); };
+    if(!monochromeflag & gameflag & !autosave) { DrawBoard(1); };
 
     openVLIR();
 }

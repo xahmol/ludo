@@ -882,6 +882,7 @@ void gamereset() {
     unsigned char player,pawn;
 
     gameflag = 1;
+    musicflag = 0;
     dicethrows = 0;
     iconflag = 0;
     turnofplayernr=0;

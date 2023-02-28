@@ -90,8 +90,10 @@ void playerwins() {
     if(!monochromeflag) { DialogueClearColor(); }
     if(DlgBoxYesNo(buffer,"Continue playing?") == NO) {
         gameflag = 0;
-        gamereset();
-        ClearBoard(); return;
+        eraseicon();
+        iconflag=0;
+        ClearBoard();
+        return;
     }
     if(!monochromeflag & gameflag) { DrawBoard(1); }
 }

@@ -87,8 +87,8 @@ _StopMusic:
         php									; Save current interrupt disable status
         sei									; Stop interupts
 		MoveW	SIDIRQtmp,intTopVector		; Restore old routine
-        plp									; Restore old interrupt status
 		jsr resetSID						; Reset SID to mute sounds
+        plp									; Restore old interrupt status
         rts 								; Return
 
 ; ---------------------------------------------------------------
