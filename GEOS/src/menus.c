@@ -406,6 +406,9 @@ void loadgame() {
         dp[x] =             savegamemem[146+(x*3)];
     }
 
+    // Setup random generator and game phase flag
+    primeRnd();
+
     DrawBoard(0);
     drawicon();
     DoIcons(icons);

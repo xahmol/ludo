@@ -1050,7 +1050,7 @@ void appExit() {
 void geosSwitch4080() {
 // Switch 40/80 selected from menu
 
-    if(musicflag) { StopMusic(); }
+    if(musicflag & !gameflag) { StopMusic(); }
     loadoverlay(2);
     SetNewMode();
     ReinitScreen(appname);
@@ -1060,7 +1060,7 @@ void geosSwitch4080() {
     DoMenu(&menuMain);
     drawicon();
     DoIcons(icons);
-    if(musicflag) { loadoverlay(3); PlayMusic(); }
+    if(musicflag & !gameflag) { loadoverlay(3); PlayMusic(); }
     return;
 }
 
@@ -1069,7 +1069,7 @@ void geosExit() {
 
     ReDoMenu();
 
-    if(musicflag) { StopMusic(); }    
+    if(musicflag & !gameflag) { StopMusic(); }    
 
     // Ask confirnation
     if(!monochromeflag) { DialogueClearColor(); }
@@ -1085,7 +1085,7 @@ void geosExit() {
                 ShowCredits(2);
             }
         }
-        if(musicflag) { loadoverlay(3); PlayMusic(); }
+        if(musicflag & !gameflag) { loadoverlay(3); PlayMusic(); }
         return;
     }  
 }
@@ -1094,7 +1094,7 @@ void gameRestart() {
 // Start or restart game
 
     ReDoMenu();
-    if(musicflag) { StopMusic(); }
+    if(musicflag & !gameflag) { StopMusic(); }
     if(!monochromeflag) { DialogueClearColor(); }
 
     if(gameflag) {
@@ -1127,7 +1127,7 @@ void gameColor() {
 
     ReDoMenu();
 
-    if(musicflag) { StopMusic(); }
+    if(musicflag & !gameflag) { StopMusic(); }
     if(!monochromeflag) { DialogueClearColor(); }
     sprintf(buffer,"Present value: %s",(monochromeflag)?"Yes":"No");
     monochromeflag = (DlgBoxYesNo("Enable monochrome mode?",buffer) == YES)?1:0;
@@ -1154,7 +1154,7 @@ void gameColor() {
         }
     }
 
-    if(musicflag) { loadoverlay(3); PlayMusic(); }
+    if(musicflag & !gameflag) { loadoverlay(3); PlayMusic(); }
     return;
 }
 
@@ -1162,7 +1162,7 @@ void fileLoad() {
 // Select load file from menu
 
     ReDoMenu();
-    if(musicflag) { StopMusic(); }
+    if(musicflag & !gameflag) { StopMusic(); }
     loadoverlay(2);
     loadgame();
     return;
@@ -1183,7 +1183,7 @@ void fileAutosaveToggle() {
 
     ReDoMenu();
     
-    if(musicflag) { StopMusic(); }
+    if(musicflag & !gameflag) { StopMusic(); }
     if(!monochromeflag) { DialogueClearColor(); }
     sprintf(buffer,"Present value: %s",(autosavetoggle)?"Yes":"No");
     autosavetoggle = (DlgBoxYesNo("Enable autosave?",buffer) == YES)?1:0;
@@ -1193,7 +1193,7 @@ void fileAutosaveToggle() {
             ShowCredits(2);
         }
     }
-    if(musicflag) { loadoverlay(3); PlayMusic(); }
+    if(musicflag & !gameflag) { loadoverlay(3); PlayMusic(); }
     return;
 }
 
@@ -1201,7 +1201,7 @@ void informationCredits (void) {
 // Select show credits from menu
     
     ReDoMenu();
-    if(musicflag) { StopMusic(); }
+    if(musicflag & !gameflag) { StopMusic(); }
     loadoverlay(2);
     ShowCredits(0);
     return;
