@@ -1,87 +1,88 @@
-# LUDO
-Ludo game for 8 bit computers.
+# GeoLudo
+Ludo game for 8 bit computers, GEOS edition
 
-Written in 1992,2020, 2021 by Xander Mol
-https://github.com/xahmol/ludo
-https://www.idreamtin8bits.com/
+Written in 2023 by Xander Mol
 
-Originally written in 1992 in Commodore BASIC 7.0 for the Commodore 128
-Rewritten for Oric Atmos in BASIC in 2020
-Rewritten for Oric Atmos in C using CC65 in 2021
-Rewritten for TI-99/4a in C using TMS9900-GCC in 2021
-Rewritten for C128 in C using CC65 in 2021
+## Contents
+[Version history and download](#version-history-and-download)
 
-**Latest builds**:
+[Known issues and bugs](#known-issues-and-bugs)
 
-Commodore 128:
+[Introduction](#introduction)
 
-* D64 version:
-  https://github.com/xahmol/ludo/raw/00036311332cf095bc47cfed7b2c6653208a68d2/C128/CC65/ludoc128.d64
+[Screenshots](#screenshots)
 
-Oric Atmos:
+[Credits](#credits)
 
-- DSK version:
-  https://github.com/xahmol/ludo/raw/main/Oric%20Atmos/CC65/BUILD/LUDO.dsk
-- HFE version (for Cumana Reborn):
-  https://github.com/xahmol/ludo/raw/main/Oric%20Atmos/CC65/BUILD/LUDO_dsk.hfe
+![GeoLudo main interface on C128 VDC mode with 64 Kb VDC RAM](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-game-128vdc64.png)
 
-TI-99/4a:
+## Version history and download
+([Back to contents](#contents))
 
-* ZIP file to be deployed at DSK1 location of e.g. TIPI or emulator:
-  https://github.com/xahmol/ludo/raw/00036311332cf095bc47cfed7b2c6653208a68d2/TI994a/LudoTI994a-v199-20210531-1535.zip
+[Link to latest build](https://github.com/xahmol/ludo/raw/main/GEOS/GeoLudo-v01-20230301-1400.zip)
 
-Original 1992 Commodore 128 version (in Dutch):
+Version v01-20230301-1400:
+- First public alpha version
 
-- D64 version:
-  https://github.com/xahmol/ludo/raw/main/C128/D64/mejn.d64
+## Known issues and bugs
+([Back to contents](#contents))
+- Application crashes on exit in Commodore Plus/4 GEOS 3.5
 
-**Instructions for playing**:
+## Introduction
+([Back to contents](#contents))
 
-The game is menu driven. For menu navigation, use the cursor keys (up, down, left, right) and press ENTER to select. Active choice has a white background in the main menu bar, yellow in the pull down menus. If the main menu bar shows no white hightlighted options, no menu choices are possible, the computer is busy executing game turn actions.
-Popups wait for a keypress, for this any key will work. Pawn selection is also performed using the cursor keys and ENTER.
-Joystick is also possible for the C128 version, but not yet implemented for the Oric Atmos version. Mouse not supported.
+GeoLudo is based on a Ludo variant that I programmed in BASIC for the Commodore 128 80 column mode in 1992. See [here](https://github.com/xahmol/ludo/tree/main/C128/BASIC%20Original) for this original version (note: start game in 80 column mode, in 40 column mode it just shows a blank screen after start).
 
 The game uses the LUDO rules from the Dutch 'Mens Erger je Niet' variant as played by my family 30 years ago, so probably there are some 'house rules' interpretations that are not the same as the present official game manual, like what is allowed after a six is thrown depending on how many pawns are already on the board. Example: after throwing a six, moving the newly placed pawn with the next dice throw is obligatory, also if this would attack another pawn of the same player. Exception is if all pawns are on the board, moving the new pawn is in that case optional. As the game only allows valid moves, this should indicate itself.
 
 Please let me know if the game interpretations are inconsistent, incorrect or not working.
 
+The GEOS adaption is based on my C ports of this original game for the [Oric Atmos](https://github.com/xahmol/ludo/tree/main/Oric%20Atmos/CC65), [Commodore 128](https://github.com/xahmol/ludo/tree/main/C128/CC65) and [TI-99/4a](https://github.com/xahmol/ludo/tree/main/TI994a).
+
 Enjoy!
 
-**Machine specific instructions**:
+## Screenshots
+([Back to contents](#contents))
 
-Commodore 128:
+### Commodore 128 with 64 Kb VDC RAM
 
-* Copy D64 file to the desired media, start with RUN"LUDO.
-* Known issue: on VICE, if the joystick is enabled, but cursor down and SPACE trigger fire. Disable joystick in loading screen by pressing J to be able to play by keyboard.
+(Screenshots made using VICE x128, as I have not hooked up my C128DCR to a capture device)
 
-Oric Atmos:
+VDC 80 column mode:
 
-* Select DSK (or HFE on Cumana Reborn) as disk in emulator or real hardware. Game autostarts.
+![C128 64Kb VDC Splash](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-splash-128vdc64.png)
+![C128 64Kb VDC Main screen](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-game-128vdc64.png)
 
-TI-99/4a:
+### Commodore 128 with 16 Kb VDC RAM
 
-* Copy contents of ZIP file to the location needed for your local DSK1 emulation (of your emulator or real hardware via e.g. TIPI)
-* Ensure Editor/Assembler is enabled as cartridge. Start E/A with menu option 2, then menuoption 5 for Run program file. Then type DSK1.LUDO and press enter.
-* For TIPI: select 1 on start menu to go to BASIC prompt and type CALL TIPI("TIPI.<your path to the ZIP contents>.LUDO")
+(Screenshots made from real iron C128D)
 
-**Screenshots**:
+VDC 80 column mode:
 
-Commodore 128:
+![C128 16Kb VDC Splash](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-splash-128vdc16.png)
+![C128 16Kb VDC Main screen](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-game-128vdc16.png)
 
-![](https://github.com/xahmol/ludo/blob/main/Media/ludoc128title.png?raw=true)
+VIC-II 40 column mode color:
 
-![](https://github.com/xahmol/ludo/blob/main/Media/ludoc128play.png?raw=true)
+![C128 VIC Splash](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-splash-128vic.png)
 
-Oric Atmos:
+VIC-II 40 column mode monochrome:
 
-![](https://github.com/xahmol/ludo/blob/main/Media/ludoorictitle.png?raw=true)
+![C128 VIC Main screen](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-game-128vic.png)
 
-![](https://github.com/xahmol/ludo/blob/main/Media/ludooricplay.png?raw=true)
+### Commodore 64
 
-Texas Instruments TI-99/4a:
-![](https://github.com/xahmol/ludo/blob/main/Media/ludotititle.png?raw=true)
+(Screenshots made from Ultimate 64)
 
-![](https://github.com/xahmol/ludo/blob/main/Media/ludotiplay.png?raw=true)
+Color mode:
+
+![C64 Splash](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-splash-c64.png)
+![C64 Main screen](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-game-c64.png)
+
+Monochrome mode:
+
+![C64 Main screen](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-game-c64mono.png)
+
 
 **Credits**:
 
@@ -159,7 +160,7 @@ Code and resources from others used:
      *   used to endorse or promote products derived from this software without
      *   specific prior written permission.
 -   Original windowing system code on Commodore 128 by unknown author.
--   Music credits:
+-   Music credits:()
     R-Type level 1 by Wally Beben/Alain Derpin
     Defender of the Crown by David Whittaker/Aldn
     Wizzball by Peter Johnson/Aldn
