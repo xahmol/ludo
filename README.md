@@ -1,6 +1,9 @@
 # LUDO
 Ludo game for 8 bit computers.
 
+For **GeoLudo**, the GEOS version playable on Commodore 64, Commodore 128 and Commodore 128 with GEOS, click:
+https://github.com/xahmol/ludo/tree/main/GEOS
+
 Written in 1992,2020, 2021 by Xander Mol
 https://github.com/xahmol/ludo
 https://www.idreamtin8bits.com/
