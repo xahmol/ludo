@@ -10,18 +10,27 @@ Written in 2023 by Xander Mol
 
 [Introduction](#introduction)
 
+[Prerequisites](#prerequisites)
+
+[Features](#features)
+
 [Screenshots](#screenshots)
 
+[Game rules](#game-rules)
+
+[Explanation of menu functions](#explanation-of-menu-functions)
+
 [Credits](#credits)
+
 
 ![GeoLudo main interface on C128 VDC mode with 64 Kb VDC RAM](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-game-128vdc64.png)
 
 ## Version history and download
 ([Back to contents](#contents))
 
-[Link to latest build](https://github.com/xahmol/ludo/raw/main/GEOS/GeoLudo-v01-20230301-1400.zip)
+[Link to latest build](https://github.com/xahmol/ludo/raw/main/GEOS/GeoLudo-v01-20230302-1343.zip)
 
-Version v01-20230301-1400:
+Version 01-20230302-1343:
 - First public alpha version
 
 ## Known issues and bugs
@@ -40,6 +49,48 @@ Please let me know if the game interpretations are inconsistent, incorrect or no
 The GEOS adaption is based on my C ports of this original game for the [Oric Atmos](https://github.com/xahmol/ludo/tree/main/Oric%20Atmos/CC65), [Commodore 128](https://github.com/xahmol/ludo/tree/main/C128/CC65) and [TI-99/4a](https://github.com/xahmol/ludo/tree/main/TI994a).
 
 Enjoy!
+
+## Prerequisites
+([Back to contents](#contents))
+
+GeoLudo is designed to work on any GEOS version on Commodore 128, Commodore 64 or Commodore Plus/4.
+
+It has been tested on:
+- Commodore 64 with GEOS64 version 2.0
+- Commodore 128 with GEOS128 version 2.0 on both a 16KB and a 64 KB VDC RAM machine. Tested in both 40 and 80 column mode operation.
+- Commodore Plus/4 with GEOS3.5 with YAPE emulation as a 1551 drive is needed. Enable CPU exact 1551 emulation in YAPE.
+
+Color mode is supoorted:
+- Commodore 128: VIC-II 40 column mode
+- Commodore 128: VDC mode only if 64 KB VDC RAM is available
+- Commodore 64
+- Commodore Plus/4
+
+(Reason for not supporting color in VDC 80 column mode on 16 Kb VDC memory C128 machines is that 16 Kb video RAM with color only allows for a 176 lines resolution under GEOS. And I could not fit the gameboard and the menus in that limited vertical resolution, also because color change is only possible per 8 lines in that mode)
+
+GEOS images can be downloaded from:
+- C64 and C128 versions: https://cbmfiles.com/geos/geos-13.php
+- Plus/4 version: http://plus4world.powweb.com/software/GEOS_3_5
+
+## Features
+([Back to contents](#contents))
+
+Multiplatform:
+- the same executable works on GEOS variants on Commodore 128, Commodore 64 and Commodore Plus/4
+
+Interface:
+- Color suppport: the game works in color on all platforms and modes apart from the VDC 80 column mode on a C128 with only 16 Kb VDC memory. On 64 Kb VDC memory color is supported. If color is supported is detected by the game itself.
+- Option to play in monochrome as in game option
+- Option to switch between 40 and 80 column mode on a C128.
+
+Title music:
+- Title music is played on the splash screen on a C64 and C128 (not supported for Plus/4)
+
+Save game support:
+- Saving and loading of a game is supported
+- Autosave option can be enabled (default off as the downside is notable extra delay due to disk access before every human turn)
+
+Full source code available at https://github.com/xahmol/ludo/tree/main/GEOS
 
 ## Screenshots
 ([Back to contents](#contents))
@@ -83,163 +134,221 @@ Monochrome mode:
 
 ![C64 Main screen](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-game-c64mono.png)
 
+### Commodore Plus/4
 
-**Credits**:
+(Screenshots made with the YAPE emulator, as I do not own a real 1551 needed to run GEOS 3.5 for Plus/4)
 
-*Commodore 128 version*:
+Color mode:
+
+![C64 Splash](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-splash-plus4.png)
+![C64 Main screen](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-game-plus4.png)
+
+Monochrome mode:
+
+![C64 Main screen](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-game-plus4mono.png)
+
+## Game rules
+([Back to contents](#contents))
+
+### Gameplay
+
+- 4 players begin with their respective pieces in their bases. On each player’s turn, the player rolls the die to determine a move. The goal of the game is to move all four of the player’s pieces clockwise once around the board, up to the destination column.
+
+### Movement
+- To begin, a player must roll a six to move a piece out of the base and onto the start position. That piece is then in play. The player cannot make any other moves until at least one piece is in play.
+- If a player has a piece or pieces in play, they can move any one of their pieces 1 to 6 spaces along the path according to the number they roll.
+
+### Throwing sixes
+
+- If all pieces are either in the home base of the player, or are in the destination column without any possible movement left, a player is entitled to try up to three times throwing a six.
+- If a six is rolled and pawns are still left in the home base, the player has to place a new pawn at its start field. The player has to move this pawn with the next throw, unless no pawns are left in the homebase.
+- Anytime a six is rolled, the player gets an extra roll after his move.
+
+### Landing on a shared square
+
+- If a player’s piece lands on an opponent’s piece, the opponent’s piece is sent back to their base where he must roll a six again in order move it out onto the starting square.
+
+### Winning the Game
+
+- When a player’s piece has reached the destination column of its own color, the piece continues its moves toward the end of the destination column.- A pawn can not pass another pawn in the destination column. First move the blocking pawn as far as possible.
+- If a pawn can not enter the destination column with the number thrown, the turn passes.
+- The first player to have all four of his pieces finish their journeys wins. The remaining players may continue the game to determine the runner-ups.
+
+## Explanation of interface and menu functions
+([Back to contents](#contents))
+
+### Start from splash screen
+
+![Splash screen](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-splash-128vdc64.png)
+
+From the splash screen, either start a new game via the Game menu, option (Re)Start, or load a previously saved game via the File menu, Load option.
+
+## Starting a new game
+
+On starting a new game (with Game>(Re)Start game), first a dialogue will ask how many players should be played by the computer AI. Enter a number between 0 and 4. Cancel will abort starting a game.
+
+![Number of AI players dialogue](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-ainumber.png)
+
+After that, dialogues will pop-up to ask to enter a name for each player. Leaving the input empty on entering, or clicking Cancel, will name the player with a default name.
+
+![Enter player names dialogue](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-enternames.png)
+
+After this, the game will start.
+
+### Throw icon: Throw the dice on player turn
+
+To throw the dice, press the Throw icon.
+
+![Throw icon](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-throw.png)
+
+### Next icon: Go to the turn of the next player
+
+To proceed to the turn of the next player, click the Next icon.
+
+![Next icon](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-next.png)
+
+### Player wins dialogue
+
+After a player has reached the destination column with all four pawns, that player wins. Choose in the dialogue popping up to proceed to play with the remaining players, or end the game and return to the start interface.
+
+On returning to the start interface, the splash screen information will not be shown again. From here choose GEOS>Exit to exit to the GEOS desktop, Game>(Re)Start to start a new game or File>Load to load a saved game.
+
+![Player wins](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-playerwon.png)
+
+### GEOS menu
+
+![GEOS menu](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-GEOSmenu.png)
+
+**Switch 40/80**
+
+Switches between the 40 column VIC-II mode and the 80 column VDC mode on a Commodore 128. Only does something on a C128.
+
+**Exit**
+
+Exit to GEOS desktop. A confirmation dialogue pops up first: click OK to exit, Cancel to cancel exiting.
+
+### Game menu
+
+![Game menu](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-gamemenu.png)
+
+**(Re)Start**
+
+Choose this to start a game after starting the application, or restart a new game and loose the running game.
+
+If a game is in progress a dialogue pop-up will ask you if you are sure, as the old game will be lost. Choose OK to proceed, or Cancel to cancel.
+
+![Restart confirmation dialogue](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-restart-confirm.png)
+
+**Color**
+
+Choose whether to enable monochrome mode (choose Yes) or color mode (choose No).
+
+Will not do anything on a C128 in VDC 80 column mode on machines with only 16 Kb VDC RAM, as color mode is not supported in that mode on those machines.
+
+![Monochrome mode dialogue](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-monochrome.png)
+
+### File menu
+
+![File menu](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-filemenu.png)
+
+**Load**
+
+Load a game that is selected via a file picker dialogue. The dialogue will show valid save game files on the present disk.
+
+*Note*: The disk icon is not (yet) implemented, only loading save games from the present active drive is supported.
+
+![Load dialogue](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-load.png)
+
+**Save**
+
+Save the present game to disk with the user provided filename. Enter the filename. Press ENTER to complete, or Cancel to cancel. Entering with no input provided will save with a default filename.
+
+![Sace dialogue](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-save.png)
+
+**Autosave**
+
+Choose whether to enable autosave mode (choose Yes) or disable it (choose No). In autosave mode, the game will be saved automatically with the name Ludo Autosave before every human player turn. This will prevent possible game progress loss in case of system failure, but will also slow down the game due to the disk access needed.
+By default, autosave is disabled to allow for faster gameplay in default mode.
+
+![Autosave dialogue](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-autosave.png)
+
+### Credits menu
+
+Clicking this will show the game version and game information.
+
+![Credits](https://raw.githubusercontent.com/xahmol/ludo/main/GEOS/screenshots/ludo-credits.png)
+
+
+## Credits
+([Back to contents](#contents))
+
+GeoLudo
+Ludo game for 8 bit computers, GEOS edition
+Written in 2023 by Xander Mol
+
+https://github.com/xahmol/ludo
+
+https://www.idreamtin8bits.com/
 
 Code and resources from others used:
 
-* CC65 cross compiler:
-  https://cc65.github.io/
-* C128 Programmers Reference Guide: For the basic VDC register routines and VDC code inspiration
-  http://www.zimmers.net/anonftp/pub/cbm/manuals/c128/C128_Programmers_Reference_Guide.pdf
-* Scott Hutter - VDC Core functions inspiration:
-  https://github.com/Commodore64128/vdc_gui/blob/master/src/vdc_core.c
-  (used as starting point, but channged to inline assembler for core functions, added VDC wait statements and expanded)
-* Francesco Sblendorio - Screen Utility: used for inspiration:
-  https://github.com/xlar54/ultimateii-dos-lib/blob/master/src/samples/screen_utility.c
-* DevDef: Commodore 128 Assembly - Part 3: The 80-column (8563) chip
-  https://devdef.blogspot.com/2018/03/commodore-128-assembly-part-3-80-column.html
-* 6502.org: Practical Memory Move Routines: Starting point for memory move routines
-  http://6502.org/source/general/memory_move.html
-* Anthony Beaucamp - 8Bit Unity: Starting point for SID play routines
-  https://github.com/8bit-Dude/8bit-Unity/blob/main/unity/targets/c64/SID.s
-* Bart van Leeuwen: For inspiration and advice while coding. Also for providing the excellent Device Manager ROM to make testing on real hardware very easy.
-* Original windowing system code on Commodore 128 by unknown author.
+-   Scott Hutter - GeoUTerm:
+    https://github.com/xlar54/ultimateii-dos-lib/
+    (GeoUTerm as GEOS sample application using this)
 
-Music credits:
+-   CC65 cross compiler:
+    https://cc65.github.io/
 
-* John Ames - Smells Like Teen Spirit
-  https://csdb.dk/sid/?id=7763
-* John Ames - Castle of Zokor: Step Carefully
-  https://csdb.dk/sid/?id=7736
-* John Ames - Final Fantasy IV - Overworld
-  https://csdb.dk/sid/?id=7743
+-   Daniel England (Daniel England) - GEOSBuild:
+    https://github.com/M3wP/GEOSBuild
+    (buildtool for GEOS disks)
 
-Tested using real hardware (C128D and C128DCR) plus VICE.
+-   David Lee - GEOS Image Editor
+    https://www.facebook.com/groups/704637082964003/permalink/5839146806179646
+    (editor for GEOS icons)
 
-*Oric Atmos version*:
+-   Subchrist Software - SpritePad Pro
+    https://subchristsoftware.itch.io/spritepad-c64-pro
+    (editor used for the file icons)
 
-Code and resources from others used:
+-   Hitchhikers Guide to GEOS v2022
+    Berkeley Softworks / Paul B Murdaugh
+    https://github.com/geos64128/HG2G2022
 
--   oricOpenLibrary for IJK joystick driver code and Sedoric routines
-                 _
-     ___ ___ _ _|_|___ ___
-    |  _| .'|_'_| |_ -|_ -|
-    |_| |__,|_,_|_|___|___|
-            raxiss (c) 2021
-    GNU General Public License v3.0
-    See https://github.com/iss000/oricOpenLibrary/blob/main/LICENSE
--   OSDK for MYMPlayer music player and building tools
-    (C) Dbug and OSDK authors
-    https://osdk.org/
--   8Bit Unity for adaptation of OSDK MYM player
-    https://github.com/8bit-Dude/8bit-Unity
-     * Copyright (c) 2018 Anthony Beaucamp.
-     *
-     * This software is provided 'as-is', without any express or implied warranty.
-     * In no event will the authors be held liable for any damages arising from
-     * the use of this software.
-     *
-     * Permission is granted to anyone to use this software for any purpose,
-     * including commercial applications, and to alter it and redistribute it
-     * freely, subject to the following restrictions:
-     *
-     *   1. The origin of this software must not be misrepresented * you must not
-     *   claim that you wrote the original software. If you use this software in a
-     *   product, an acknowledgment in the product documentation would be
-     *   appreciated but is not required.
-     *
-     *   2. Altered source versions must be plainly marked as such, and must not
-     *   be misrepresented as being the original software.
-     *
-     *   3. This notice may not be removed or altered from any distribution.
-     *
-     *   4. The names of this software and/or it's copyright holders may not be
-     *   used to endorse or promote products derived from this software without
-     *   specific prior written permission.
--   Original windowing system code on Commodore 128 by unknown author.
--   Music credits:()
-    R-Type level 1 by Wally Beben/Alain Derpin
-    Defender of the Crown by David Whittaker/Aldn
-    Wizzball by Peter Johnson/Aldn
--   Documentation used:
-    OSDK.org, forum.defence-force.org, defence-force.org.
--   ORIC software development tooling:
-    CC65 from CC65 contributors, see https://cc65.github.io/
-    OSDK from DBug/OSDK Authors
-    CD2 from Twilighte
-    Oric Explorer by Scott Davies
-    ORIC Character Generater by Pe@ceR
-    HxCFloppyEmulator Software by Jean-Francois del Nero.
--   Tested using Oricuton emulator and an Oric Atmos with a Cumana Reborn. 
+-   Sample sequential application header of GeoProgrammer
+    Berkeley Softworks
 
+-   Heureks: GEOS64 Programming Examples
+    https://codeberg.org/heurekus/C64-Geos-Programming
+    (sample code using C in CC65 for writing applications in GEOS)
 
+-   Lyonlabs / Cenbe GEOS resources page:
+    https://www.lyonlabs.org/commodore/onrequest/geos/index.html
+    Including using code from:
+    https://www.lyonlabs.org/commodore/onrequest/geos/geos-prog-tips.html
 
-*TI-99/4a version*:
+-   Bo Zimmerman GEOS resources page:
+    http://www.zimmers.net/geos/
 
-Code and resources from others used:
+-   CBM Files GEOS disk images
+    https://cbmfiles.com/geos/geos-13.php
 
-- TMS9900 modification of GCC by Insomnia
-  https://atariage.com/forums/topic/164295-gcc-for-the-ti/
-- LIBTI99 and LIBTIVGM2 libraries by Tursi aka Mike Brent
-  LIBTI99: Generic library for conio, sound, file and VDP functions
-  https://github.com/tursilion/libti99
-  LIBTIVGM2: Library for VGMComp2 music functions
-  https://github.com/tursilion/vgmcomp2/tree/master/Players/libtivgm2
-- Jedimatt42 for:
-  TMS9900-GCC installation script and instructions
-  https://atariage.com/forums/topic/164295-gcc-for-the-ti/page/24/?tab=comments#comment-4776745
-  Speech library:
-  Source: https://github.com/jedimatt42/fcmd/tree/jm42/say-toy/example/gcc/say
-  See forum thread on AtariAge:
-  https://atariage.com/forums/topic/318907-doing-speech-in-c-using-tms9900-gcc/
-  TIPI software and code examples
-  https://github.com/jedimatt42/tipi
-- PeteE on Makefile code to adapt Magellan screens and random() function:
-  https://github.com/peberlein/turmoil
-- TheCodex for Magellan tool to create screens
-  https://atariage.com/forums/topic/161356-magellan/
-- PTWZ for Python Wizard to convert speech to LPC data:
-  https://github.com/ptwz/python_wizard
-- Original windowing system code on Commodore 128 by unknown author.
+-   GEOS - Wheels - GeoWorks - MegaPatch - gateWay - BreadBox Facebook Group
+    https://www.facebook.com/groups/704637082964003/permalink/5839146806179646
 
-Music credits:
+-   Bart van Leeuwen for testing and providing the Device Manager ROM and GEOS RAM Boot
 
-* R-Type: Game Start Music
-  https://www.smspower.org/Music/RType-SMS-PSG
-* Astro Warriot: Galaxy Zone
-  https://www.smspower.org/Music/AstroWarrior-SMS
-* Submarine Attack: Title Screen
-  https://www.smspower.org/Music/SubmarineAttack-SMS
+-   Gideon Zweijtzer for creating the Ultimate II+ cartridge and the Ultimate64, and the Ultimate Command Interface enabling this software.
+   
+-   Tested using real hardware (C128D, C128DCR, Ultimate 64) using GEOS128 2.0, GEOS64 2.0 and Megapatch3 128.
 
-  Documentation used:
+Music credit:
+- Avicii - Hey Brother (Universal) https://en.wikipedia.org/wiki/Hey_Brother
 
-* AtariAge TI-99/4a community
-  https://atariage.com/forums/forum/164-ti-994a-computers/
-
-  Tested using Classic99 emulator and original TI-99/4a with TIPI. 
-
-
-
-*Tooling to transfer original Commodore software code*:
-
-* VICE by VICE authors
-* DirMaster by The Wiz/Elwix
-* CharPad Free by Subchrist software
-* UltimateII+ cartridge by Gideon Zweijtzer
-
-
+Licensed under the GNU General Public License v3.0
 
 The code can be used freely as long as you retain
 a notice describing original source and author.
 
 THE PROGRAMS ARE DISTRIBUTED IN THE HOPE THAT THEY WILL BE USEFUL,
 BUT WITHOUT ANY WARRANTY. USE THEM AT YOUR OWN RISK!
-
-
-
-Thanks for reading and enjoy playing!
-
-Xander Mol

@@ -85,7 +85,7 @@ ULTHOST3 = ftp://192.168.1.55/usb0/Geos/
 
 # Data for ZIP file
 ZIP = GeoLudo-v01-$(shell date "+%Y%m%d-%H%M").zip
-ZIPLIST = $(MAIN).d64 $(MAIN).d81
+ZIPLIST = $(MAIN).d64 $(MAIN).d81 readme.pdf
 
 ########################################
 
