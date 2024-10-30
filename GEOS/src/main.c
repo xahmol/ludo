@@ -852,7 +852,7 @@ unsigned char inputofnames() {
     unsigned int result;
     char aitext[6];
 
-    if(DlgBoxGetString(numberai,1,"Enter number of AI players (0-4)","(RETURN for 0, Cancel to abort}") != CANCEL) {
+    if(DlgBoxGetString(numberai,1,"Enter number of AI players (0-4)","(RETURN for 0, Cancel to abort)") != CANCEL) {
         ainumber = numberai[0]-48;
     } else { return 0; }
 
